@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+:root {
+  --background: #08090c;
+  --foreground: #e2e8f0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+/* 1. Ultra-subtle 40px engineering millimeter drafting grid */
+.bg-cad-grid {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+}
+
+/* 2. Faint 45-degree racing apex chevron/kerb stripe pattern */
+.bg-kerb-stripes {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(210, 255, 0, 0.03) 0,
+    rgba(210, 255, 0, 0.03) 14px,
+    rgba(255, 128, 0, 0.02) 14px,
+    rgba(255, 128, 0, 0.02) 28px
+  );
+}
+
+/* Motorsport diagonal speed lines backdrop pattern */
+.bg-speed-lines {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.03) 0,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 28px
+  );
+}
+
+.bg-speed-lines-dense {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(210, 255, 0, 0.05) 0,
+    rgba(210, 255, 0, 0.05) 1px,
+    transparent 1px,
+    transparent 16px
+  );
+}
+
+/* Custom motorsport kinetic animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes marqueeInfinite {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes audioWave {
+  0%, 100% {
+    height: 4px;
+  }
+  50% {
+    height: 18px;
+  }
+}
+
+/* 3. Aerodynamic streamline drift animation */
+@keyframes streamlineDrift {
+  0% {
+    transform: translateX(-100%) translateY(0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.4;
+  }
+  80% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateX(100vw) translateY(-25px);
+    opacity: 0;
+  }
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px);
+    opacity: 0.6;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+.animate-marquee-infinite {
+  display: flex;
+  width: 200%;
+  animation: marqueeInfinite 24s linear infinite;
+}
+
+.animate-audio-1 {
+  animation: audioWave 0.7s ease-in-out infinite alternate;
+}
+.animate-audio-2 {
+  animation: audioWave 0.5s ease-in-out infinite alternate 0.2s;
+}
+.animate-audio-3 {
+  animation: audioWave 0.8s ease-in-out infinite alternate 0.35s;
+}
+.animate-audio-4 {
+  animation: audioWave 0.6s ease-in-out infinite alternate 0.15s;
+}
+
+.animate-streamline-1 {
+  animation: streamlineDrift 14s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.animate-streamline-2 {
+  animation: streamlineDrift 18s cubic-bezier(0.4, 0, 0.2, 1) infinite 4s;
+}
+.animate-streamline-3 {
+  animation: streamlineDrift 22s cubic-bezier(0.4, 0, 0.2, 1) infinite 8s;
+}
+
+.animate-particle-1 {
+  animation: particleFloat 6s ease-in-out infinite;
+}
+.animate-particle-2 {
+  animation: particleFloat 8s ease-in-out infinite 2s;
+}
+.animate-particle-3 {
+  animation: particleFloat 10s ease-in-out infinite 4s;
+}
