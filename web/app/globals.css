@@ -28,7 +28,7 @@ body {
   transform: translateZ(0);
   will-change: transform;
   background-image: 
-    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(210, 255, 0, 0.035) 0%, rgba(255, 255, 255, 0.015) 40%, transparent 75%),
+    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(210, 255, 0, 0.06) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 80%),
     linear-gradient(to bottom, transparent 0%, transparent 65%, rgba(4, 5, 8, 0.85) 100%),
     repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 12px);
 }
@@ -46,12 +46,12 @@ body {
   scrollbar-width: none;
 }
 
-/* 1. Fine 48px CAD coordinate drafting grid at low opacity (opacity-10 feel) */
+/* 1. Fine 48px CAD coordinate drafting grid with crosshair feeling */
 .bg-cad-grid {
   background-size: 48px 48px;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }
 
 /* 2. Faint 45-degree racing apex chevron/kerb stripe pattern */
