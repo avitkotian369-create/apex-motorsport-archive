@@ -32,22 +32,34 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
   const heroImage = car.cinematicHeroImageUrl || car.image;
   const teardownImage = car.knollingTeardownImageUrl || car.knollingImageUrl;
 
+  // Throttled mouse movement for perspective tilt using requestAnimationFrame
+  const rAFRef = useRef<number | null>(null);
+
   const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
+    const clientX = e.clientX;
+    const clientY = e.clientY;
 
-    const rotX = ((y - centerY) / centerY) * -4;
-    const rotY = ((x - centerX) / centerX) * 4;
+    if (rAFRef.current) cancelAnimationFrame(rAFRef.current);
 
-    setRotateX(rotX);
-    setRotateY(rotY);
+    rAFRef.current = requestAnimationFrame(() => {
+      if (!cardRef.current) return;
+      const rect = cardRef.current.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const rotX = ((y - centerY) / centerY) * -3.5;
+      const rotY = ((x - centerX) / centerX) * 3.5;
+
+      setRotateX(rotX);
+      setRotateY(rotY);
+    });
   };
 
   const handleCardMouseLeave = () => {
+    if (rAFRef.current) cancelAnimationFrame(rAFRef.current);
     setRotateX(0);
     setRotateY(0);
     setIsHovered(false);
@@ -74,16 +86,18 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
       <div className="p-5 sm:p-6 border-b border-[#171E2D] relative flex-1 flex flex-col justify-between">
         <div>
           <div className="flex items-start justify-between gap-3 mb-3">
-            {/* Top-Left: Red rounded pill for homologation tag */}
-            <div className="min-w-0">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold tracking-wider uppercase border border-red-500/60 text-red-400 bg-red-500/10 shadow-[0_0_12px_rgba(239,68,68,0.2)] whitespace-nowrap overflow-hidden">
+            {/* Top-Left: Red rounded pill for homologation tag with locked single line and fixed height */}
+            <div className="min-w-0 flex-1">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold tracking-wider uppercase border border-red-500/60 text-red-400 bg-red-500/10 shadow-[0_0_12px_rgba(239,68,68,0.2)] line-clamp-1 whitespace-nowrap overflow-hidden max-w-[260px]">
                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 animate-pulse" />
                 <span className="truncate">{car.homologationTag}</span>
               </span>
-              <h3 className="text-2xl sm:text-3xl font-black font-sans text-white mt-2 group-hover:text-[#D2FF00] transition-colors tracking-tight truncate">
-                {car.brand} {car.model}
-              </h3>
-              <div className="text-xs font-mono text-[#717A8C] mt-0.5 truncate">{car.trim}</div>
+              <div className="h-16 flex flex-col justify-center mt-2">
+                <h3 className="text-2xl sm:text-3xl font-black font-sans text-white group-hover:text-[#D2FF00] transition-colors tracking-tight truncate leading-tight">
+                  {car.brand} {car.model}
+                </h3>
+                <div className="text-xs font-mono text-[#717A8C] mt-0.5 truncate">{car.trim}</div>
+              </div>
             </div>
 
             {/* Top-Right: Dark box with engine code and proper padding so text never clips */}
@@ -147,8 +161,8 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
               )}
             </div>
 
-            {/* Top-Left: Status pill (Replaced backdrop-blur with opaque hex) */}
-            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-[#0B0F17]/95 border border-[#D2FF00]/50 text-[10px] font-mono font-bold text-[#D2FF00] flex items-center gap-2 shadow-[0_0_15px_rgba(210,255,0,0.3)] z-20">
+            {/* Top-Left: Status pill (High-performance solid dark tone: bg-[#0D111A]/95 border border-white/10) */}
+            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-[#0D111A]/95 border border-white/10 text-[10px] font-mono font-bold text-[#D2FF00] flex items-center gap-2 shadow-lg z-20">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D2FF00] opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D2FF00]" />
@@ -163,7 +177,7 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
             {/* Top-Right: Clean single-action toggle button */}
             <button
               onClick={() => setShowTeardownPreview(!showTeardownPreview)}
-              className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-[#0B0F17]/95 hover:bg-[#D2FF00] text-[#D2FF00] hover:text-black border border-[#D2FF00]/40 text-[10px] font-mono font-bold flex items-center gap-1.5 transition-all z-20 cursor-pointer shadow-lg"
+              className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-[#0D111A]/95 hover:bg-[#D2FF00] text-[#D2FF00] hover:text-black border border-white/10 text-[10px] font-mono font-bold flex items-center gap-1.5 transition-all z-20 cursor-pointer shadow-lg"
               title="Toggle between assembled chassis and knolling teardown"
             >
               {showTeardownPreview ? (

@@ -160,7 +160,7 @@ export default function MotorsportHomePage() {
         className="pt-12 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10"
       >
         {/* Sticky Search & Brand Filter Bar */}
-        <div className="sticky top-16 z-30 bg-[#0B0F17]/95 border border-white/10 p-6 rounded-2xl shadow-2xl mb-10 space-y-4">
+        <div className="sticky top-16 z-30 bg-[#07090E]/95 border border-white/10 p-6 rounded-2xl shadow-2xl mb-10 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="text-xs font-mono text-[#D2FF00] font-bold uppercase tracking-widest mb-1">
