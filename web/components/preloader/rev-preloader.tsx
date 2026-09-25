@@ -36,7 +36,7 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
 
   useEffect(() => {
     const startTime = Date.now();
-    const duration = 1500; // 1.5s total launch sequence
+    const duration = 1400; // 1.4s authentic launch sequence
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -84,7 +84,7 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
   return (
     <aside
       aria-label="Apex Cockpit Telemetry Preloader"
-      className={`fixed inset-0 z-50 bg-[#07090E] text-white flex flex-col justify-between p-6 sm:p-10 select-none overflow-hidden transition-opacity duration-300 ease-out bg-[repeating-linear-gradient(45deg,rgba(210,255,0,0.025)_0px,rgba(210,255,0,0.025)_1px,transparent_1px,transparent_14px)] ${
+      className={`fixed inset-0 z-50 bg-[#07090E] text-white flex flex-col justify-between p-6 sm:p-10 select-none overflow-hidden transition-opacity duration-300 ease-out bg-[repeating-linear-gradient(45deg,rgba(210,255,0,0.02)_0px,rgba(210,255,0,0.02)_1px,transparent_1px,transparent_14px)] ${
         isExiting ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
     >
@@ -159,7 +159,7 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
         <div className="w-full max-w-xl mx-auto space-y-2 pt-2">
           <div className="h-2.5 w-full rounded-full bg-slate-900 border border-white/10 overflow-hidden p-[1px]">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-orange-500 via-yellow-400 to-[#10B981] transition-all duration-75"
+              className="h-full rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-[#10B981] transition-all duration-75"
               style={{ width: `${percent}%` }}
             />
           </div>
