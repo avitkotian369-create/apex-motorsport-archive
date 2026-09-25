@@ -1,46 +1,37 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Radio, FastForward, CheckCircle2 } from "lucide-react";
+import { FastForward } from "lucide-react";
 
 interface RevPreloaderProps {
   onComplete?: () => void;
 }
 
-const ECU_LOGS = [
-  "[BOOT] MOTEC M150 MOTORSPORT ECU INITIALIZING...",
-  "[OK] CAN-BUS 2.0B CHASSIS PROTOCOL: ACTIVE (1000 KBPS)",
-  "[OK] BOSCH MOTORSPORT ABS & TRACTION CONTROL: SYNCED",
-  "[OK] ACTIVE DRS ACTUATOR CALIBRATION: COMPLETE (±0.05 MM)",
-  "[OK] TITANIUM VALVETRAIN OIL PRESSURE: 6.2 BAR NOMINAL",
-  "[OK] ISO 7200 KNOLLING CAD INDEX: 6/6 VEHICLES MOUNTED",
-  "[READY] MONOCOQUE ARCHIVE ENGAGED // GREEN FLAG"
-];
-
-// Gear parameters: for each gear, target speed and redline climb
+// Dyno run gear profiles: 1st through 4th gear
 const GEAR_PROFILES = [
-  { gear: 1, minRpm: 1400, maxRpm: 8600, minSpeed: 0, maxSpeed: 74 },
-  { gear: 2, minRpm: 5200, maxRpm: 8750, minSpeed: 74, maxSpeed: 128 },
-  { gear: 3, minRpm: 5600, maxRpm: 8850, minSpeed: 128, maxSpeed: 182 },
-  { gear: 4, minRpm: 6100, maxRpm: 8950, minSpeed: 182, maxSpeed: 236 }
+  { gear: 1, minRpm: 1500, maxRpm: 8600, minSpeed: 0, maxSpeed: 74 },
+  { gear: 2, minRpm: 5400, maxRpm: 8750, minSpeed: 74, maxSpeed: 132 },
+  { gear: 3, minRpm: 5800, maxRpm: 8850, minSpeed: 132, maxSpeed: 186 },
+  { gear: 4, minRpm: 6200, maxRpm: 9000, minSpeed: 186, maxSpeed: 242 }
 ];
 
 export function RevPreloader({ onComplete }: RevPreloaderProps) {
-  const [revs, setRevs] = useState(1400);
+  const [revs, setRevs] = useState(1500);
   const [gear, setGear] = useState(1);
   const [speed, setSpeed] = useState(0);
-  const [throttle, setThrottle] = useState(85);
-  const [progress, setProgress] = useState(0);
+  const [dynoPoints, setDynoPoints] = useState<{ x: number; y: number }[]>([]);
   const [shiftFlash, setShiftFlash] = useState(false);
-  const [logs, setLogs] = useState<string[]>([]);
+  const [punchScale, setPunchScale] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const prevGearRef = useRef(1);
   const hasFinishedRef = useRef(false);
 
   const finishPreloader = useCallback(() => {
     if (hasFinishedRef.current) return;
     hasFinishedRef.current = true;
     setIsExiting(true);
+    // Smooth motion streak dissolve into the homepage
     setTimeout(() => {
       setIsComplete(true);
       if (onComplete) onComplete();
@@ -49,61 +40,61 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
 
   useEffect(() => {
     const startTime = Date.now();
-    const duration = 2100; // 2.1s authentic multi-gear sprint
-
-    // Cycle ECU diagnostic boot logs rapidly
-    let logIndex = 0;
-    const logInterval = setInterval(() => {
-      if (logIndex < ECU_LOGS.length) {
-        setLogs((prev) => [...prev.slice(-2), ECU_LOGS[logIndex]]);
-        logIndex++;
-      }
-    }, 280);
+    const duration = 2200; // 2.2s dyno acceleration pull across 4 gears
+    const points: { x: number; y: number }[] = [];
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const p = Math.min(1, elapsed / duration);
-      setProgress(Math.floor(p * 100));
 
-      // Calculate sequential gear pull (Gears 1 to 4)
+      // Gear calculation
       const totalGears = GEAR_PROFILES.length;
       const gearProgress = p * totalGears;
       const currentGearIndex = Math.min(totalGears - 1, Math.floor(gearProgress));
       const profile = GEAR_PROFILES[currentGearIndex];
       const fractionInGear = gearProgress - currentGearIndex;
 
-      // Rev climb within current gear with exponential spool-up
+      // Realistic engine spool curve
       const currentRpm = Math.floor(
-        profile.minRpm + Math.pow(fractionInGear, 1.25) * (profile.maxRpm - profile.minRpm)
+        profile.minRpm + Math.pow(fractionInGear, 1.3) * (profile.maxRpm - profile.minRpm)
       );
       setRevs(currentRpm);
       setGear(profile.gear);
 
-      // Speed climb smoothly
       const currentSpeed = Math.floor(
         profile.minSpeed + fractionInGear * (profile.maxSpeed - profile.minSpeed)
       );
       setSpeed(currentSpeed);
 
-      // Dynamic throttle percentage (85% -> 100%)
-      const currentThrottle = Math.min(100, Math.floor(85 + fractionInGear * 15));
-      setThrottle(currentThrottle);
+      // Build real-time sawtooth dyno waveform path
+      // X maps across dyno width (0 to 360), Y maps RPM (1000 to 9200) to height (140 down to 10)
+      const graphX = Math.round(p * 360);
+      const graphY = Math.round(140 - ((currentRpm - 1000) / 8200) * 125);
+      points.push({ x: graphX, y: graphY });
+      setDynoPoints([...points]);
 
-      // Flash at redline shift point (fraction > 0.92)
-      if (fractionInGear > 0.92 && currentGearIndex < totalGears - 1) {
+      // Detect Gear Shift: punch animation & 80ms ignition-cut micro flash
+      if (profile.gear !== prevGearRef.current) {
+        prevGearRef.current = profile.gear;
+        setPunchScale(true);
         setShiftFlash(true);
-      } else {
-        setShiftFlash(false);
+        setTimeout(() => setShiftFlash(false), 80);
+        setTimeout(() => setPunchScale(false), 160);
+      }
+
+      // Shift flash trigger right before gear upshift
+      if (fractionInGear > 0.95 && currentGearIndex < totalGears - 1) {
+        setShiftFlash(true);
+        setTimeout(() => setShiftFlash(false), 80);
       }
 
       if (p >= 1) {
         clearInterval(interval);
-        clearInterval(logInterval);
         setTimeout(() => {
           finishPreloader();
-        }, 180);
+        }, 160);
       }
-    }, 25);
+    }, 20);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" || e.code === "Space") {
@@ -114,52 +105,37 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
 
     return () => {
       clearInterval(interval);
-      clearInterval(logInterval);
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [finishPreloader]);
 
   if (isComplete) return null;
 
-  // 16 Sequential LED Shift Lights Calculation
-  const leds = Array.from({ length: 16 }, (_, i) => {
-    const ledThreshold = 2000 + i * (6900 / 16);
-    const isActive = revs >= ledThreshold;
+  // Convert dyno points into an SVG path
+  const dynoPathData = dynoPoints.length > 0
+    ? dynoPoints.reduce((acc, pt, i) => `${acc} ${i === 0 ? "M" : "L"} ${pt.x} ${pt.y}`, "")
+    : "M 0 135";
 
-    let color = "bg-[#141B26]";
-    let glow = "";
-
-    if (isActive) {
-      if (i < 4) {
-        color = "bg-emerald-400";
-        glow = "shadow-[0_0_10px_#34D399]";
-      } else if (i < 8) {
-        color = "bg-[#D2FF00]";
-        glow = "shadow-[0_0_12px_#D2FF00]";
-      } else if (i < 12) {
-        color = "bg-amber-400";
-        glow = "shadow-[0_0_14px_#F59E0B]";
-      } else {
-        color = "bg-red-500 animate-pulse";
-        glow = "shadow-[0_0_18px_#EF4444]";
-      }
-    }
-
-    return { id: i, isActive, color, glow };
-  });
-
-  // SVG Radial Tachometer Arc calculation (180° sweep)
-  const maxArc = 440;
-  const normalizedRev = Math.max(0, Math.min(1, (revs - 1000) / 8000));
-  const strokeOffset = maxArc - normalizedRev * maxArc;
+  const dynoAreaPath = dynoPoints.length > 0
+    ? `${dynoPathData} L ${dynoPoints[dynoPoints.length - 1].x} 145 L 0 145 Z`
+    : "";
 
   return (
     <aside
-      aria-label="Motorsport Sequential Dash Initialization"
+      aria-label="Motorsport Dyno Pull Initialization"
       className={`fixed inset-0 z-[100] bg-[#05070B] flex flex-col justify-between p-6 sm:p-10 select-none overflow-hidden transition-all duration-500 ease-out ${
-        isExiting ? "scale-110 opacity-0 blur-md pointer-events-none" : "scale-100 opacity-100"
+        isExiting
+          ? "scale-110 opacity-0 blur-lg tracking-widest pointer-events-none"
+          : "scale-100 opacity-100"
       }`}
     >
+      {/* 80ms Ignition Cut Micro-Flash Overlay */}
+      <div
+        className={`pointer-events-none fixed inset-0 z-50 bg-[#D2FF00]/15 transition-opacity duration-75 ${
+          shiftFlash ? "opacity-100" : "opacity-0"
+        }`}
+      />
+
       {/* Background CAD Coordinate Grid & High-Voltage Vignette */}
       <div
         className="absolute inset-0 pointer-events-none opacity-20"
@@ -173,153 +149,164 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
       />
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(3,4,6,0.95)_100%)]" />
 
-      {/* 1. TOP TELEMETRY HEADER & SKIP INTRO BUTTON */}
+      {/* 1. TOP HEADER & ACCESSIBLE SKIP BUTTON */}
       <div className="flex items-center justify-between border-b border-[#1A2234] pb-4 font-mono text-xs z-10">
         <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#D2FF00] animate-ping" />
+          <div className="w-2.5 h-2.5 rounded-full bg-[#D2FF00] shadow-[0_0_10px_#D2FF00] animate-ping" />
           <span className="text-white font-bold tracking-widest uppercase">
-            MOTEC D153 MOTORSPORT DASH // SEQUENTIAL TELEMETRY
+            CHASSIS DYNAMOMETER // LIVE W.O.T. POWER SPRINT
           </span>
           <span className="hidden md:inline text-[#64748B] border-l border-[#1E293B] pl-3">
-            SAMPLING: 1000 HZ • CAN ID 0x3F0 • SEQUENTIAL DOG-RING ENGAGED
+            ACCELERATION RUN • 1ST TO 4TH GEAR PULL
           </span>
         </div>
 
-        {/* Quick Skip Button */}
+        {/* Skip Button */}
         <button
           onClick={finishPreloader}
           className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-[#25324A] bg-[#0E1524] hover:bg-[#D2FF00] text-slate-300 hover:text-black font-mono font-bold text-xs tracking-wider transition-all cursor-pointer shadow-lg hover:shadow-[0_0_20px_rgba(210,255,0,0.35)]"
           aria-label="Skip preloader animation"
         >
-          <span>[ SKIP ]</span>
+          <span>[ SKIP ⏭ ]</span>
           <FastForward className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      {/* 2. CENTER MOTEC RACING INSTRUMENT CLUSTER */}
-      <div className="max-w-4xl mx-auto w-full my-auto flex flex-col items-center justify-center relative z-10">
-        {/* SEQUENTIAL LED SHIFT LIGHT ARRAY */}
-        <div className="w-full max-w-xl mb-6 p-2 rounded-2xl bg-[#080B11] border border-[#1E283D] shadow-2xl flex items-center justify-between gap-1.5 sm:gap-2">
-          {leds.map((led) => (
-            <div
-              key={led.id}
-              className={`flex-1 h-3 rounded-sm transition-all duration-75 ${led.color} ${led.glow}`}
-            />
-          ))}
-        </div>
+      {/* 2. CENTER DYNAMOMETER RUNNER & CENTRAL GEAR BOX */}
+      <div className="max-w-4xl mx-auto w-full my-auto flex flex-col items-center justify-center relative z-10 space-y-6">
+        {/* CENTRAL MILLED METAL GEAR BOX */}
+        <div
+          className={`relative px-8 py-5 rounded-2xl bg-gradient-to-b from-[#161D2B] via-[#0E131E] to-[#080B12] border-2 transition-all duration-150 shadow-[0_15px_40px_rgba(0,0,0,0.8)] flex items-center justify-center gap-4 ${
+            punchScale
+              ? "border-[#D2FF00] scale-110 shadow-[0_0_35px_rgba(210,255,0,0.5)]"
+              : "border-[#253248] scale-100"
+          }`}
+        >
+          {/* Milled Corner Rivets */}
+          <div className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-slate-600 shadow-inner" />
+          <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-slate-600 shadow-inner" />
+          <div className="absolute bottom-2 left-2 w-1.5 h-1.5 rounded-full bg-slate-600 shadow-inner" />
+          <div className="absolute bottom-2 right-2 w-1.5 h-1.5 rounded-full bg-slate-600 shadow-inner" />
 
-        {/* RADIAL TACHOMETER SWEEP ARC & DIGITAL TELEMETRY CORE */}
-        <div className="relative w-80 h-48 sm:w-96 sm:h-56 flex items-end justify-center">
-          <svg viewBox="0 0 320 180" className="w-full h-full overflow-visible">
-            {/* Background Arc Track */}
-            <path
-              d="M 30 160 A 130 130 0 0 1 290 160"
-              fill="none"
-              stroke="#131B29"
-              strokeWidth="12"
-              strokeLinecap="round"
-            />
-            {/* Active Sweeping Redline Arc */}
-            <path
-              d="M 30 160 A 130 130 0 0 1 290 160"
-              fill="none"
-              stroke="url(#tachometer-gradient)"
-              strokeWidth="12"
-              strokeLinecap="round"
-              strokeDasharray={maxArc}
-              strokeDashoffset={strokeOffset}
-              className="transition-all duration-75"
-            />
-            {/* Gradient definition */}
-            <defs>
-              <linearGradient id="tachometer-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#10B981" />
-                <stop offset="50%" stopColor="#D2FF00" />
-                <stop offset="80%" stopColor="#F59E0B" />
-                <stop offset="100%" stopColor="#EF4444" />
-              </linearGradient>
-            </defs>
-          </svg>
+          {/* Large Bold Punching Gear Number */}
+          <span
+            className={`text-8xl sm:text-9xl font-black font-mono leading-none tracking-tighter transition-all duration-100 ${
+              punchScale
+                ? "text-[#D2FF00] drop-shadow-[0_0_30px_#D2FF00]"
+                : "text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.25)]"
+            }`}
+          >
+            {gear}
+          </span>
 
-          {/* Central Digital Readouts Inside The Arc */}
-          <div className="absolute inset-0 flex flex-col items-center justify-end pb-2 text-center">
-            {/* Large Digital Gear Indicator with Shift Flash */}
-            <div className="flex items-baseline gap-1.5 font-mono">
-              <span
-                className={`text-7xl sm:text-8xl font-black leading-none tracking-tighter transition-all duration-75 drop-shadow-[0_0_25px_rgba(210,255,0,0.35)] ${
-                  shiftFlash ? "text-red-500 scale-110 drop-shadow-[0_0_35px_#EF4444]" : "text-white"
-                }`}
-              >
-                {gear}
-              </span>
-              <span className="text-xs sm:text-sm font-mono font-bold text-[#D2FF00] tracking-widest uppercase">
-                GEAR
-              </span>
-            </div>
-
-            {/* High-Voltage RPM Counter */}
-            <div className="font-mono mt-1">
-              <span className="text-3xl sm:text-4xl font-extrabold text-[#D2FF00] tracking-tight">
-                {revs.toLocaleString()}
-              </span>
-              <span className="text-xs text-slate-400 font-normal ml-1">RPM</span>
-            </div>
+          <div className="flex flex-col justify-center font-mono">
+            <span className="text-sm sm:text-base font-bold text-[#D2FF00] tracking-widest uppercase">
+              GEAR
+            </span>
+            <span className="text-[10px] text-slate-400 uppercase tracking-wider">
+              DOG-RING BOX
+            </span>
+            <span className="text-xl sm:text-2xl font-black text-white mt-1">
+              {speed} <span className="text-xs text-slate-400 font-normal">KM/H</span>
+            </span>
           </div>
         </div>
 
-        {/* Telemetry Readout Strip: Speed, Lap Delta, Throttle */}
-        <div className="grid grid-cols-3 gap-3 w-full max-w-lg mt-6 font-mono text-center">
-          <div className="p-2.5 rounded-xl bg-[#090D15] border border-[#1A2438] shadow-inner">
-            <span className="text-[9px] text-[#64748B] block font-bold uppercase tracking-wider">SPEED</span>
-            <span className="text-lg font-black text-white">
-              {speed} <span className="text-[10px] text-slate-500 font-normal">KM/H</span>
+        {/* LIVE SAWTOOTH DYNO WAVEFORM DISPLAY */}
+        <div className="w-full max-w-2xl bg-[#080C14] border border-[#1C263A] rounded-2xl p-4 shadow-2xl relative overflow-hidden">
+          {/* Dyno Grid Background */}
+          <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 mb-2 border-b border-[#151D2D] pb-1.5">
+            <span className="text-[#D2FF00] font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D2FF00] animate-ping" />
+              DYNO RPM SAWTOOTH TRACE (1ST → 4TH GEAR)
             </span>
+            <span>REDLINE 9,000 RPM // W.O.T.</span>
           </div>
-          <div className="p-2.5 rounded-xl bg-[#090D15] border border-[#1A2438] shadow-inner">
-            <span className="text-[9px] text-[#64748B] block font-bold uppercase tracking-wider">LAP DELTA</span>
-            <span className="text-lg font-black text-emerald-400">
-              -0.248 <span className="text-[10px] font-normal">S</span>
+
+          <div className="relative w-full h-36">
+            {/* Horizontal RPM Reference Guidelines */}
+            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
+              <div className="border-b border-red-500 text-[8px] font-mono text-red-400 pl-1">9,000 RPM [REDLINE]</div>
+              <div className="border-b border-amber-400 text-[8px] font-mono text-amber-300 pl-1">7,000 RPM</div>
+              <div className="border-b border-lime-400 text-[8px] font-mono text-lime-300 pl-1">5,000 RPM [TORQUE PEAK]</div>
+              <div className="border-b border-slate-600 text-[8px] font-mono text-slate-400 pl-1">3,000 RPM</div>
+            </div>
+
+            {/* Sawtooth SVG Canvas */}
+            <svg
+              viewBox="0 0 360 150"
+              preserveAspectRatio="none"
+              className="w-full h-full overflow-visible relative z-10"
+            >
+              <defs>
+                <linearGradient id="dynoWaveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#10B981" />
+                  <stop offset="40%" stopColor="#D2FF00" />
+                  <stop offset="75%" stopColor="#F59E0B" />
+                  <stop offset="100%" stopColor="#EF4444" />
+                </linearGradient>
+
+                <linearGradient id="dynoFillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#D2FF00" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#D2FF00" stopOpacity="0.0" />
+                </linearGradient>
+              </defs>
+
+              {/* Shaded Area Under Sawtooth Curve */}
+              {dynoAreaPath && (
+                <path d={dynoAreaPath} fill="url(#dynoFillGrad)" />
+              )}
+
+              {/* Live Traced Sawtooth Line */}
+              <path
+                d={dynoPathData}
+                fill="none"
+                stroke="url(#dynoWaveGrad)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter="drop-shadow(0 0 8px rgba(210,255,0,0.5))"
+              />
+
+              {/* Current Leading Tracer Head */}
+              {dynoPoints.length > 0 && (
+                <circle
+                  cx={dynoPoints[dynoPoints.length - 1].x}
+                  cy={dynoPoints[dynoPoints.length - 1].y}
+                  r="4"
+                  fill="#FFFFFF"
+                  stroke="#D2FF00"
+                  strokeWidth="2"
+                  className="animate-pulse"
+                />
+              )}
+            </svg>
+          </div>
+
+          {/* RPM Numerical Live Readout */}
+          <div className="flex items-center justify-between text-xs font-mono pt-2 border-t border-[#151D2D] mt-1">
+            <span className="text-slate-400">
+              CURRENT TACH: <span className="text-[#D2FF00] font-black text-sm">{revs.toLocaleString()} RPM</span>
             </span>
-          </div>
-          <div className="p-2.5 rounded-xl bg-[#090D15] border border-[#1A2438] shadow-inner">
-            <span className="text-[9px] text-[#64748B] block font-bold uppercase tracking-wider">THROTTLE</span>
-            <span className="text-lg font-black text-[#D2FF00]">
-              {throttle}%
+            <span className="text-emerald-400 font-bold">
+              IGNITION TIMING: +28.5° ADV
             </span>
           </div>
         </div>
       </div>
 
-      {/* 3. BOTTOM ECU DIAGNOSTICS BOOT LOG & PROGRESS STRIP */}
-      <div className="border-t border-[#1A2234] pt-4 flex flex-col md:flex-row items-start md:items-end justify-between gap-4 font-mono text-xs z-10">
-        {/* Terminal Boot Log */}
-        <div className="space-y-1 max-w-lg w-full">
-          <div className="text-[10px] text-[#D2FF00] uppercase font-bold flex items-center gap-1.5 mb-1">
-            <Radio className="w-3 h-3 animate-pulse" />
-            <span>ECU DIAGNOSTICS LOG STREAM</span>
-          </div>
-          <div className="bg-[#07090F] border border-[#172033] p-2.5 rounded-lg space-y-1 font-mono text-[10px] text-slate-400 shadow-inner min-h-[50px]">
-            {logs.map((log, index) => (
-              <div key={index} className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3 h-3 text-[#D2FF00] shrink-0" />
-                <span className={index === logs.length - 1 ? "text-white font-bold" : "text-slate-400"}>
-                  {log}
-                </span>
-              </div>
-            ))}
-          </div>
+      {/* 3. TELEMETRY FOOTER & PROGRESS */}
+      <div className="border-t border-[#1A2234] pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 font-mono text-xs z-10">
+        <div className="text-[11px] text-slate-400 tracking-wider">
+          <span className="text-[#D2FF00] font-bold">CHASSIS DYNO BENCH</span> {"//"} SEQUENTIAL DOG-BOX CALIBRATION {"//"} 100% W.O.T.
         </div>
 
-        {/* Launch Sequence Progress Bar */}
-        <div className="w-full md:w-64 space-y-1.5 text-right">
-          <div className="flex justify-between text-[10px] text-slate-400">
-            <span>CALIBRATION</span>
-            <span className="text-[#D2FF00] font-bold">{progress}% READY</span>
-          </div>
-          <div className="w-full h-2 bg-[#121824] rounded-full overflow-hidden border border-[#1E293B] p-0.5 shadow-inner">
+        <div className="flex items-center gap-3 text-[10px] text-slate-500">
+          <span className="text-white font-bold">PULL PROGRESS: GEAR {gear}/4</span>
+          <div className="w-32 h-1.5 bg-[#121824] rounded-full overflow-hidden border border-[#1E293B]">
             <div
               className="h-full bg-gradient-to-r from-emerald-400 via-[#D2FF00] to-red-500 rounded-full transition-all duration-75"
-              style={{ width: `${progress}%` }}
+              style={{ width: `${(gear / 4) * 100}%` }}
             />
           </div>
         </div>
