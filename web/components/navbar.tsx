@@ -10,7 +10,7 @@ interface NavbarProps {
 
 export function Navbar({ currentCarSlug }: NavbarProps) {
   return (
-    <header className="sticky top-0 z-50 bg-[#08090C]/95 backdrop-blur-xl border-b border-[#1A1E29] transition-all overflow-hidden no-scrollbar">
+    <header className="sticky top-0 z-50 bg-[#0B0F17]/95 border-b border-[#1A1E29] transition-all overflow-hidden no-scrollbar">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4 overflow-visible">
         {/* Brand identity: MONOCOQUE // Automotive Anatomy Archive */}
         <Link href="/" className="flex items-center gap-3 group cursor-pointer shrink-0 overflow-visible select-none">

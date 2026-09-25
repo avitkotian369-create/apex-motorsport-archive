@@ -253,7 +253,7 @@ export default function CarCadTerminalPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-[#06080E] text-[#E2E8F0] selection:bg-[#D2FF00] selection:text-black flex flex-col font-sans relative overflow-x-hidden bg-cad-grid">
       {/* 1. TIER 1: MINIMALIST UTILITY NAVIGATION (HEIGHT: ~48PX) */}
-      <header className="border-b border-[#161F30] bg-[#07090E]/95 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-[#161F30] bg-[#0B0F17]/95 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between gap-4">
           {/* Left: Sleek back navigation link */}
           <Link
@@ -335,7 +335,7 @@ export default function CarCadTerminalPage({ params }: PageProps) {
         {/* TIER 3: FLOATING TELEMETRY HUD STRIP (4 CLEAN PILLARS) */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-mono">
           {/* Column 1: OUTPUT */}
-          <div className="group relative rounded-xl border border-[#182236] hover:border-[#D2FF00]/50 bg-[#0A0D15]/90 backdrop-blur-md p-3.5 sm:p-4 shadow-lg transition-all duration-200">
+          <div className="group relative rounded-xl border border-white/10 hover:border-[#D2FF00]/50 bg-[#0D121D]/90 p-3.5 sm:p-4 shadow-lg transition-all duration-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase font-bold tracking-wider">
                 <Zap className="w-3.5 h-3.5 text-[#D2FF00] group-hover:scale-110 transition-transform" />
@@ -358,7 +358,7 @@ export default function CarCadTerminalPage({ params }: PageProps) {
           </div>
 
           {/* Column 2: REDLINE */}
-          <div className="group relative rounded-xl border border-[#182236] hover:border-cyan-400/50 bg-[#0A0D15]/90 backdrop-blur-md p-3.5 sm:p-4 shadow-lg transition-all duration-200">
+          <div className="group relative rounded-xl border border-white/10 hover:border-cyan-400/50 bg-[#0D121D]/90 p-3.5 sm:p-4 shadow-lg transition-all duration-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase font-bold tracking-wider">
                 <Gauge className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
@@ -383,7 +383,7 @@ export default function CarCadTerminalPage({ params }: PageProps) {
           </div>
 
           {/* Column 3: CURB WEIGHT */}
-          <div className="group relative rounded-xl border border-[#182236] hover:border-amber-400/50 bg-[#0A0D15]/90 backdrop-blur-md p-3.5 sm:p-4 shadow-lg transition-all duration-200">
+          <div className="group relative rounded-xl border border-white/10 hover:border-amber-400/50 bg-[#0D121D]/90 p-3.5 sm:p-4 shadow-lg transition-all duration-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase font-bold tracking-wider">
                 <Scale className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
@@ -406,7 +406,7 @@ export default function CarCadTerminalPage({ params }: PageProps) {
           </div>
 
           {/* Column 4: DOWNFORCE */}
-          <div className="group relative rounded-xl border border-[#182236] hover:border-red-400/50 bg-[#0A0D15]/90 backdrop-blur-md p-3.5 sm:p-4 shadow-lg transition-all duration-200">
+          <div className="group relative rounded-xl border border-white/10 hover:border-red-400/50 bg-[#0D121D]/90 p-3.5 sm:p-4 shadow-lg transition-all duration-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase font-bold tracking-wider">
                 <Flame className="w-3.5 h-3.5 text-red-400 group-hover:scale-110 transition-transform" />
@@ -459,7 +459,7 @@ export default function CarCadTerminalPage({ params }: PageProps) {
         </section>
 
         {/* 3. DE-CLUTTERED, BEGINNER-FRIENDLY PARTS LEDGER */}
-        <section className="rounded-2xl border border-[#1E2536] bg-[#0A0D15]/95 backdrop-blur-xl overflow-hidden shadow-2xl font-mono">
+        <section className="rounded-2xl border border-white/10 bg-[#0D121D]/95 overflow-hidden shadow-2xl font-mono">
           {/* Ledger Header */}
           <div className="px-5 py-4 border-b border-[#1A2233] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0E131E]">
             <div className="flex items-center gap-3">

@@ -16,6 +16,8 @@ interface StreamParticle {
 
 export function WindTunnelStream() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isVisibleRef = useRef<boolean>(true);
+  const animationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -23,7 +25,6 @@ export function WindTunnelStream() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animationFrameId: number;
     let width = (canvas.width = canvas.offsetWidth);
     let height = (canvas.height = canvas.offsetHeight);
 
@@ -51,6 +52,8 @@ export function WindTunnelStream() {
     }));
 
     const render = () => {
+      if (!isVisibleRef.current) return;
+
       ctx.clearRect(0, 0, width, height);
 
       particles.forEach((p) => {
@@ -95,14 +98,36 @@ export function WindTunnelStream() {
       });
 
       ctx.globalAlpha = 1.0;
-      animationFrameId = requestAnimationFrame(render);
+      animationFrameRef.current = requestAnimationFrame(render);
     };
 
-    render();
+    // Attach IntersectionObserver to pause off-screen canvas loops
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const wasVisible = isVisibleRef.current;
+        isVisibleRef.current = entry.isIntersecting;
+
+        if (entry.isIntersecting && !wasVisible) {
+          // Resume animation loop
+          animationFrameRef.current = requestAnimationFrame(render);
+        } else if (!entry.isIntersecting && animationFrameRef.current) {
+          // Cancel active frame to free CPU/GPU
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(canvas);
+    animationFrameRef.current = requestAnimationFrame(render);
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
   }, []);
 
@@ -110,7 +135,7 @@ export function WindTunnelStream() {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-80"
-      style={{ mixBlendMode: "screen" }}
+      style={{ mixBlendMode: "screen", transform: "translateZ(0)" }}
     />
   );
 }

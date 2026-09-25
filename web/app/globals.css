@@ -22,7 +22,6 @@ body {
     radial-gradient(ellipse 90% 55% at 50% -10%, rgba(210, 255, 0, 0.035) 0%, rgba(255, 255, 255, 0.015) 40%, transparent 75%),
     linear-gradient(to bottom, transparent 0%, transparent 65%, rgba(4, 5, 8, 0.85) 100%),
     repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 12px);
-  background-attachment: fixed;
 }
 
 /* Hide scrollbars for chrome, safari, edge, firefox while allowing clean scroll */
@@ -145,6 +144,8 @@ body {
   display: flex;
   width: 200%;
   animation: marqueeInfinite 24s linear infinite;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .animate-audio-1 {
