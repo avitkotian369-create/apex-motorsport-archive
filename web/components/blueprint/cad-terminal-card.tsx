@@ -213,7 +213,7 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
               <Zap className="w-3 h-3 text-[#D2FF00]" />
               <span>OUTPUT</span>
             </div>
-            <div className="font-bold text-white mt-1 text-sm tracking-tight truncate">{car.output}</div>
+            <div className="font-bold text-white mt-1 text-xs sm:text-sm tracking-tight whitespace-nowrap overflow-visible">{car.output}</div>
           </div>
 
           {/* Column 2: Redline */}
@@ -222,7 +222,7 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
               <Gauge className="w-3 h-3 text-cyan-400" />
               <span>REDLINE</span>
             </div>
-            <div className="font-bold text-cyan-400 mt-1 text-sm tracking-tight truncate">{car.redline}</div>
+            <div className="font-bold text-cyan-400 mt-1 text-xs sm:text-sm tracking-tight whitespace-nowrap overflow-visible">{car.redline}</div>
           </div>
 
           {/* Column 3: Curb Weight */}
@@ -231,7 +231,7 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
               <Scale className="w-3 h-3 text-[#FF8000]" />
               <span>CURB WEIGHT</span>
             </div>
-            <div className="font-bold text-amber-400 mt-1 text-sm tracking-tight truncate">{car.weight}</div>
+            <div className="font-bold text-amber-400 mt-1 text-xs sm:text-sm tracking-tight whitespace-nowrap overflow-visible">{car.weight}</div>
           </div>
 
           {/* Column 4: Downforce Metric */}
@@ -240,7 +240,7 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
               <Flame className="w-3 h-3 text-red-400" />
               <span>DOWNFORCE</span>
             </div>
-            <div className="font-bold text-red-400 mt-1 text-sm tracking-tight truncate">{car.downforce}</div>
+            <div className="font-bold text-red-400 mt-1 text-xs sm:text-sm tracking-tight whitespace-nowrap overflow-visible">{car.downforce}</div>
           </div>
         </div>
 
