@@ -8,7 +8,7 @@ interface RevPreloaderProps {
 }
 
 const GEAR_RUNS = [
-  { gear: 1, minRpm: 1800, maxRpm: 8400 },
+  { gear: 1, minRpm: 1200, maxRpm: 8400 },
   { gear: 2, minRpm: 5200, maxRpm: 8600 },
   { gear: 3, minRpm: 5600, maxRpm: 8750 },
   { gear: 4, minRpm: 6000, maxRpm: 8900 }
@@ -16,7 +16,7 @@ const GEAR_RUNS = [
 
 export function RevPreloader({ onComplete }: RevPreloaderProps) {
   const [gear, setGear] = useState(1);
-  const [rpm, setRpm] = useState(1800);
+  const [rpm, setRpm] = useState(1200);
   const [fraction, setFraction] = useState(0);
   const [punch, setPunch] = useState(false);
   const [limeFlash, setLimeFlash] = useState(false);
@@ -29,7 +29,7 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
     if (hasFinishedRef.current) return;
     hasFinishedRef.current = true;
     setIsExiting(true);
-    // Smooth 350ms fade-out into the homepage
+    // Smooth fade-out into the homepage
     setTimeout(() => {
       setIsComplete(true);
       if (onComplete) onComplete();
@@ -38,7 +38,7 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
 
   useEffect(() => {
     const startTime = Date.now();
-    const duration = 1350; // Fast 1.35s total sequence
+    const duration = 1400; // Crisp ~1.4s progression across 4 gears
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -51,7 +51,7 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
       const frac = progressInGears - gearIndex;
       setFraction(frac);
 
-      // Fast, non-linear RPM spool
+      // Fast non-linear RPM climb
       const currentRpm = Math.floor(
         profile.minRpm + Math.pow(frac, 1.25) * (profile.maxRpm - profile.minRpm)
       );
@@ -92,19 +92,19 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
 
   return (
     <aside
-      aria-label="Gear Shift Preloader"
+      aria-label="Launch Control Preloader"
       className={`fixed inset-0 z-[100] bg-[#06080E] flex flex-col justify-between p-6 sm:p-10 select-none overflow-hidden transition-all duration-350 ease-out ${
         isExiting ? "opacity-0 scale-105 pointer-events-none" : "opacity-100 scale-100"
       }`}
     >
-      {/* 50ms Electric Lime Micro-Flash */}
+      {/* 50ms Electric Lime Micro-Flash on Gear Shifts */}
       <div
         className={`pointer-events-none fixed inset-0 z-50 bg-[#D2FF00]/10 transition-opacity duration-75 ${
           limeFlash ? "opacity-100" : "opacity-0"
         }`}
       />
 
-      {/* Subtle CAD Background Grid */}
+      {/* Subtle CAD Coordinate Grid & Radial Ambient Spotlight */}
       <div
         className="absolute inset-0 pointer-events-none opacity-20"
         style={{
@@ -115,22 +115,23 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
           backgroundSize: "40px 40px"
         }}
       />
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_35%,rgba(6,8,14,0.92)_100%)]" />
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_35%,rgba(6,8,14,0.95)_100%)]" />
 
-      {/* TOP HEADER: Subtle Meta + Unobtrusive [ SKIP ] Button */}
+      {/* 1. TOP UTILITY HEADER */}
       <div className="flex items-center justify-between z-10 font-mono text-xs">
+        {/* Left: Pulsing status indicator */}
         <div className="flex items-center gap-2.5 text-slate-400">
-          <span className="w-2 h-2 rounded-full bg-[#D2FF00] shadow-[0_0_8px_#D2FF00]" />
+          <span className="w-2 h-2 rounded-full bg-[#D2FF00] shadow-[0_0_8px_#D2FF00] animate-ping" />
           <span className="text-white font-bold tracking-wider text-[11px] uppercase">
             MONOCOQUE ARCHIVE
           </span>
           <span className="text-[#323E54] hidden sm:inline">{"//"}</span>
-          <span className="text-[10px] text-[#63728B] hidden sm:inline uppercase">
+          <span className="text-[10px] text-[#8696AE] hidden sm:inline uppercase tracking-wider">
             CALIBRATION RUN
           </span>
         </div>
 
-        {/* Subtle [ SKIP ] Button */}
+        {/* Right: Clean Bypass [ SKIP ] ⏭ Button */}
         <button
           onClick={finishPreloader}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1E273A] bg-[#0A0D15] hover:border-[#D2FF00]/60 hover:text-[#D2FF00] text-slate-400 font-mono text-xs tracking-wider transition-colors cursor-pointer"
@@ -141,9 +142,9 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
         </button>
       </div>
 
-      {/* CENTER MINIMALIST GEAR DISPLAY */}
-      <div className="my-auto max-w-sm mx-auto w-full flex flex-col items-center justify-center relative z-10 text-center">
-        {/* Prominent Gear Number with Tactile Scale Punch */}
+      {/* 2. CENTER STAGE: DYNAMIC GEAR COUNTER & HORIZONTAL TACHOMETER */}
+      <div className="my-auto max-w-md mx-auto w-full flex flex-col items-center justify-center relative z-10 text-center">
+        {/* Dynamic Gear Counter */}
         <div className="flex items-baseline justify-center gap-2 font-mono">
           <span
             className={`text-8xl sm:text-9xl font-black text-white leading-none tracking-tighter transition-transform duration-100 select-none ${
@@ -157,29 +158,43 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
           </span>
         </div>
 
-        {/* Razor-Thin Horizontal Rev Progress Line */}
-        <div className="w-56 sm:w-64 h-[2px] bg-[#161F2E] rounded-full mt-4 overflow-hidden relative">
+        {/* Horizontal Tachometer Line */}
+        <div className="w-64 sm:w-80 h-[2px] bg-[#161F2E] rounded-full mt-4 overflow-hidden relative">
           <div
-            className="h-full bg-gradient-to-r from-slate-400 via-[#D2FF00] to-[#D2FF00] transition-all duration-75"
+            className="h-full bg-gradient-to-r from-[#FF8000] via-[#D2FF00] to-[#D2FF00] transition-all duration-75"
             style={{ width: `${Math.min(100, fraction * 100)}%` }}
           />
         </div>
 
-        {/* Live Monospace RPM Readout */}
-        <div className="mt-3 font-mono text-xs sm:text-sm text-slate-300 tracking-wider">
-          <span className="font-extrabold text-[#D2FF00]">{rpm.toLocaleString()}</span>{" "}
-          <span className="text-slate-500 font-medium">RPM</span>
+        {/* Micro-Labels: 1,200 IDLE (Left) and 9,000 MAX REDLINE (Right) */}
+        <div className="w-64 sm:w-80 flex items-center justify-between font-mono text-[9px] text-[#55657E] mt-1.5 px-0.5 tracking-wider">
+          <span>1,200 IDLE</span>
+          <span>9,000 MAX REDLINE</span>
+        </div>
+
+        {/* Clean, High-Impact Monospace RPM Readout */}
+        <div className="mt-4 font-mono text-sm sm:text-base tracking-wider text-white">
+          <span className="font-black text-[#D2FF00] text-lg sm:text-xl drop-shadow-[0_0_12px_rgba(210,255,0,0.3)]">
+            {rpm.toLocaleString()}
+          </span>{" "}
+          <span className="text-slate-400 font-bold text-xs">RPM</span>
         </div>
       </div>
 
-      {/* BOTTOM FOOTER: Minimalist Telemetry Note */}
-      <div className="flex items-center justify-between border-t border-[#131B2A] pt-4 font-mono text-[10px] text-slate-500 z-10">
-        <span className="tracking-wider uppercase text-slate-400">
+      {/* 3. BOTTOM STATUS RIBBON */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 items-center border-t border-[#131B2A] pt-4 font-mono text-[10px] text-slate-500 z-10 gap-2">
+        {/* Left */}
+        <div className="tracking-wider uppercase text-slate-400 text-left">
           SEQUENTIAL DOG-RING TRANSMISSION
-        </span>
-        <span className="text-right text-[#D2FF00]">
+        </div>
+        {/* Center */}
+        <div className="tracking-wider uppercase text-slate-500 text-center hidden sm:block">
+          INITIALIZING FACTORY BLUEPRINT ARCHIVE
+        </div>
+        {/* Right */}
+        <div className="text-right text-[#D2FF00] font-bold tracking-wider">
           GEAR {gear}/4 • ENGAGED
-        </span>
+        </div>
       </div>
     </aside>
   );

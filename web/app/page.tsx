@@ -193,7 +193,7 @@ export default function MotorsportHomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#08090C] text-[#E2E8F0] selection:bg-[#D2FF00] selection:text-black font-sans relative overflow-x-hidden bg-cad-grid">
+    <div className="min-h-screen bg-[#06080E] text-[#E2E8F0] selection:bg-[#D2FF00] selection:text-black font-sans relative overflow-x-hidden bg-cad-grid">
       {/* 1. INTERACTIVE CURSOR RADIAL SPOTLIGHT (Papaya #FF8000 & Electric Lime #D2FF00 Dual-Tone Glow) */}
       <div
         className="pointer-events-none fixed inset-0 z-20 transition-opacity duration-300"

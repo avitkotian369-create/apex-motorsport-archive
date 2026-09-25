@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #08090c;
+  --background: #06080e;
   --foreground: #e2e8f0;
 }
 
@@ -13,10 +13,15 @@
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+  /* Motorsport Diagonal Hatch / Carbon Weave Layer */
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(210, 255, 0, 0.04), transparent 70%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 14px);
+  background-attachment: fixed;
 }
 
 /* Hide scrollbars for chrome, safari, edge, firefox while allowing clean scroll */
@@ -32,12 +37,12 @@ body {
   scrollbar-width: none;
 }
 
-/* 1. Ultra-subtle 40px engineering millimeter drafting grid */
+/* 1. Fine 48px CAD coordinate drafting grid at low opacity */
 .bg-cad-grid {
-  background-size: 40px 40px;
+  background-size: 48px 48px;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
 }
 
 /* 2. Faint 45-degree racing apex chevron/kerb stripe pattern */
