@@ -70,7 +70,7 @@ const DEFAULT_CAR_META: BenchmarkCarMeta = {
   redline: "9,000 RPM",
   dryWeight: "1,450 kg (DIN)",
   aeroBalance: "860 kg @ 285 km/h",
-  defaultCutaway: "/assets/monocoque-exploded-v2.jpg",
+  defaultCutaway: "/assets/porsche-gt3rs-knolling-teardown.jpg",
   dimensions: {
     wheelbase: "2,457 mm",
     trackFront: "1,630 mm",
@@ -167,25 +167,28 @@ export function BlueprintCanvas({
 
   // Vehicle Knolling teardown photo selection
   const primaryKnollingImage = useMemo(() => {
+    if (carInfo?.defaultCutaway && carInfo.defaultCutaway.includes("knolling-teardown")) {
+      return carInfo.defaultCutaway;
+    }
     const key = (carKey || "").toLowerCase();
     if (key.includes("bmw") || key.includes("m4") || key.includes("csl") || key.includes("g82")) {
       return "/assets/bmw-m4-knolling-teardown.jpg";
     }
     if (key.includes("mclaren") || key.includes("f1") || key.includes("xp5")) {
-      return "/assets/mclaren-f1-monocoque-exploded-v2.jpg";
+      return "/assets/mclaren-f1-knolling-teardown.jpg";
     }
     if (key.includes("golf") || key.includes("vw") || key.includes("volkswagen")) {
-      return "/assets/vw-golfr-cutaway.jpg";
+      return "/assets/vw-golfr-knolling-teardown.jpg";
     }
     if (key.includes("ferrari") || key.includes("f40")) {
-      return "/assets/ferrari-f40-cutaway.jpg";
+      return "/assets/ferrari-f40-knolling-teardown.jpg";
     }
     if (key.includes("skyline") || key.includes("r34") || key.includes("gtr") || key.includes("nissan")) {
-      return "/assets/skyline-r34-cutaway.jpg";
+      return "/assets/skyline-r34-knolling-teardown.jpg";
     }
-    // Default: Porsche 911 GT3 RS exploded monocoque
-    return "/assets/monocoque-exploded-v2.jpg";
-  }, [carKey]);
+    // Default: Porsche 911 GT3 RS knolling teardown
+    return "/assets/porsche-gt3rs-knolling-teardown.jpg";
+  }, [carKey, carInfo?.defaultCutaway]);
 
   const [currentImageSrc, setCurrentImageSrc] = useState<string>(primaryKnollingImage);
 
@@ -194,7 +197,7 @@ export function BlueprintCanvas({
   }, [primaryKnollingImage]);
 
   const handleImageError = () => {
-    setCurrentImageSrc("/assets/cad-chassis-schematic.svg");
+    setCurrentImageSrc("/assets/bmw-m4-knolling-teardown.jpg");
   };
 
   // Tracking mouse movement for caliper and pan

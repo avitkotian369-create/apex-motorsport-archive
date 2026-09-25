@@ -32,7 +32,7 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
   "porsche-911-gt3-rs": {
     name: "PORSCHE 911 GT3 RS (Weissach Package)",
     badge: "WEISSACH HOMOLOGATION",
-    engine: "4.0L FLAT-6 NA (MA1.77)",
+    engine: "MA1.77 // 4.0L FLAT-6",
     power: "525 PS (386 kW)",
     redline: "9,000 RPM",
     dryWeight: "1,450 kg (DIN)",
@@ -49,11 +49,11 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
   "bmw-m4-csl": {
     name: "BMW M4 CSL (Competition Sport Lightweight)",
     badge: "CSL LIGHTWEIGHT HOMOLOGATION",
-    engine: "3.0L TWIN-TURBO I6 (S58B30T0)",
+    engine: "S58B30T0 // 3.0L TWIN-TURBO",
     power: "550 PS (405 kW)",
     redline: "7,200 RPM",
-    dryWeight: "1,625 kg (DIN / -100 kg CSL)",
-    aeroBalance: "CSL Carbon Ducktail & Splitter (220 kg)",
+    dryWeight: "1,625 kg (DIN)",
+    aeroBalance: "220 kg @ 250 km/h",
     defaultCutaway: "/assets/bmw-m4-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,857 mm",
@@ -66,11 +66,11 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
   "mclaren-f1-xp5": {
     name: "MCLAREN F1 XP5 (Le Mans Benchmark)",
     badge: "LE MANS BENCHMARK HOMOLOGATION",
-    engine: "6.1L BMW S70/2 60° V12",
+    engine: "BMW S70/2 // 6.1L 60° V12",
     power: "627 PS (461 kW)",
     redline: "7,500 RPM",
     dryWeight: "1,138 kg (Dry)",
-    aeroBalance: "Active Pop-Up Brake Foil",
+    aeroBalance: "Active Dynamic Brake Foil",
     defaultCutaway: "/assets/mclaren-f1-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,718 mm",
@@ -83,11 +83,11 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
   "volkswagen-golf-r-mk8": {
     name: "VOLKSWAGEN GOLF R MK8 (20 Years Edition)",
     badge: "20 YEARS HOMOLOGATION SPEC",
-    engine: "2.0L TSI TURBO (EA888 GEN 4)",
+    engine: "EA888 GEN 4 // 2.0L TSI",
     power: "320 PS (235 kW)",
     redline: "6,800 RPM",
     dryWeight: "1,551 kg (DIN)",
-    aeroBalance: "High-Speed Aero Foil",
+    aeroBalance: "R-Performance Aero Foil",
     defaultCutaway: "/assets/vw-golfr-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,628 mm",
@@ -100,7 +100,7 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
   "ferrari-f40": {
     name: "FERRARI F40 (Tipo F120AB)",
     badge: "TIPO F120AB HOMOLOGATION",
-    engine: "2.9L TWIN-TURBO 90° V8 (TIPO F120A)",
+    engine: "TIPO F120A // 2.9L TT V8",
     power: "478 PS (352 kW)",
     redline: "7,750 RPM",
     dryWeight: "1,100 kg (Dry)",
@@ -117,7 +117,7 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
   "nissan-skyline-gtr-r34": {
     name: "NISSAN SKYLINE GT-R R34 (V-Spec II Nürburgring)",
     badge: "V-SPEC II NÜRBURGRING HOMOLOGATION",
-    engine: "2.6L TWIN-TURBO RB26DETT",
+    engine: "RB26DETT // 2.6L TT I6",
     power: "280+ PS (206 kW)",
     redline: "8,000 RPM",
     dryWeight: "1,560 kg (DIN)",
@@ -257,7 +257,8 @@ export default function CarCadTerminalPage({ params }: PageProps) {
                 <span className="text-xs sm:text-sm font-mono font-black text-white uppercase tracking-wider">
                   {carInfo.name}
                 </span>
-                <span className="hidden md:inline-block px-2 py-0.5 text-[9px] font-mono font-bold rounded bg-[#D2FF00]/10 text-[#D2FF00] border border-[#D2FF00]/30">
+                <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wider uppercase border border-red-500/60 text-red-400 bg-red-500/10 shadow-[0_0_12px_rgba(239,68,68,0.2)]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                   {carInfo.badge}
                 </span>
               </div>
@@ -267,30 +268,46 @@ export default function CarCadTerminalPage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Live Telemetry Strip */}
-          <div className="hidden lg:flex items-center gap-2.5 font-mono text-xs">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0E131E] border border-[#1E2536]">
-              <Zap className="w-3.5 h-3.5 text-[#D2FF00]" />
-              <span className="text-[#647087]">ENG:</span>
-              <span className="text-white font-bold">{carInfo.engine}</span>
+          <div className="flex items-center gap-3">
+            {/* Inset dark box with #D2FF00 electric lime engine code */}
+            <div className="text-right font-mono bg-[#07090E] px-3 py-1.5 rounded-xl border border-[#1A2233] shadow-inner shrink-0 hidden sm:block">
+              <span className="text-[8px] text-[#616E82] uppercase tracking-wider block font-bold leading-none">
+                ENGINE BLOCK
+              </span>
+              <span className="text-xs font-bold text-[#D2FF00] tracking-wide block mt-0.5">
+                {carInfo.engine}
+              </span>
             </div>
 
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0E131E] border border-[#1E2536]">
-              <Flame className="w-3.5 h-3.5 text-[#FF8000]" />
-              <span className="text-[#647087]">POWER:</span>
-              <span className="text-[#FF8000] font-bold">{carInfo.power}</span>
-            </div>
+            {/* Live Telemetry Matrix (4 Columns) */}
+            <div className="hidden lg:flex items-center gap-2 font-mono text-xs">
+              {/* 1. Output */}
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0E131E] border border-[#1E2536]">
+                <Zap className="w-3.5 h-3.5 text-[#D2FF00]" />
+                <span className="text-[#647087]">OUTPUT:</span>
+                <span className="text-white font-bold">{carInfo.power}</span>
+              </div>
 
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0E131E] border border-[#1E2536]">
-              <Gauge className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="text-[#647087]">REDLINE:</span>
-              <span className="text-cyan-400 font-bold">{carInfo.redline}</span>
-            </div>
+              {/* 2. Redline */}
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0E131E] border border-[#1E2536]">
+                <Gauge className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="text-[#647087]">REDLINE:</span>
+                <span className="text-cyan-400 font-bold">{carInfo.redline}</span>
+              </div>
 
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0E131E] border border-[#1E2536]">
-              <Scale className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-[#647087]">WEIGHT:</span>
-              <span className="text-amber-400 font-bold">{carInfo.dryWeight}</span>
+              {/* 3. Curb Weight */}
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0E131E] border border-[#1E2536]">
+                <Scale className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-[#647087]">CURB WT:</span>
+                <span className="text-amber-400 font-bold">{carInfo.dryWeight}</span>
+              </div>
+
+              {/* 4. Downforce */}
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0E131E] border border-[#1E2536]">
+                <Flame className="w-3.5 h-3.5 text-red-400" />
+                <span className="text-[#647087]">AERO:</span>
+                <span className="text-red-400 font-bold max-w-[130px] truncate">{carInfo.aeroBalance}</span>
+              </div>
             </div>
           </div>
         </div>
