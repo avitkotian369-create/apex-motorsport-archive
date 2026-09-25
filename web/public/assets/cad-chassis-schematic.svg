@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#0E131F" />
+      <stop offset="100%" stop-color="#090B10" />
+    </radialGradient>
+    <!-- 40px CAD Measurement Grid -->
+    <pattern id="cadGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#161F2E" stroke-width="0.8" opacity="0.45" />
+      <circle cx="0" cy="0" r="1" fill="#24334A" />
+    </pattern>
+    <pattern id="cadMajorGrid" width="200" height="200" patternUnits="userSpaceOnUse">
+      <path d="M 200 0 L 0 0 0 200" fill="none" stroke="#1E2B40" stroke-width="1.2" opacity="0.7" />
+    </pattern>
+    <!-- Glow Filters -->
+    <filter id="glowLime" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="glowPapaya" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 1. Background -->
+  <rect width="1920" height="1080" fill="url(#bgGlow)" />
+  <rect width="1920" height="1080" fill="url(#cadGrid)" />
+  <rect width="1920" height="1080" fill="url(#cadMajorGrid)" />
+
+  <!-- 2. CAD Centerline & Datum Axes -->
+  <line x1="160" y1="540" x2="1760" y2="540" stroke="#00E5FF" stroke-width="1" stroke-dasharray="12 4 3 4" opacity="0.4" />
+  <line x1="960" y1="120" x2="960" y2="960" stroke="#00E5FF" stroke-width="1" stroke-dasharray="12 4 3 4" opacity="0.4" />
+
+  <!-- 3. Corner Telemetry Reticles -->
+  <g stroke="#D2FF00" stroke-width="1.5" opacity="0.75">
+    <!-- Top Left -->
+    <path d="M 40 70 L 40 40 L 70 40" fill="none" />
+    <text x="80" y="48" fill="#63758D" font-family="monospace" font-size="12">[00.00, 00.00] REF_ORIGIN</text>
+    <!-- Top Right -->
+    <path d="M 1880 70 L 1880 40 L 1850 40" fill="none" />
+    <text x="1750" y="48" fill="#63758D" font-family="monospace" font-size="12">[1920, 00.00] +X_MAX</text>
+    <!-- Bottom Left -->
+    <path d="M 40 1010 L 40 1040 L 70 1040" fill="none" />
+    <text x="80" y="1044" fill="#63758D" font-family="monospace" font-size="12">[00.00, 1080] +Y_MAX</text>
+    <!-- Bottom Right -->
+    <path d="M 1880 1010 L 1880 1040 L 1850 1040" fill="none" />
+    <text x="1760" y="1044" fill="#63758D" font-family="monospace" font-size="12">[1920, 1080] END_EXTENT</text>
+  </g>
+
+  <!-- 4. Monocoque & Chassis Technical Wireframe Schematics -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Main Carbon Monocoque Tub Outer Hull -->
+    <path d="M 520 440 L 760 380 L 1220 380 L 1460 460 L 1520 620 L 1440 680 L 1260 720 L 660 720 L 480 660 L 460 560 Z"
+          stroke="#D2FF00" stroke-width="2.5" opacity="0.85" filter="url(#glowLime)" />
+
+    <!-- Inner Cockpit Cell & Survival Shell -->
+    <path d="M 640 460 L 800 420 L 1140 420 L 1320 490 L 1360 620 L 1220 660 L 740 660 L 600 600 Z"
+          stroke="#00E5FF" stroke-width="1.8" opacity="0.75" />
+
+    <!-- A-Pillar and Roofline Arch -->
+    <path d="M 800 420 L 900 240 L 1180 240 L 1300 440"
+          stroke="#FF8000" stroke-width="2" opacity="0.8" />
+    <path d="M 880 260 L 1160 260" stroke="#FF8000" stroke-width="1.2" stroke-dasharray="6 3" opacity="0.6" />
+    <!-- Double-Bubble Roof Guide Channels -->
+    <path d="M 940 240 Q 1040 220 1140 240" stroke="#D2FF00" stroke-width="1.5" />
+    <path d="M 940 255 Q 1040 235 1140 255" stroke="#D2FF00" stroke-width="1" opacity="0.7" />
+
+    <!-- Front Impact Crash Structure (Extruded Aluminum Cones) -->
+    <polygon points="340,490 480,470 480,630 340,610" stroke="#00E5FF" stroke-width="2" />
+    <line x1="380" y1="485" x2="380" y2="615" stroke="#00E5FF" stroke-width="1" stroke-dasharray="4 2" />
+    <line x1="420" y1="480" x2="420" y2="620" stroke="#00E5FF" stroke-width="1" stroke-dasharray="4 2" />
+    <!-- Front Splitter Plane -->
+    <path d="M 280 630 L 580 630 L 600 660 L 260 660 Z" stroke="#FF8000" stroke-width="2.2" fill="#FF8000" fill-opacity="0.08" />
+    <line x1="280" y1="630" x2="240" y2="610" stroke="#FF8000" stroke-width="1.5" />
+    <line x1="260" y1="660" x2="220" y2="640" stroke="#FF8000" stroke-width="1.5" />
+
+    <!-- Side Sill & Venturi Tunnel Guide Flanges -->
+    <path d="M 660 720 L 700 780 L 1220 780 L 1260 720" stroke="#D2FF00" stroke-width="2" />
+    <line x1="780" y1="780" x2="800" y2="720" stroke="#63758D" stroke-width="1" />
+    <line x1="960" y1="780" x2="960" y2="720" stroke="#63758D" stroke-width="1" />
+    <line x1="1120" y1="780" x2="1100" y2="720" stroke="#63758D" stroke-width="1" />
+
+    <!-- Rear Upswept Aerodynamic Diffuser (14-Degree Venturi Ramp) -->
+    <path d="M 1260 720 L 1580 670 L 1600 710 L 1280 770 Z" stroke="#00E5FF" stroke-width="2.2" fill="#00E5FF" fill-opacity="0.08" />
+    <!-- Vertical Strakes -->
+    <line x1="1340" y1="710" x2="1350" y2="760" stroke="#00E5FF" stroke-width="1.8" />
+    <line x1="1420" y1="695" x2="1435" y2="745" stroke="#00E5FF" stroke-width="1.8" />
+    <line x1="1500" y1="680" x2="1520" y2="730" stroke="#00E5FF" stroke-width="1.8" />
+
+    <!-- Swan-Neck Active Rear Wing Assembly -->
+    <!-- Swan Neck Pylons -->
+    <path d="M 1360 480 Q 1420 320 1520 220" stroke="#FF8000" stroke-width="2.5" />
+    <path d="M 1390 500 Q 1450 340 1530 225" stroke="#FF8000" stroke-width="1.5" opacity="0.6" />
+    <!-- Wing Airfoil Cross-Section -->
+    <path d="M 1480 200 Q 1580 180 1660 210 Q 1680 230 1620 240 Q 1540 230 1480 200 Z"
+          stroke="#D2FF00" stroke-width="2.2" fill="#D2FF00" fill-opacity="0.12" filter="url(#glowLime)" />
+    <!-- Active DRS Flap Articulation Vector -->
+    <path d="M 1620 210 L 1680 170" stroke="#FF8000" stroke-width="2" stroke-dasharray="4 2" />
+    <circle cx="1620" cy="210" r="3" fill="#FF8000" />
+    <text x="1690" y="170" fill="#FF8000" font-family="monospace" font-size="11" font-weight="bold">DRS FLAP 34°</text>
+
+    <!-- Structural Bulkheads & Hardpoints (Co-cured suspension nodes) -->
+    <circle cx="580" cy="540" r="10" stroke="#00E5FF" stroke-width="2" />
+    <circle cx="580" cy="540" r="4" fill="#00E5FF" />
+    <text x="540" y="520" fill="#00E5FF" font-family="monospace" font-size="10">NODE_FRONT_A</text>
+
+    <circle cx="1320" cy="580" r="10" stroke="#00E5FF" stroke-width="2" />
+    <circle cx="1320" cy="580" r="4" fill="#00E5FF" />
+    <text x="1335" y="595" fill="#00E5FF" font-family="monospace" font-size="10">NODE_REAR_SUB</text>
+  </g>
+
+  <!-- 5. Dimensioning Lines & Datum Arrows -->
+  <g stroke="#64748B" stroke-width="1" font-family="monospace" font-size="11" fill="#94A3B8">
+    <!-- Wheelbase Datum Line -->
+    <line x1="580" y1="840" x2="1320" y2="840" stroke="#FF8000" stroke-width="1.2" stroke-dasharray="8 4" />
+    <line x1="580" y1="820" x2="580" y2="860" stroke="#FF8000" stroke-width="1.5" />
+    <line x1="1320" y1="820" x2="1320" y2="860" stroke="#FF8000" stroke-width="1.5" />
+    <text x="890" y="832" fill="#FF8000" font-weight="bold">WHEELBASE DATUM: 2,457.0 MM (±0.05 MM)</text>
+
+    <!-- Overall Length Span -->
+    <line x1="260" y1="900" x2="1660" y2="900" stroke="#D2FF00" stroke-width="1.2" />
+    <line x1="260" y1="880" x2="260" y2="920" stroke="#D2FF00" stroke-width="1.5" />
+    <line x1="1660" y1="880" x2="1660" y2="920" stroke="#D2FF00" stroke-width="1.5" />
+    <text x="900" y="892" fill="#D2FF00" font-weight="bold">TOTAL CHASSIS SPAN: 4,572.0 MM</text>
+  </g>
+
+  <!-- 6. ISO 7200 Title Block in Bottom-Right -->
+  <g transform="translate(1380, 930)">
+    <rect width="480" height="90" fill="#0D111A" stroke="#223048" stroke-width="1.5" rx="4" />
+    <line x1="0" y1="30" x2="480" y2="30" stroke="#223048" stroke-width="1" />
+    <line x1="0" y1="60" x2="480" y2="60" stroke="#223048" stroke-width="1" />
+    <line x1="240" y1="0" x2="240" y2="60" stroke="#223048" stroke-width="1" />
+
+    <text x="12" y="20" fill="#64748B" font-family="monospace" font-size="9">HOMOLOGATION DOC NO.</text>
+    <text x="12" y="48" fill="#FFFFFF" font-family="monospace" font-size="12" font-weight="bold">CAD-SCHEMATIC-01-CHASSIS</text>
+
+    <text x="252" y="20" fill="#64748B" font-family="monospace" font-size="9">SUBSTRATE / MATERIAL</text>
+    <text x="252" y="48" fill="#D2FF00" font-family="monospace" font-size="12" font-weight="bold">TORAY T1000 PRE-PREG / AL-EXT</text>
+
+    <text x="12" y="78" fill="#64748B" font-family="monospace" font-size="9">STANDARD: ISO 7200 / DIN 912</text>
+    <text x="252" y="78" fill="#FF8000" font-family="monospace" font-size="9" font-weight="bold">TORSIONAL RIGIDITY: 42,000 NM/DEG</text>
+  </g>
+</svg>

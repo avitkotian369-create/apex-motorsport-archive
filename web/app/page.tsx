@@ -66,6 +66,25 @@ const VEHICLES: VehicleArchiveCard[] = [
     accent: "border-[#FF8000]/60 text-[#FF8000] bg-[#FF8000]/10"
   },
   {
+    slug: "bmw-m4-csl",
+    brand: "BMW",
+    model: "M4 CSL",
+    trim: "G82 Competition Sport Lightweight",
+    year: 2023,
+    engineCode: "S58B30T0",
+    powertrain: "3.0L Twin-Turbo Inline-6 (Closed Deck)",
+    output: "550 PS (405 kW)",
+    torque: "650 Nm @ 2,750 RPM",
+    redline: "7,200 RPM",
+    weight: "1,625 kg (DIN)",
+    downforce: "CSL Carbon Ducktail & Splitter (220 kg)",
+    topSpeed: "307 km/h",
+    zeroToHundred: "3.7s",
+    image: "/assets/bmw-m4-knolling-teardown.jpg",
+    badge: "CSL LIGHTWEIGHT HOMOLOGATION",
+    accent: "border-red-500/60 text-red-400 bg-red-500/10"
+  },
+  {
     slug: "volkswagen-golf-r-mk8",
     brand: "Volkswagen",
     model: "Golf R",
@@ -583,12 +602,12 @@ export default function MotorsportHomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded bg-[#D2FF00] flex items-center justify-center text-black font-black text-sm tracking-tighter shadow-[0_0_15px_rgba(210,255,0,0.5)]">
-              AX
+              MQ
             </div>
             <div>
-              <span className="font-mono font-bold tracking-wider text-sm text-white">APEX ARCHIVE</span>
-              <span className="hidden sm:inline-block ml-2 text-[10px] font-mono text-[#717A8C] border-l border-[#222838] pl-2">
-                MOTORSPORT ANATOMY TERMINAL
+              <span className="font-mono font-bold tracking-wider text-sm text-white">MONOCOQUE</span>
+              <span className="hidden sm:inline-block ml-2 text-[10px] font-mono text-[#717A8C] border-l border-[#222838] pl-2 uppercase">
+                Automotive Anatomy Archive
               </span>
             </div>
           </div>
@@ -599,7 +618,7 @@ export default function MotorsportHomePage() {
               className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#222838] bg-[#0E121B] hover:border-[#D2FF00]/50 hover:text-[#D2FF00] transition-colors cursor-pointer"
             >
               <Compass className="w-3.5 h-3.5" />
-              <span>CAD PADDOCK DECK</span>
+              <span>KNOLLING CATALOG DECK</span>
             </button>
             <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-[#10141E] border border-[#1E2433] text-[11px] text-[#8A95A8]">
               <span className="w-2 h-2 rounded-full bg-[#D2FF00] animate-ping" />
@@ -635,7 +654,7 @@ export default function MotorsportHomePage() {
           <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-[#D2FF00]/40 bg-[#D2FF00]/10 text-[#D2FF00] font-mono text-xs tracking-widest uppercase">
             <span className="w-2 h-2 rounded-full bg-[#D2FF00] animate-ping" />
             <Award className="w-3.5 h-3.5" />
-            <span>APEX ARCHIVE — THE MOTORSPORT & AUTOMOTIVE ANATOMY TERMINAL</span>
+            <span>MONOCOQUE // AUTOMOTIVE ANATOMY ARCHIVE — Interactive Knolling & Exploded Parts Catalog</span>
           </div>
 
           {/* Massive Kinetic Typography */}
@@ -796,18 +815,18 @@ export default function MotorsportHomePage() {
       {/* 6. INFINITE KINETIC TICKER MARQUEE (High-Voltage Motorsport Accent) */}
       <div className="w-full bg-[#D2FF00] text-black py-3 overflow-hidden font-mono text-xs sm:text-sm font-black tracking-widest uppercase select-none shadow-[0_0_25px_rgba(210,255,0,0.3)] relative z-10">
         <div className="animate-marquee-infinite whitespace-nowrap">
-          <span className="mx-4">{"/// APEX MOTORSPORT CAD ARCHIVE"}</span>
-          <span className="mx-4">{"/// 9,000 RPM FLAT-6"}</span>
-          <span className="mx-4">{"/// FIA HOMOLOGATED"}</span>
+          <span className="mx-4">{"/// MONOCOQUE AUTOMOTIVE ANATOMY ARCHIVE"}</span>
+          <span className="mx-4">{"/// EXPLODED KNOLLING TEARDOWN"}</span>
+          <span className="mx-4">{"/// 6 HOMOLOGATED VEHICLES"}</span>
           <span className="mx-4">{"/// CARBON MONOCOQUE DISSECTION"}</span>
-          <span className="mx-4">{"/// 860 KG ACTIVE DRS DOWNFORCE"}</span>
-          <span className="mx-4">{"/// EA888 TSI 4MOTION"}</span>
-          <span className="mx-4">{"/// APEX MOTORSPORT CAD ARCHIVE"}</span>
-          <span className="mx-4">{"/// 9,000 RPM FLAT-6"}</span>
-          <span className="mx-4">{"/// FIA HOMOLOGATED"}</span>
+          <span className="mx-4">{"/// S58 TWIN-TURBO & 9,000 RPM FLAT-6"}</span>
+          <span className="mx-4">{"/// ISO 7200 STANDARDS"}</span>
+          <span className="mx-4">{"/// MONOCOQUE AUTOMOTIVE ANATOMY ARCHIVE"}</span>
+          <span className="mx-4">{"/// EXPLODED KNOLLING TEARDOWN"}</span>
+          <span className="mx-4">{"/// 6 HOMOLOGATED VEHICLES"}</span>
           <span className="mx-4">{"/// CARBON MONOCOQUE DISSECTION"}</span>
-          <span className="mx-4">{"/// 860 KG ACTIVE DRS DOWNFORCE"}</span>
-          <span className="mx-4">{"/// EA888 TSI 4MOTION"}</span>
+          <span className="mx-4">{"/// S58 TWIN-TURBO & 9,000 RPM FLAT-6"}</span>
+          <span className="mx-4">{"/// ISO 7200 STANDARDS"}</span>
         </div>
       </div>
 
@@ -950,8 +969,8 @@ export default function MotorsportHomePage() {
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <span className="w-2 h-2 rounded-full bg-[#D2FF00]" />
-            <span className="text-white font-bold">APEX ARCHIVE</span>
-            <span>— MOTORSPORT ANATOMY & SCHEMATICS</span>
+            <span className="text-white font-bold">MONOCOQUE // AUTOMOTIVE ANATOMY ARCHIVE</span>
+            <span>— Interactive Knolling & Exploded Parts Catalog</span>
           </div>
           <div className="flex items-center gap-4 text-[11px]">
             <span>ENGINEERING PURISTS ONLY</span>

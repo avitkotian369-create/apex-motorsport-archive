@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <radialGradient id="bgGlowSusp" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#0E131E" />
+      <stop offset="100%" stop-color="#090B10" />
+    </radialGradient>
+    <pattern id="cadGridSusp" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#161F2E" stroke-width="0.8" opacity="0.45" />
+      <circle cx="0" cy="0" r="1" fill="#24334A" />
+    </pattern>
+    <pattern id="cadMajorGridSusp" width="200" height="200" patternUnits="userSpaceOnUse">
+      <path d="M 200 0 L 0 0 0 200" fill="none" stroke="#1E2B40" stroke-width="1.2" opacity="0.7" />
+    </pattern>
+    <filter id="glowLimeSusp" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="glowPapayaSusp" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 1. Background -->
+  <rect width="1920" height="1080" fill="url(#bgGlowSusp)" />
+  <rect width="1920" height="1080" fill="url(#cadGridSusp)" />
+  <rect width="1920" height="1080" fill="url(#cadMajorGridSusp)" />
+
+  <!-- 2. Wheel Spindle & Kingpin Incline Axes -->
+  <line x1="200" y1="540" x2="1800" y2="540" stroke="#00E5FF" stroke-width="1.2" stroke-dasharray="16 4 3 4" opacity="0.5" />
+  <!-- Kingpin Steering Axis (Inclined 11.5°) -->
+  <line x1="820" y1="140" x2="920" y2="940" stroke="#FF8000" stroke-width="1.2" stroke-dasharray="12 4" opacity="0.6" />
+  <text x="835" y="170" fill="#FF8000" font-family="monospace" font-size="11">KINGPIN STEERING AXIS (11.5° KPI)</text>
+
+  <!-- 3. Corner Telemetry Reticles -->
+  <g stroke="#D2FF00" stroke-width="1.5" opacity="0.75">
+    <path d="M 40 70 L 40 40 L 70 40" fill="none" />
+    <text x="80" y="48" fill="#63758D" font-family="monospace" font-size="12">[00.00, 00.00] STRUT_TOP_MOUNT</text>
+    <path d="M 1880 70 L 1880 40 L 1850 40" fill="none" />
+    <text x="1740" y="48" fill="#63758D" font-family="monospace" font-size="12">[1920, 00.00] WHEEL_PLANE</text>
+    <path d="M 40 1010 L 40 1040 L 70 1040" fill="none" />
+    <text x="80" y="1044" fill="#63758D" font-family="monospace" font-size="12">[00.00, 1080] SUBFRAME_PICKUP</text>
+    <path d="M 1880 1010 L 1880 1040 L 1850 1040" fill="none" />
+    <text x="1760" y="1044" fill="#63758D" font-family="monospace" font-size="12">[1920, 1080] BRAKE_CALIPER</text>
+  </g>
+
+  <!-- 4. Exploded Corner Hub & Suspension CAD Technical Geometry -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- [01] Öhlins TTX Adjustable Coilover Damper (Left) -->
+    <g transform="translate(360, 240)">
+      <!-- Top Mount & Monoball Bearing -->
+      <polygon points="20,20 120,20 105,45 35,45" stroke="#FF8000" stroke-width="2" fill="#FF8000" fill-opacity="0.1" />
+      <circle cx="70" cy="30" r="10" stroke="#D2FF00" stroke-width="2" />
+      <!-- Damper Cylinder Body -->
+      <rect x="52" y="45" width="36" height="340" stroke="#D2FF00" stroke-width="2.5" fill="#D2FF00" fill-opacity="0.05" />
+      <!-- Silicon-Chromium Main Spring -->
+      <path d="M 40 80 Q 70 105 100 80 Q 70 130 40 105 Q 70 155 100 130 Q 70 180 40 155 Q 70 205 100 180 Q 70 230 40 205 Q 70 255 100 230 Q 70 280 40 255"
+            stroke="#D2FF00" stroke-width="3" filter="url(#glowLimeSusp)" />
+      <!-- Lower Helper Spring -->
+      <path d="M 46 290 Q 70 305 94 290 Q 70 320 46 305 Q 70 335 94 320" stroke="#00E5FF" stroke-width="2" />
+      <!-- External TTX Reservoir Piggyback -->
+      <rect x="96" y="80" width="28" height="90" rx="4" stroke="#FF8000" stroke-width="2" fill="#FF8000" fill-opacity="0.1" />
+      <text x="-40" y="390" fill="#D2FF00" font-family="monospace" font-size="11" font-weight="bold">ÖHLINS TTX COILOVER</text>
+    </g>
+
+    <!-- [02] Upper Aerodynamic Wishbone A-Arm -->
+    <g transform="translate(740, 180)">
+      <path d="M 20 40 Q 100 15 180 60 Q 200 80 160 90 Q 80 55 20 70 Z"
+            stroke="#D2FF00" stroke-width="2.5" fill="#D2FF00" fill-opacity="0.08" filter="url(#glowLimeSusp)" />
+      <circle cx="25" cy="55" r="8" stroke="#00E5FF" stroke-width="2" />
+      <circle cx="175" cy="75" r="10" stroke="#FF8000" stroke-width="2" />
+      <text x="30" y="20" fill="#D2FF00" font-family="monospace" font-size="11" font-weight="bold">UPPER AERO WISHBONE</text>
+    </g>
+
+    <!-- [03] 5-Axis CNC Steering Knuckle Upright -->
+    <g transform="translate(820, 380)">
+      <path d="M 30 40 L 90 20 L 130 60 L 120 180 L 140 260 L 70 300 L 20 250 L 30 140 Z"
+          stroke="#00E5FF" stroke-width="2.5" fill="#00E5FF" fill-opacity="0.08" />
+      <!-- Spindle Bore Center -->
+      <circle cx="75" cy="160" r="32" stroke="#00E5FF" stroke-width="2" stroke-dasharray="6 3" />
+      <circle cx="75" cy="160" r="18" stroke="#FF8000" stroke-width="2" />
+      <!-- Caliper Mounting Radial Lugs -->
+      <circle cx="120" cy="80" r="6" stroke="#D2FF00" stroke-width="2" />
+      <circle cx="130" cy="240" r="6" stroke="#D2FF00" stroke-width="2" />
+      <text x="-40" y="320" fill="#00E5FF" font-family="monospace" font-size="11" font-weight="bold">CNC STEERING KNUCKLE</text>
+    </g>
+
+    <!-- [04] Angular Contact Wheel Bearing -->
+    <g transform="translate(1000, 480)">
+      <rect x="0" y="20" width="40" height="80" rx="3" stroke="#D2FF00" stroke-width="2.2" />
+      <!-- Dual Row Spherical Balls -->
+      <circle cx="15" cy="40" r="8" stroke="#00E5FF" stroke-width="1.5" />
+      <circle cx="15" cy="60" r="8" stroke="#00E5FF" stroke-width="1.5" />
+      <circle cx="25" cy="40" r="8" stroke="#00E5FF" stroke-width="1.5" />
+      <circle cx="25" cy="60" r="8" stroke="#00E5FF" stroke-width="1.5" />
+      <text x="-20" y="125" fill="#D2FF00" font-family="monospace" font-size="10">ANGULAR BEARING</text>
+    </g>
+
+    <!-- [05] Wheel Spindle Hub with High-Tensile Studs -->
+    <g transform="translate(1120, 440)">
+      <!-- Hub Flange -->
+      <path d="M 20 10 L 40 10 L 40 60 L 70 60 L 70 100 L 40 100 L 40 150 L 20 150 Z"
+            stroke="#FF8000" stroke-width="2.5" fill="#FF8000" fill-opacity="0.1" />
+      <!-- M14 Wheel Studs -->
+      <rect x="40" y="25" width="35" height="10" stroke="#FF8000" stroke-width="2" />
+      <rect x="40" y="125" width="35" height="10" stroke="#FF8000" stroke-width="2" />
+      <text x="-10" y="175" fill="#FF8000" font-family="monospace" font-size="10">M14 WHEEL HUB</text>
+    </g>
+
+    <!-- [06] 410mm Carbon-Silicon Carbide (PCCB) Rotor -->
+    <g transform="translate(1300, 310)">
+      <!-- Outer Ceramic Ring -->
+      <ellipse cx="60" cy="230" rx="55" ry="220" stroke="#D2FF00" stroke-width="3.5" filter="url(#glowLimeSusp)" />
+      <!-- Inner Floating Hat Bell (7075-T6) -->
+      <ellipse cx="60" cy="230" rx="30" ry="110" stroke="#FF8000" stroke-width="2" />
+      <!-- Radial Floating Drive Bobbins -->
+      <circle cx="60" cy="130" r="4" fill="#FF8000" />
+      <circle cx="60" cy="180" r="4" fill="#FF8000" />
+      <circle cx="60" cy="280" r="4" fill="#FF8000" />
+      <circle cx="60" cy="330" r="4" fill="#FF8000" />
+      <!-- Internal Spiral Curved Cooling Vanes -->
+      <path d="M 40 70 Q 70 90 60 120" stroke="#64748B" stroke-width="1.5" />
+      <path d="M 40 340 Q 70 370 60 400" stroke="#64748B" stroke-width="1.5" />
+      <text x="10" y="475" fill="#D2FF00" font-family="monospace" font-size="11" font-weight="bold">410MM C/SIC CERAMIC ROTOR</text>
+    </g>
+
+    <!-- [07] Brembo 6-Piston Monobloc Radial Caliper (Right) -->
+    <g transform="translate(1560, 360)">
+      <!-- Monobloc Stiff Bridge Body -->
+      <path d="M 20 40 Q 80 30 110 50 L 120 320 Q 80 340 20 330 L 15 280 L 50 260 L 50 110 L 15 90 Z"
+            stroke="#FF8000" stroke-width="3" fill="#FF8000" fill-opacity="0.12" filter="url(#glowPapayaSusp)" />
+      <!-- 3 Stepped Pistons (30mm, 34mm, 38mm) -->
+      <circle cx="75" cy="110" r="18" stroke="#D2FF00" stroke-width="2" />
+      <circle cx="75" cy="185" r="21" stroke="#D2FF00" stroke-width="2" />
+      <circle cx="75" cy="265" r="24" stroke="#D2FF00" stroke-width="2" />
+      <text x="-20" y="375" fill="#FF8000" font-family="monospace" font-size="11" font-weight="bold">BREMBO 6-PISTON MONOBLOC</text>
+    </g>
+
+    <!-- [08] Lower Teardrop Wishbone Control Arm -->
+    <g transform="translate(480, 720)">
+      <path d="M 20 30 Q 140 10 260 50 Q 280 70 240 80 Q 120 45 20 60 Z"
+            stroke="#D2FF00" stroke-width="2.5" fill="#D2FF00" fill-opacity="0.08" />
+      <circle cx="25" cy="45" r="9" stroke="#00E5FF" stroke-width="2" />
+      <circle cx="255" cy="65" r="12" stroke="#FF8000" stroke-width="2" />
+      <text x="60" y="95" fill="#D2FF00" font-family="monospace" font-size="11" font-weight="bold">LOWER TEARDROP WISHBONE (40 KG DOWNFORCE)</text>
+    </g>
+  </g>
+
+  <!-- 5. Dimension & Angle Callouts -->
+  <g stroke="#64748B" stroke-width="1" font-family="monospace" font-size="11" fill="#94A3B8">
+    <line x1="820" y1="540" x2="1620" y2="540" stroke="#00E5FF" stroke-width="1.2" stroke-dasharray="6 3" />
+    <text x="1100" y="530" fill="#00E5FF" font-weight="bold">TRACK WIDTH FLANGE OFFSET: +32 MM ET</text>
+  </g>
+
+  <!-- 6. ISO 7200 Title Block in Bottom-Right -->
+  <g transform="translate(1380, 930)">
+    <rect width="480" height="90" fill="#0D111A" stroke="#223048" stroke-width="1.5" rx="4" />
+    <line x1="0" y1="30" x2="480" y2="30" stroke="#223048" stroke-width="1" />
+    <line x1="0" y1="60" x2="480" y2="60" stroke="#223048" stroke-width="1" />
+    <line x1="240" y1="0" x2="240" y2="60" stroke="#223048" stroke-width="1" />
+
+    <text x="12" y="20" fill="#64748B" font-family="monospace" font-size="9">HOMOLOGATION DOC NO.</text>
+    <text x="12" y="48" fill="#FFFFFF" font-family="monospace" font-size="12" font-weight="bold">CAD-SCHEMATIC-03-SUSPENSION</text>
+
+    <text x="252" y="20" fill="#64748B" font-family="monospace" font-size="9">KINEMATICS / BRAKING</text>
+    <text x="252" y="48" fill="#D2FF00" font-family="monospace" font-size="12" font-weight="bold">DOUBLE-WISHBONE / C-SIC ROTOR</text>
+
+    <text x="12" y="78" fill="#64748B" font-family="monospace" font-size="9">ANTI-DIVE GEOMETRY: 1.8G</text>
+    <text x="252" y="78" fill="#FF8000" font-family="monospace" font-size="9" font-weight="bold">RADIAL BOLT TORQUE: 115 NM</text>
+  </g>
+</svg>

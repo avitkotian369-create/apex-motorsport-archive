@@ -1,626 +1,574 @@
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
-  Sliders,
-  Sparkles,
-  Info,
-  Layers,
-  ChevronRight,
-  X
+  Compass,
+  Grid,
+  Move
 } from "lucide-react";
+import { TargetCallout, AssemblyTier } from "@/lib/pins-data";
 import { CarDetail } from "@/lib/api";
 
-interface BlueprintCanvasProps {
-  carDetail: CarDetail | null;
-  selectedFastenerId: number | null;
-  onSelectFastener: (id: number) => void;
+export interface BenchmarkCarMeta {
+  name: string;
+  badge: string;
+  engine: string;
+  power: string;
+  redline: string;
+  dryWeight: string;
+  aeroBalance: string;
+  defaultCutaway: string;
+  dimensions: {
+    wheelbase: string;
+    trackFront: string;
+    trackRear: string;
+    overallLength: string;
+    overallHeight: string;
+  };
 }
 
-// 3 Streamlined Cinematic Assembly Stages
-export type AssemblyStage = "cutaway" | "engine" | "door";
+export type SubAssemblyStage = "chassis" | "powertrain" | "suspension";
+export type KnollingTierFilter = "all" | AssemblyTier;
+
+export interface BlueprintCanvasProps {
+  carKey?: string;
+  carInfo?: BenchmarkCarMeta;
+  activeTier?: KnollingTierFilter;
+  onTierChange?: (tier: KnollingTierFilter) => void;
+  // Backward compatibility
+  assemblyStage?: SubAssemblyStage;
+  onAssemblyStageChange?: (stage: SubAssemblyStage) => void;
+  pins?: TargetCallout[];
+  selectedPinId?: number | null;
+  onSelectPin?: (id: number) => void;
+  hoveredPinId?: number | null;
+  onHoverPin?: (id: number | null) => void;
+  zoomLevel?: number;
+  onZoomChange?: (zoom: number | ((prev: number) => number)) => void;
+  panOffset?: { x: number; y: number };
+  onPanChange?: (offset: { x: number; y: number } | ((prev: { x: number; y: number }) => { x: number; y: number })) => void;
+  showGrid?: boolean;
+  onToggleGrid?: () => void;
+  caliperMeasurement?: boolean;
+  onToggleCaliper?: () => void;
+  glowColor?: "lime" | "papaya";
+  // Backward compatibility
+  carDetail?: CarDetail | null;
+  selectedFastenerId?: number | null;
+  onSelectFastener?: (id: number) => void;
+}
+
+const DEFAULT_CAR_META: BenchmarkCarMeta = {
+  name: "PORSCHE 911 GT3 RS (992.1)",
+  badge: "WEISSACH HOMOLOGATION",
+  engine: "4.0L FLAT-6 NA (MA1.77)",
+  power: "525 PS (386 kW)",
+  redline: "9,000 RPM",
+  dryWeight: "1,450 kg (DIN)",
+  aeroBalance: "860 kg @ 285 km/h",
+  defaultCutaway: "/assets/monocoque-exploded-v2.jpg",
+  dimensions: {
+    wheelbase: "2,457 mm",
+    trackFront: "1,630 mm",
+    trackRear: "1,580 mm",
+    overallLength: "4,572 mm",
+    overallHeight: "1,322 mm"
+  }
+};
+
+export const LAYER_PILLS: { id: KnollingTierFilter; label: string }[] = [
+  { id: "all", label: "[ALL PARTS]" },
+  { id: "aero", label: "[AERO SHELL]" },
+  { id: "monocoque", label: "[MONOCOQUE]" },
+  { id: "powertrain", label: "[POWERTRAIN]" },
+  { id: "brakes_gear", label: "[BRAKES & GEAR]" },
+  { id: "hardware", label: "[HARDWARE]" },
+];
 
 export function BlueprintCanvas({
-  carDetail,
+  carKey = "porsche-911-gt3-rs",
+  carInfo = DEFAULT_CAR_META,
+  activeTier: propActiveTier,
+  onTierChange,
+  onAssemblyStageChange,
+  pins = [],
+  selectedPinId = null,
+  onSelectPin,
+  hoveredPinId = null,
+  onHoverPin,
+  zoomLevel: propZoom,
+  onZoomChange,
+  panOffset: propPan,
+  onPanChange,
+  showGrid: propGrid,
+  onToggleGrid,
+  caliperMeasurement: propCaliper,
+  onToggleCaliper,
+  glowColor = "lime",
   selectedFastenerId,
   onSelectFastener,
 }: BlueprintCanvasProps) {
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [showGrid, setShowGrid] = useState(true);
-  const [assemblyStage, setAssemblyStage] = useState<AssemblyStage>("cutaway");
-  const [activePeelIndex, setActivePeelIndex] = useState<number>(0);
-  const [isDossierOpen, setIsDossierOpen] = useState<boolean>(true);
+  // Internal state
+  const [internalTier, setInternalTier] = useState<KnollingTierFilter>("all");
+  const [internalZoom, setInternalZoom] = useState(1);
+  const [internalPan, setInternalPan] = useState({ x: 0, y: 0 });
+  const [internalGrid, setInternalGrid] = useState(true);
+  const [internalCaliper, setInternalCaliper] = useState(false);
+  const [internalSelectedId, setInternalSelectedId] = useState<number | null>(null);
+
+  const activeTier = propActiveTier !== undefined ? propActiveTier : internalTier;
+  const setTier = (tier: KnollingTierFilter) => {
+    if (onTierChange) onTierChange(tier);
+    else setInternalTier(tier);
+
+    // Map tier back to legacy assemblyStage if handler provided
+    if (onAssemblyStageChange) {
+      if (tier === "powertrain") onAssemblyStageChange("powertrain");
+      else if (tier === "brakes_gear") onAssemblyStageChange("suspension");
+      else onAssemblyStageChange("chassis");
+    }
+  };
+
+  const zoom = propZoom !== undefined ? propZoom : internalZoom;
+  const setZoom = onZoomChange || setInternalZoom;
+
+  const pan = propPan !== undefined ? propPan : internalPan;
+  const setPan = onPanChange || setInternalPan;
+
+  const isGridOn = propGrid !== undefined ? propGrid : internalGrid;
+  const toggleGrid = onToggleGrid || (() => setInternalGrid((g) => !g));
+
+  const isCaliperOn = propCaliper !== undefined ? propCaliper : internalCaliper;
+  const toggleCaliper = onToggleCaliper || (() => setInternalCaliper((c) => !c));
+
+  const activeSelectedId = selectedPinId !== undefined ? selectedPinId : (selectedFastenerId || internalSelectedId);
+  const handleSelect = (id: number) => {
+    if (onSelectPin) onSelectPin(id);
+    else if (onSelectFastener) onSelectFastener(id);
+    else setInternalSelectedId(id);
+  };
+
+  // Draggable Datum Caliper handles
+  const [datumPoints, setDatumPoints] = useState<{ p1: { x: number; y: number }; p2: { x: number; y: number } }>({
+    p1: { x: 25, y: 75 },
+    p2: { x: 75, y: 75 }
+  });
+  const [draggingDatum, setDraggingDatum] = useState<"p1" | "p2" | null>(null);
   const [cursorCoords, setCursorCoords] = useState<{ x: number; y: number } | null>(null);
+
+  // Pan dragging state
+  const [isPanning, setIsPanning] = useState(false);
+  const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  const isVW = carDetail?.model?.toLowerCase().includes("golf") || carDetail?.brand_id === 2;
-
-  // Assembly-specific high-resolution diagram
-  const stageImage = useMemo(() => {
-    if (isVW) {
+  // Vehicle Knolling teardown photo selection
+  const primaryKnollingImage = useMemo(() => {
+    const key = (carKey || "").toLowerCase();
+    if (key.includes("bmw") || key.includes("m4") || key.includes("csl") || key.includes("g82")) {
+      return "/assets/bmw-m4-knolling-teardown.jpg";
+    }
+    if (key.includes("mclaren") || key.includes("f1") || key.includes("xp5")) {
+      return "/assets/mclaren-f1-monocoque-exploded-v2.jpg";
+    }
+    if (key.includes("golf") || key.includes("vw") || key.includes("volkswagen")) {
       return "/assets/vw-golfr-cutaway.jpg";
     }
-    if (assemblyStage === "engine") {
-      return "/assets/porsche-flat6-engine.jpg";
+    if (key.includes("ferrari") || key.includes("f40")) {
+      return "/assets/ferrari-f40-cutaway.jpg";
     }
-    if (assemblyStage === "door") {
-      return "/assets/porsche-door-cutaway.jpg";
+    if (key.includes("skyline") || key.includes("r34") || key.includes("gtr") || key.includes("nissan")) {
+      return "/assets/skyline-r34-cutaway.jpg";
     }
-    return "/assets/porsche-gt3rs-cutaway.jpg";
-  }, [assemblyStage, isVW]);
+    // Default: Porsche 911 GT3 RS exploded monocoque
+    return "/assets/monocoque-exploded-v2.jpg";
+  }, [carKey]);
 
+  const [currentImageSrc, setCurrentImageSrc] = useState<string>(primaryKnollingImage);
 
+  useEffect(() => {
+    setCurrentImageSrc(primaryKnollingImage);
+  }, [primaryKnollingImage]);
 
-  // The 5 Canonical Engineering Target Points for the Porsche GT3 RS Cutaway
-  const targetCallouts = useMemo(() => {
-    if (isVW) {
-      // 4 Golf R targets
-      return [
-        {
-          id: 101,
-          num: "01",
-          name: "2.0L TSI EA888 Gen 4 Block",
-          subsystem: "Crankcase & Cylinders",
-          part_number: "06Q-100-031-H",
-          x_percent: 26.0,
-          y_percent: 52.0,
-          leaderSide: "left" as const,
-          material: "GJL-250 Grey Cast Iron",
-          weightDelta: "142 kg (Rigid Deck)",
-          spec: "M10x1.5 (40 Nm + 90° + 90°)",
-          operationalLimit: "6,800 RPM / 1.8 Bar Boost",
-          rationale: "Cast-iron crankcase resists cylinder distortion under high boost, preserving ring sealing under track thermals.",
-          layers: [
-            { name: "Continental R-Turbo & Intake", material: "Cast Inconel & Al Exhaust Manifold", desc: "Integrated cylinder-head exhaust manifold ensures rapid spooling." },
-            { name: "Cast-Iron Engine Block", material: "GJL-250 Grey Cast Iron", desc: "Heavy-duty cross-bolted main bearing structure handling 420 Nm torque." },
-            { name: "Forged Crank & Sump", material: "Micro-Alloyed Forged Steel", desc: "Deep-draw baffled oil pan preventing pump cavitation during lateral acceleration." }
-          ]
-        },
-        {
-          id: 102,
-          num: "02",
-          name: "DCC Adaptive MacPherson Struts",
-          subsystem: "Front Running Gear",
-          part_number: "5WA-412-021-AC",
-          x_percent: 23.5,
-          y_percent: 62.0,
-          leaderSide: "left" as const,
-          material: "Forged Aluminum Knuckle & Steel Damper",
-          weightDelta: "-3.2 kg Unsprung",
-          spec: "M14x1.5 Pinch Bolt (70 Nm + 90°)",
-          operationalLimit: "200 Hz Valving Response",
-          rationale: "Electronically adjusted electromagnetic valves modify rebound and compression damping 200 times per second for curb-hopping composure.",
-          layers: [
-            { name: "Coilover Spring & Top Mount", material: "High-Tensile Silicon-Chromium Steel", desc: "Progressive rate coils with hardened rubber isolator bushings." },
-            { name: "DCC Variable Damper", material: "Nitrogen Gas & Internal Solenoid Valve", desc: "Dynamic damping adjusts millisecond-by-millisecond to pavement imperfections." },
-            { name: "Cast Steering Knuckle", material: "Forged Aluminum Alloy", desc: "High-rigidity upright transmitting steering rack forces without flex." }
-          ]
-        },
-        {
-          id: 103,
-          num: "03",
-          name: "R-Performance Torque Splitter",
-          subsystem: "AWD Differential",
-          part_number: "0CP-525-010-J",
-          x_percent: 78.5,
-          y_percent: 68.0,
-          leaderSide: "right" as const,
-          material: "Die-Cast Aluminum & Multi-Plate Clutches",
-          weightDelta: "26.5 kg Housing",
-          spec: "M10x1.5 Subframe Bolts (60 Nm + 90°)",
-          operationalLimit: "100% Torque to Outside Wheel",
-          rationale: "Twin electro-mechanical multi-plate clutches independently power each rear wheel, virtually eliminating transverse FWD understeer.",
-          layers: [
-            { name: "Die-Cast Aluminum Casing", material: "High-Pressure Cast Aluminum", desc: "Lightweight housing with integral cooling ribs and low-friction PTFE seals." },
-            { name: "Twin Multi-Plate Clutches", material: "Carbon-Friction Carbon Discs", desc: "Electronically modulated clutch packs controlling individual rear wheel slip." },
-            { name: "Hypoid Ring & Pinion", material: "Case-Hardened Alloy Steel", desc: "Precision-lapped ring and pinion transferring prop shaft drive power." }
-          ]
-        },
-        {
-          id: 104,
-          num: "04",
-          name: "Aero Fascia Air Guides",
-          subsystem: "Aerodynamic Bodywork",
-          part_number: "5H0-807-217-GRU",
-          x_percent: 12.0,
-          y_percent: 70.0,
-          leaderSide: "left" as const,
-          material: "Polypropylene Copolymer (PP-EPDM)",
-          weightDelta: "7.1 kg Assembly",
-          spec: "M6 Torx T25 Screws (9.0 Nm)",
-          operationalLimit: "High-Speed Downforce Balance",
-          rationale: "Directs targeted airflow through front bumper louvers to keep transmission fluid and DSG clutches within nominal operating thermal windows.",
-          layers: [
-            { name: "Outer Fascia Bumper Shell", material: "Injection Molded PP-EPDM", desc: "Aerodynamically contoured skin with deep gloss black grille aperture." },
-            { name: "Internal Air Deflector Vanes", material: "Glass-Reinforced Polyamide", desc: "Directs high-pressure air through side-mounted auxiliary coolers." },
-            { name: "Underbody Splice Fasteners", material: "Corrosion-Resistant Zinc-Plated Steel", desc: "Torx retainers ensuring undertray seal under high-speed vacuum." }
-          ]
-        }
-      ];
-    }
+  const handleImageError = () => {
+    setCurrentImageSrc("/assets/cad-chassis-schematic.svg");
+  };
 
-    // Porsche 911 GT3 RS Canonical 5 Reticles
-    return [
-      {
-        id: 1,
-        num: "01",
-        name: "4.0L High-Rev Valvetrain & Dry Sump",
-        subsystem: "Powertrain Core",
-        part_number: "992-109-015-RS",
-        x_percent: 68.5,
-        y_percent: 50.0,
-        leaderSide: "right" as const,
-        material: "Forged Titanium & 100Cr6 Alloy Steel",
-        weightDelta: "-8.4 kg Rotating Mass",
-        spec: "M7x1.0 Gr.12.9 (16 Nm) / M11 Cross-Bolts (85 Nm)",
-        operationalLimit: "9,000 RPM Continuous / 2.5G Lateral",
-        rationale: "Eliminates hydraulic lifter collapse at high RPM using rigid finger followers, while 7-stage dry-sump scavenging prevents oil starvation at 2.5G.",
-        layers: [
-          { name: "Resonance Carbon Airbox & 6 ITBs", material: "Toray Carbon Pre-preg", desc: "Individual throttle bodies create instant atmospheric cylinder filling with zero delay." },
-          { name: "Rigid Finger Follower Valvetrain", material: "DLC-Coated Steel (3000 HV)", desc: "Micro-shinned rigid rockers guarantee valve opening precision up to 9,000 RPM." },
-          { name: "7-Stage Dry-Sump Crankcase", material: "Cast Alusil with PTWA Plasma Liner", desc: "Dedicated scavenge pumps evacuate crankcase oil directly into external tank." }
-        ]
-      },
-      {
-        id: 2,
-        num: "02",
-        name: "AZ31B Hydroformed Magnesium Roof",
-        subsystem: "BIW & Monocoque",
-        part_number: "992-817-010-MG",
-        x_percent: 51.5,
-        y_percent: 26.0,
-        leaderSide: "left" as const,
-        material: "AZ31B-H24 Magnesium Alloy (1.1mm)",
-        weightDelta: "-1.8 kg vs CFRP (-7.5mm CoG)",
-        spec: "Dow Betamate 2090 + M5 Ti Bolts (6.2 Nm)",
-        operationalLimit: "440°C Superplastic Formed",
-        rationale: "Removing weight from the vehicle's highest structural point lowers center of gravity height by 7.5 mm, directly neutralizing lateral cornering body roll.",
-        layers: [
-          { name: "Outer Double-Bubble Contour", material: "AZ31B Magnesium Sheet", desc: "Aerodynamic channels guide laminar cockpit airflow smoothly into the rear wing." },
-          { name: "Dielectric PEO Surface Barrier", material: "Keronite Plasma Electrolytic Layer", desc: "Insulates magnesium from adjacent aluminum and steel unibody to prevent galvanic reaction." },
-          { name: "Structural Crash Toughened Adhesive", material: "Dow Betamate 2090 Epoxy", desc: "High-modulus adhesive joint distributing roof shear loads into pillars without flex." }
-        ]
-      },
-      {
-        id: 3,
-        num: "03",
-        name: "Forged Aero Teardrop Wishbones & Center-Lock Hub",
-        subsystem: "Running Gear & Chassis",
-        part_number: "992-407-151-GT",
-        x_percent: 31.0,
-        y_percent: 74.0,
-        leaderSide: "left" as const,
-        material: "Forged AlSi10Mg + Forged 7075-T6 Nut",
-        weightDelta: "-18.2 kg Rotating Mass",
-        spec: "M30x1.5 Center-Lock (600 Nm)",
-        operationalLimit: "40 kg Aerodynamic Front Downforce",
-        rationale: "Wishbone arm profiles are aerodynamically shaped into airfoils that generate 40 kg of clean downforce alone while eliminating brake-dive geometry.",
-        layers: [
-          { name: "Airfoil Teardrop Upper & Lower Arms", material: "Closed-Die Forged Aluminum", desc: "Drop-forged profile generates aerodynamic downforce in clean wheel-well airflow." },
-          { name: "Center-Lock Wheel Spindle", material: "42CrMo4 Quenched Steel Spindle", desc: "Central high-torque drive hub engineered for 600 Nm single-nut motorsport pit changes." },
-          { name: "410mm Carbon-Silicon Rotor (PCCB)", material: "Carbon-Ceramic Matrix (C/SiC)", desc: "Withstands 850°C track braking without fading, halving unsprung rotating weight." }
-        ]
-      },
-      {
-        id: 4,
-        num: "04",
-        name: "Multi-Layer CFRP Door Assembly & Intrusion Core",
-        subsystem: "Safety Cell & Doors",
-        part_number: "992-831-011-RS",
-        x_percent: 44.0,
-        y_percent: 52.0,
-        leaderSide: "left" as const,
-        material: "Toray T700 CFRP + 22MnB5 Boron Steel",
-        weightDelta: "-5.5 kg Per Door (-11 kg Total)",
-        spec: "M8 XZN Triple-Square (34 Nm + 45°)",
-        operationalLimit: "1,500 MPa Side Intrusion Resistance",
-        rationale: "Integrates ultra-high-strength hot-formed boron steel inside a monolithic carbon skin, cutting unibody mass while exceeding FIA crash intrusion standards.",
-        layers: [
-          { name: "Outer CFRP Carbon Skin", material: "T700 2x2 Twill Pre-preg (1.4 mm)", desc: "Autoclave-molded carbon panel contoured with boundary-layer wheel arch air extractors." },
-          { name: "Boron Steel Anti-Intrusion Beam", material: "Hot-Stamped 22MnB5 Boron Rebar", desc: "1,500 MPa high-yield structural beam shielding driver cockpit from side barrier impacts." },
-          { name: "Minimalist Lightweight Door Card", material: "Molded Carbon Composite & Fabric Loop", desc: "Eliminates heavy electric latch motors in favor of iconic RS emergency fabric pull loops." }
-        ]
-      },
-      {
-        id: 5,
-        num: "05",
-        name: "Dual-Element Active DRS Swan-Neck Wing",
-        subsystem: "Active Aerodynamics",
-        part_number: "992-827-901-RS",
-        x_percent: 81.0,
-        y_percent: 28.0,
-        leaderSide: "right" as const,
-        material: "High-Modulus Carbon & CNC 7075-T6 Pylons",
-        weightDelta: "860 kg Downforce at 285 km/h",
-        spec: "M8x1.25 Gr.10.9 (42 Nm into Shock Towers)",
-        operationalLimit: "34° Hydraulic DRS Flap Pivoting",
-        rationale: "Top-mounted swan-neck pylons maintain uninterrupted airflow along the wing's low-pressure underside, boosting aerodynamic downforce by over 30%.",
-        layers: [
-          { name: "Dual-Element Carbon Mainfoil & Flap", material: "High-Modulus Pre-preg Carbon", desc: "Upper active flap dynamically tilts 34 degrees via electro-hydraulic cylinder for DRS low-drag mode." },
-          { name: "Billet Aluminum Swan-Neck Pylons", material: "CNC 7075-T6 Aerospace Aluminum", desc: "Transfers 860 kg of crushing downforce directly into rear BIW suspension shock towers." },
-          { name: "Electro-Hydraulic DRS Actuator", material: "Hard-Anodized Micro-Hydraulic RAM", desc: "Actuates low-drag flap position in under 0.3 seconds at steering wheel command." }
-        ]
-      }
-    ];
-  }, [isVW]);
-
-  // Selected callout
-  const activeCallout = useMemo(() => {
-    if (selectedFastenerId) {
-      const found = targetCallouts.find((c) => c.id === selectedFastenerId);
-      if (found) return found;
-    }
-    return targetCallouts[0];
-  }, [targetCallouts, selectedFastenerId]);
-
-  // Coordinate tracking for live datum display
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  // Tracking mouse movement for caliper and pan
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
-    setCursorCoords({ x: parseFloat(x.toFixed(1)), y: parseFloat(y.toFixed(1)) });
+    const cur = { x: parseFloat(x.toFixed(1)), y: parseFloat(y.toFixed(1)) };
+    setCursorCoords(cur);
+
+    if (draggingDatum) {
+      setDatumPoints((prev) => ({
+        ...prev,
+        [draggingDatum]: cur
+      }));
+      return;
+    }
+
+    if (isPanning) {
+      const dx = e.clientX - panStartRef.current.x;
+      const dy = e.clientY - panStartRef.current.y;
+      panStartRef.current = { x: e.clientX, y: e.clientY };
+      setPan((prev: { x: number; y: number }) => ({
+        x: prev.x + dx,
+        y: prev.y + dy
+      }));
+    }
+  }, [draggingDatum, isPanning, setPan]);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button === 0 && !draggingDatum) {
+      setIsPanning(true);
+      panStartRef.current = { x: e.clientX, y: e.clientY };
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsPanning(false);
+    if (draggingDatum) setDraggingDatum(null);
   };
 
   const handleMouseLeave = () => {
     setCursorCoords(null);
+    setIsPanning(false);
+    setDraggingDatum(null);
   };
 
+  const handleResetView = () => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+
+  // Caliper distance calculation in millimeters (scaled to vehicle dimensions)
+  const caliperDistanceMm = useMemo(() => {
+    const dx = Math.abs(datumPoints.p2.x - datumPoints.p1.x);
+    const dy = Math.abs(datumPoints.p2.y - datumPoints.p1.y);
+    const hypotPercent = Math.hypot(dx, dy);
+    const baseLengthMm = 4500;
+    const dist = (hypotPercent / 100) * baseLengthMm;
+    return dist.toFixed(1);
+  }, [datumPoints]);
+
   return (
-    <div className="rounded-2xl border border-stone-800 bg-[#090b10] overflow-hidden shadow-2xl space-y-0 relative">
-      {/* Top Cinematic Stage Header & Assembly Segmented Control */}
-      <div className="px-6 py-4 border-b border-stone-800/80 bg-[#0c0f16] flex flex-col md:flex-row md:items-center justify-between gap-4">
-        {/* Left: Active Vehicle & CAD Datum */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.2)]">
-            <Sliders className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold tracking-widest text-stone-100 uppercase">
-                {carDetail ? `${carDetail.model} ${carDetail.trim || ""}` : "PORSCHE 911 GT3 RS"}
-              </span>
-              <span className="px-2 py-0.5 text-[9px] font-mono font-bold rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                STAGE INSPECTION
-              </span>
-            </div>
-            <div className="text-[11px] font-mono text-stone-400">
-              DATUM: <span className="text-amber-300 font-bold">{cursorCoords ? `X:${cursorCoords.x.toFixed(1)}% / Y:${cursorCoords.y.toFixed(1)}%` : "STANDBY"}</span> • METRIC CAD PROJECTION
-            </div>
-          </div>
+    <div className="relative w-full rounded-2xl border border-[#1E2536] bg-[#090B10] overflow-hidden shadow-2xl flex flex-col select-none">
+      {/* 1. TOP TOOLBAR: LAYER ISOLATION PILLS & CAD UTILITIES */}
+      <div className="px-4 sm:px-6 py-3 border-b border-[#1E2536] bg-[#0A0D15]/95 backdrop-blur-xl flex flex-wrap items-center justify-between gap-3 font-mono z-30">
+        {/* Layer Isolation Pills */}
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0E131E] border border-[#1E2536] overflow-x-auto scrollbar-none max-w-full">
+          {LAYER_PILLS.map((pill) => {
+            const isActive = activeTier === pill.id;
+            return (
+              <button
+                key={pill.id}
+                onClick={() => setTier(pill.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold tracking-wider transition-all duration-150 cursor-pointer whitespace-nowrap ${
+                  isActive
+                    ? "bg-[#D2FF00] text-black shadow-[0_0_14px_rgba(210,255,0,0.5)] font-black"
+                    : "text-[#8A95A8] hover:text-white hover:bg-[#151D2D]"
+                }`}
+              >
+                {pill.label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Center: Cinematic Assembly Tabs */}
-        {!isVW ? (
-          <div className="p-1 rounded-xl bg-[#121622] border border-stone-800 flex items-center gap-1 shadow-inner">
-            <button
-              onClick={() => setAssemblyStage("cutaway")}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold tracking-wider uppercase transition-all cursor-pointer ${
-                assemblyStage === "cutaway"
-                  ? "bg-amber-500 text-black shadow-[0_0_12px_rgba(245,158,11,0.35)]"
-                  : "text-stone-400 hover:text-stone-200 hover:bg-stone-800/50"
-              }`}
-            >
-              [ CHASSIS MONOCOQUE ]
-            </button>
-            <button
-              onClick={() => setAssemblyStage("engine")}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold tracking-wider uppercase transition-all cursor-pointer ${
-                assemblyStage === "engine"
-                  ? "bg-amber-500 text-black shadow-[0_0_12px_rgba(245,158,11,0.35)]"
-                  : "text-stone-400 hover:text-stone-200 hover:bg-stone-800/50"
-              }`}
-            >
-              [ 4.0L FLAT-6 POWERTRAIN ]
-            </button>
-            <button
-              onClick={() => setAssemblyStage("door")}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold tracking-wider uppercase transition-all cursor-pointer ${
-                assemblyStage === "door"
-                  ? "bg-amber-500 text-black shadow-[0_0_12px_rgba(245,158,11,0.35)]"
-                  : "text-stone-400 hover:text-stone-200 hover:bg-stone-800/50"
-              }`}
-            >
-              [ COMPOSITE DOOR CASSETTE ]
-            </button>
-          </div>
-        ) : (
-          <div className="px-3.5 py-1.5 rounded-lg bg-[#121622] border border-stone-800 text-xs font-mono font-bold text-amber-400">
-            [ MQB EVO ARCHITECTURE & EA888 TSI ]
-          </div>
-        )}
-
-        {/* Right: Stage Viewport Tools */}
-        <div className="flex items-center gap-1.5 text-xs font-mono">
+        {/* CAD Canvas Tools: Caliper, Grid & Controls */}
+        <div className="flex items-center gap-2 text-xs">
+          {/* Caliper Toggle */}
           <button
-            onClick={() => setShowGrid(!showGrid)}
-            className={`px-2.5 py-1 rounded text-[11px] border transition-colors ${
-              showGrid ? "bg-stone-800 text-amber-400 border-amber-500/40" : "text-stone-500 border-stone-800"
+            onClick={toggleCaliper}
+            className={`px-3 py-1.5 rounded-lg border font-mono font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+              isCaliperOn
+                ? "bg-[#FF8000] text-black border-[#FF8000] shadow-[0_0_15px_rgba(255,128,0,0.4)]"
+                : "bg-[#0E131E] border-[#222A3B] text-[#A6B2C4] hover:border-[#FF8000] hover:text-[#FF8000]"
             }`}
+            title="Toggle Datum Caliper Measurement"
           >
-            GRID
+            <Compass className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">CALIPER</span>
+            <span>{isCaliperOn ? "[ON]" : "[OFF]"}</span>
           </button>
+
+          {/* Grid Toggle */}
           <button
-            onClick={() => setZoomLevel((z) => Math.min(z + 0.2, 2.0))}
-            className="p-1.5 rounded text-stone-400 hover:text-white border border-stone-800 hover:bg-stone-800"
-            title="Zoom In"
+            onClick={toggleGrid}
+            className={`px-2.5 py-1.5 rounded-lg text-[11px] border transition-colors cursor-pointer flex items-center gap-1 ${
+              isGridOn ? "bg-[#161D2C] text-[#D2FF00] border-[#D2FF00]/40" : "text-[#637085] border-[#1C2230]"
+            }`}
+            title="Toggle CAD Grid"
           >
-            <ZoomIn className="w-3.5 h-3.5" />
+            <Grid className="w-3 h-3" />
+            <span className="hidden md:inline">GRID</span>
           </button>
-          <button
-            onClick={() => setZoomLevel((z) => Math.max(z - 0.2, 0.8))}
-            className="p-1.5 rounded text-stone-400 hover:text-white border border-stone-800 hover:bg-stone-800"
-            title="Zoom Out"
-          >
-            <ZoomOut className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => setZoomLevel(1)}
-            className="p-1.5 rounded text-stone-400 hover:text-white border border-stone-800 hover:bg-stone-800"
-            title="Reset Scale"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
+
+          {/* Smooth Zoom Controls */}
+          <div className="flex items-center gap-1 bg-[#0E131E] border border-[#1E2536] p-0.5 rounded-lg">
+            <button
+              onClick={() => setZoom((z) => Math.min(z + 0.25, 3.0))}
+              className="p-1.5 rounded text-[#8A95A8] hover:text-white hover:bg-[#182030] cursor-pointer transition-colors"
+              title="Zoom In (+25%)"
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+            <span className="px-1 text-[10px] text-[#A6B2C4] font-bold min-w-[38px] text-center">
+              {Math.round(zoom * 100)}%
+            </span>
+            <button
+              onClick={() => setZoom((z) => Math.max(z - 0.25, 0.6))}
+              className="p-1.5 rounded text-[#8A95A8] hover:text-white hover:bg-[#182030] cursor-pointer transition-colors"
+              title="Zoom Out (-25%)"
+            >
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={handleResetView}
+              className="p-1.5 rounded text-[#8A95A8] hover:text-white hover:bg-[#182030] cursor-pointer transition-colors"
+              title="Reset Zoom & Pan"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Main Full-Bleed Viewport & Floating Engineering Dossier Stage */}
-      <div className="relative w-full h-[540px] sm:h-[600px] overflow-hidden bg-[#07090e] select-none flex items-center justify-center">
-        {/* Subtle Engineering Millimeter Datum Grid */}
-        {showGrid && (
+      {/* 2. EXPLODED ISOMETRIC KNOLLING VIEWPORT */}
+      <div
+        className="relative w-full aspect-video min-h-[500px] max-h-[740px] overflow-hidden bg-[#07090E] flex items-center justify-center cursor-grab active:cursor-grabbing"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Subtle CAD 40px Measurement Grid */}
+        {isGridOn && (
           <div
-            className="absolute inset-0 pointer-events-none opacity-10"
+            className="absolute inset-0 pointer-events-none z-10"
             style={{
               backgroundImage: `
-                linear-gradient(to right, rgba(245, 158, 11, 0.15) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(245, 158, 11, 0.15) 1px, transparent 1px)
+                linear-gradient(to right, rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.04) 1px, transparent 1px)
               `,
-              backgroundSize: "48px 48px",
+              backgroundSize: "40px 40px",
             }}
           />
         )}
 
-        {/* Asphalt / Graphite Dark Vignette */}
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(5,7,11,0.85)_100%)] z-10" />
+        {/* Dark-room Radial Vignette */}
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_55%,rgba(4,6,10,0.85)_100%)] z-15" />
 
-        {/* Canvas Workspace */}
+        {/* Tier Boundary Guide Badges on Canvas Margin */}
+        <div className="absolute left-4 top-0 bottom-0 pointer-events-none z-20 flex flex-col justify-between py-6 font-mono text-[9px] text-[#55647A] tracking-wider select-none">
+          <div className="flex items-center gap-1.5 bg-[#090C12]/80 px-2 py-1 rounded border border-[#1A2234]">
+            <span className={`w-1.5 h-1.5 rounded-full ${activeTier === "aero" ? "bg-[#D2FF00]" : "bg-[#55647A]"}`} />
+            <span>01. AERO SHELL & BODY PANELS</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-[#090C12]/80 px-2 py-1 rounded border border-[#1A2234]">
+            <span className={`w-1.5 h-1.5 rounded-full ${activeTier === "monocoque" ? "bg-[#D2FF00]" : "bg-[#55647A]"}`} />
+            <span>02. STRUCTURAL MONOCOQUE / UNIBODY</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-[#090C12]/80 px-2 py-1 rounded border border-[#1A2234]">
+            <span className={`w-1.5 h-1.5 rounded-full ${activeTier === "powertrain" ? "bg-[#D2FF00]" : "bg-[#55647A]"}`} />
+            <span>03. POWERTRAIN & DRIVETRAIN</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-[#090C12]/80 px-2 py-1 rounded border border-[#1A2234]">
+            <span className={`w-1.5 h-1.5 rounded-full ${activeTier === "brakes_gear" || activeTier === "hardware" ? "bg-[#D2FF00]" : "bg-[#55647A]"}`} />
+            <span>04. SUSPENSION, BRAKES & HARDWARE</span>
+          </div>
+        </div>
+
+        {/* Floating Zoom & Reset Overlay Buttons (Bottom Right of Viewport) */}
+        <div className="absolute bottom-4 right-4 z-30 flex items-center gap-1.5 bg-[#0B0E17]/90 backdrop-blur-xl border border-[#1E2536] p-1.5 rounded-xl shadow-2xl">
+          <button
+            onClick={() => setZoom((z) => Math.min(z + 0.25, 3.0))}
+            className="p-1.5 rounded-lg bg-[#141B28] hover:bg-[#D2FF00] hover:text-black text-[#A6B2C4] font-mono text-xs font-bold transition-all cursor-pointer"
+            title="Zoom In"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setZoom((z) => Math.max(z - 0.25, 0.6))}
+            className="p-1.5 rounded-lg bg-[#141B28] hover:bg-[#D2FF00] hover:text-black text-[#A6B2C4] font-mono text-xs font-bold transition-all cursor-pointer"
+            title="Zoom Out"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleResetView}
+            className="p-1.5 rounded-lg bg-[#141B28] hover:bg-[#D2FF00] hover:text-black text-[#A6B2C4] font-mono text-xs font-bold transition-all cursor-pointer"
+            title="Reset View"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Draggable Datum Caliper Vector Overlay */}
+        {isCaliperOn && (
+          <div className="absolute inset-0 z-25 font-mono text-[10px] pointer-events-none">
+            <svg className="absolute inset-0 w-full h-full pointer-events-none">
+              <line
+                x1={`${datumPoints.p1.x}%`}
+                y1={`${datumPoints.p1.y}%`}
+                x2={`${datumPoints.p2.x}%`}
+                y2={`${datumPoints.p2.y}%`}
+                stroke="#FF8000"
+                strokeWidth="2"
+                strokeDasharray="4 4"
+                className="opacity-90"
+              />
+            </svg>
+
+            {/* Datum A Handle */}
+            <div
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                setDraggingDatum("p1");
+              }}
+              style={{ left: `${datumPoints.p1.x}%`, top: `${datumPoints.p1.y}%` }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 z-40 pointer-events-auto"
+            >
+              <div className="w-6 h-6 rounded-full bg-[#D2FF00] text-black flex items-center justify-center shadow-[0_0_15px_#D2FF00] border-2 border-white font-bold text-[9px]">
+                <Move className="w-3.5 h-3.5" />
+              </div>
+            </div>
+
+            {/* Datum B Handle */}
+            <div
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                setDraggingDatum("p2");
+              }}
+              style={{ left: `${datumPoints.p2.x}%`, top: `${datumPoints.p2.y}%` }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing p-1 z-40 pointer-events-auto"
+            >
+              <div className="w-6 h-6 rounded-full bg-[#FF8000] text-black flex items-center justify-center shadow-[0_0_15px_#FF8000] border-2 border-white font-bold text-[9px]">
+                <Move className="w-3.5 h-3.5" />
+              </div>
+            </div>
+
+            {/* Caliper Readout Badge */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/95 border border-[#FF8000] text-[#FF8000] font-bold text-xs shadow-2xl flex items-center gap-2">
+              <Compass className="w-3.5 h-3.5" />
+              <span>CALIPER SPAN: {caliperDistanceMm} MM (±0.05 MM)</span>
+            </div>
+          </div>
+        )}
+
+        {/* 3. TRANSFORM CONTAINER: ZOOM & PAN WITH ISOMETRIC TEARDOWN PHOTO */}
         <div
           ref={canvasRef}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          className="relative w-full h-full flex items-center justify-center p-6 transition-transform duration-200 ease-out z-10"
-          style={{ transform: `scale(${zoomLevel})` }}
+          className="relative w-full h-full flex items-center justify-center transition-transform duration-100 ease-out z-10"
+          style={{
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+          }}
         >
-          {/* Dominant CAD Cutaway Image */}
-          <div className="relative w-full max-w-5xl h-full flex items-center justify-center">
+          <div className="relative w-full max-w-5xl aspect-video max-h-full flex items-center justify-center">
+            {/* Exploded Teardown Photography / Knolling Schematic */}
             <Image
-              src={stageImage}
-              alt="Automotive CAD Technical Cutaway"
+              src={currentImageSrc}
+              alt={`${carInfo.name} Exploded Mechanical Teardown Knolling`}
               fill
               priority
               sizes="(max-width: 1400px) 100vw, 1200px"
-              className="object-contain filter drop-shadow-[0_25px_50px_rgba(0,0,0,0.95)] pointer-events-none transition-opacity duration-300"
+              onError={handleImageError}
+              className="object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.95)] pointer-events-none transition-all duration-300"
             />
 
-            {/* Pulsing CAD Reticles with Thin Hairline Leader Lines */}
-            {targetCallouts.map((callout) => {
-              const isSelected = activeCallout.id === callout.id;
+            {/* 4. CLEAN 24PX CIRCULAR NUMBERED BADGES (ZERO TEXT ON CANVAS) */}
+            {pins.map((callout) => {
+              const isSelected = activeSelectedId === callout.id;
+              const isHovered = hoveredPinId === callout.id;
+
+              // Layer Isolation: Dim pins not belonging to active tier
+              const isTierMatch = activeTier === "all" || callout.tier === activeTier;
+
+              const isPapaya = glowColor === "papaya" && isSelected;
+              const pingColor = isPapaya ? "bg-[#FF8000]" : "bg-[#D2FF00]";
+              const activeBorderColor = isPapaya ? "border-[#FF8000]" : "border-[#D2FF00]";
+              const shadowGlow = isPapaya
+                ? "shadow-[0_0_20px_#FF8000]"
+                : "shadow-[0_0_20px_#D2FF00]";
 
               return (
                 <div
                   key={callout.id}
-                  onClick={() => {
-                    onSelectFastener(callout.id);
-                    setIsDossierOpen(true);
-                    setActivePeelIndex(0);
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelect(callout.id);
+                  }}
+                  onMouseEnter={() => {
+                    if (onHoverPin) onHoverPin(callout.id);
+                  }}
+                  onMouseLeave={() => {
+                    if (onHoverPin) onHoverPin(null);
                   }}
                   style={{
                     left: `${callout.x_percent}%`,
                     top: `${callout.y_percent}%`,
                   }}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-30 group"
+                  className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-30 group transition-all duration-200 ${
+                    isTierMatch
+                      ? "opacity-100 scale-100"
+                      : "opacity-25 scale-90 pointer-events-none"
+                  }`}
+                  title={`${callout.num}. ${callout.name}`}
                 >
-                  {/* Outer Pulsing Radar Ring */}
+                  {/* Pulsing Radar Ring on Select or Hover */}
                   <span
-                    className={`absolute -inset-3 rounded-full pointer-events-none transition-all ${
-                      isSelected
-                        ? "animate-ping opacity-80 bg-amber-400"
-                        : "opacity-0 group-hover:opacity-60 group-hover:animate-ping bg-amber-500"
+                    className={`absolute -inset-2.5 rounded-full pointer-events-none transition-all ${
+                      isSelected || isHovered
+                        ? `animate-ping opacity-85 ${pingColor}`
+                        : `opacity-0 group-hover:opacity-60 group-hover:animate-ping ${pingColor}`
                     }`}
                   />
 
-                  {/* CAD Crosshair Reticle Center */}
+                  {/* Clean 24px Circular Numbered Badge (Zero text clutter) */}
                   <div
-                    className={`relative flex items-center justify-center w-7 h-7 rounded-full transition-all duration-200 ${
-                      isSelected
-                        ? "bg-amber-500 text-black shadow-[0_0_20px_#f59e0b] scale-125 border-2 border-white"
-                        : "bg-[#0c0f16]/90 border border-amber-400/80 text-amber-300 hover:scale-115 hover:border-amber-400 hover:bg-amber-500 hover:text-black backdrop-blur-md"
+                    className={`relative flex items-center justify-center w-6 h-6 rounded-full transition-all duration-200 ${
+                      isSelected || isHovered
+                        ? isPapaya
+                          ? `bg-[#FF8000] text-black ${shadowGlow} scale-125 border-2 border-white font-black`
+                          : `bg-[#D2FF00] text-black ${shadowGlow} scale-125 border-2 border-white font-black`
+                        : `bg-[#090B10] border ${activeBorderColor} text-[#D2FF00] hover:scale-120 hover:bg-[#D2FF00] hover:text-black font-bold shadow-lg`
                     }`}
                   >
-                    {/* Reticle + Hairlines */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className={`w-3.5 h-[1px] ${isSelected ? "bg-black" : "bg-amber-400"}`} />
-                      <div className={`h-3.5 w-[1px] absolute ${isSelected ? "bg-black" : "bg-amber-400"}`} />
-                    </div>
-                    <span className="text-[10px] font-mono font-bold relative z-10">{callout.num}</span>
-                  </div>
-
-                  {/* Hairline Leader Line & Hover Tooltip */}
-                  <div
-                    className={`absolute bottom-full mb-2 pointer-events-none transition-all duration-200 ${
-                      callout.leaderSide === "left"
-                        ? "right-1/2 translate-x-3 items-end"
-                        : "left-1/2 -translate-x-3 items-start"
-                    } ${isSelected ? "flex flex-col opacity-100" : "hidden group-hover:flex flex-col opacity-90"}`}
-                  >
-                    <div className="px-2.5 py-1 rounded bg-[#10141e]/95 border border-stone-700 text-stone-100 text-[10px] font-mono shadow-2xl backdrop-blur-md whitespace-nowrap flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                      <span className="font-bold text-amber-300">{callout.name}</span>
-                    </div>
-                    {/* Hairline connector drop */}
-                    <div className="w-[1px] h-2.5 bg-amber-400/60" />
+                    <span className="text-[10px] font-mono leading-none select-none font-black">
+                      {callout.num}
+                    </span>
                   </div>
                 </div>
               );
             })}
           </div>
         </div>
-
-        {/* Interactive "Engineering Dossier" Drawer (Right-Hand Overlay) */}
-        {isDossierOpen && activeCallout && (
-          <div className="absolute top-4 right-4 bottom-4 w-[360px] sm:w-[390px] rounded-xl border border-stone-800 bg-[#0c0f17]/95 backdrop-blur-xl shadow-2xl p-5 z-40 flex flex-col justify-between overflow-y-auto animate-in fade-in slide-in-from-right-4 duration-200">
-            <div className="space-y-4">
-              {/* Dossier Header */}
-              <div className="flex items-start justify-between gap-2 pb-3 border-b border-stone-800/80">
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">
-                    <span>CALLOUT [{activeCallout.num}]</span>
-                    <span>•</span>
-                    <span className="text-stone-400">{activeCallout.subsystem}</span>
-                  </div>
-                  <h3 className="text-sm sm:text-base font-bold text-stone-100 leading-snug font-mono">
-                    {activeCallout.name}
-                  </h3>
-                  <div className="text-[10px] font-mono text-stone-400">
-                    OEM PART NUMBER: <span className="text-stone-300">{activeCallout.part_number}</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setIsDossierOpen(false)}
-                  className="p-1.5 rounded text-stone-500 hover:text-stone-300 hover:bg-stone-800 transition-colors"
-                  title="Close Dossier"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* 3 High-Signal Metric Badges */}
-              <div className="grid grid-cols-3 gap-2 font-mono">
-                {/* 1. Material Chemistry */}
-                <div className="p-2 rounded-lg bg-[#121622] border border-stone-800/90 text-center space-y-0.5">
-                  <span className="text-[8px] text-stone-400 uppercase block font-bold">MATERIAL</span>
-                  <span className="text-xs font-bold text-emerald-400 truncate block" title={activeCallout.material}>
-                    {activeCallout.material.split(" ")[0]}
-                  </span>
-                </div>
-
-                {/* 2. Weight Delta */}
-                <div className="p-2 rounded-lg bg-[#121622] border border-stone-800/90 text-center space-y-0.5">
-                  <span className="text-[8px] text-stone-400 uppercase block font-bold">WEIGHT DELTA</span>
-                  <span className="text-xs font-bold text-amber-400 truncate block">
-                    {activeCallout.weightDelta.split(" ")[0]}
-                  </span>
-                </div>
-
-                {/* 3. Load / Torque Spec */}
-                <div className="p-2 rounded-lg bg-[#121622] border border-stone-800/90 text-center space-y-0.5">
-                  <span className="text-[8px] text-stone-400 uppercase block font-bold">FASTENER TORQUE</span>
-                  <span className="text-xs font-bold text-cyan-400 truncate block">
-                    {activeCallout.spec.split(" ")[0]}
-                  </span>
-                </div>
-              </div>
-
-              {/* Weissach Engineering Rationale */}
-              <div className="p-3.5 rounded-lg bg-[#121622] border border-stone-800 space-y-1.5">
-                <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1.5 font-mono">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  WEISSACH ENGINEERING RATIONALE
-                </div>
-                <p className="text-xs text-stone-300 font-sans leading-relaxed">
-                  {activeCallout.rationale}
-                </p>
-                <div className="pt-2 border-t border-stone-800/80 flex justify-between text-[10px] font-mono text-stone-400">
-                  <span>LIMIT: <span className="text-red-400 font-bold">{activeCallout.operationalLimit}</span></span>
-                </div>
-              </div>
-
-              {/* Interactive Sub-Layer Slider */}
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold">
-                  <span className="flex items-center gap-1.5">
-                    <Layers className="w-3.5 h-3.5 text-amber-400" />
-                    SUB-LAYER PEEL EXPLORER
-                  </span>
-                  <span className="text-amber-400">LAYER {activePeelIndex + 1} / {activeCallout.layers.length}</span>
-                </div>
-
-                {/* Pill Segmented Layer Switcher */}
-                <div className="grid grid-cols-3 gap-1 p-1 rounded-lg bg-[#121622] border border-stone-800 font-mono text-[10px]">
-                  {activeCallout.layers.map((layer, idx) => (
-                    <button
-                      key={layer.name}
-                      onClick={() => setActivePeelIndex(idx)}
-                      className={`py-1 rounded text-center transition-all cursor-pointer truncate px-1 font-bold ${
-                        activePeelIndex === idx
-                          ? "bg-amber-500 text-black shadow-sm"
-                          : "text-stone-400 hover:text-stone-200"
-                      }`}
-                      title={layer.name}
-                    >
-                      {idx === 0 ? "Outer Shell" : idx === 1 ? "Safety Frame" : "Core Mech"}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Active Layer Details Card */}
-                <div className="p-3 rounded-lg bg-[#121622] border border-stone-800 space-y-1.5">
-                  <div className="flex items-center justify-between text-xs font-bold text-stone-100 font-mono">
-                    <span>{activeCallout.layers[activePeelIndex]?.name}</span>
-                    <span className="text-[10px] text-emerald-400 font-mono">
-                      {activeCallout.layers[activePeelIndex]?.material}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-stone-400 font-sans leading-relaxed">
-                    {activeCallout.layers[activePeelIndex]?.desc}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Dossier Footer Action */}
-            <div className="pt-3 border-t border-stone-800/80 flex items-center justify-between text-xs font-mono">
-              <span className="text-stone-500 text-[10px]">SPEC: ISO 898-1 / DIN 912</span>
-              <button
-                onClick={() => {
-                  const nextIdx = (targetCallouts.findIndex(c => c.id === activeCallout.id) + 1) % targetCallouts.length;
-                  onSelectFastener(targetCallouts[nextIdx].id);
-                  setActivePeelIndex(0);
-                }}
-                className="flex items-center gap-1 text-amber-400 hover:text-amber-300 font-bold transition-colors cursor-pointer"
-              >
-                NEXT COMPONENT
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Minimized Dossier Button if closed */}
-        {!isDossierOpen && (
-          <button
-            onClick={() => setIsDossierOpen(true)}
-            className="absolute top-4 right-4 z-30 px-3.5 py-2 rounded-lg bg-[#121622]/90 border border-stone-700 text-amber-400 hover:border-amber-400 hover:text-amber-300 text-xs font-mono font-bold shadow-xl backdrop-blur-md flex items-center gap-2 cursor-pointer transition-all"
-          >
-            <Layers className="w-3.5 h-3.5" />
-            OPEN ENGINEERING DOSSIER
-          </button>
-        )}
       </div>
 
-      {/* Bottom Stage Status Bar */}
-      <div className="px-6 py-2.5 bg-[#0c0f16] border-t border-stone-800 text-xs font-mono text-stone-400 flex items-center justify-between">
-        <span className="flex items-center gap-2">
-          <Info className="w-3.5 h-3.5 text-amber-400" />
-          Click any pulsing crosshair reticle on the schematic to inspect component metallurgy and sub-layer peel
-        </span>
-        <span className="text-amber-400 font-bold">5 ACTIVE TELEMETRY STATIONS</span>
+      {/* 5. CANVAS FOOTER STATUS STRIP */}
+      <div className="px-5 py-2.5 bg-[#080B10] border-t border-[#1E2536] flex flex-wrap items-center justify-between text-[11px] font-mono text-[#63758D]">
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#D2FF00]" />
+          <span className="text-white font-bold">MONOCOQUE EXPLODED MECHANICAL TEARDOWN</span>
+          <span className="text-[#3A475C]">•</span>
+          <span>ISO 7200 KNOLLING CAD SPECIFICATION</span>
+        </div>
+        <div className="flex items-center gap-4 text-[10px]">
+          <span>DATUM: <span className="text-cyan-400 font-bold">{cursorCoords ? `${cursorCoords.x}%, ${cursorCoords.y}%` : "CALIBRATED"}</span></span>
+          <span>ACTIVE TIER: <span className="text-[#D2FF00] font-bold uppercase">{activeTier}</span></span>
+          <span>PINS INDEXED: <span className="text-white font-bold">{pins.length}</span></span>
+          <span>TOLERANCE: <span className="text-[#FF8000] font-bold">±0.05 MM</span></span>
+        </div>
       </div>
     </div>
   );
 }
+
+export default BlueprintCanvas;

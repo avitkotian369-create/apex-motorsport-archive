@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <radialGradient id="bgGlowPwt" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#0F1422" />
+      <stop offset="100%" stop-color="#090B10" />
+    </radialGradient>
+    <pattern id="cadGridPwt" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#161F2E" stroke-width="0.8" opacity="0.45" />
+      <circle cx="0" cy="0" r="1" fill="#24334A" />
+    </pattern>
+    <pattern id="cadMajorGridPwt" width="200" height="200" patternUnits="userSpaceOnUse">
+      <path d="M 200 0 L 0 0 0 200" fill="none" stroke="#1E2B40" stroke-width="1.2" opacity="0.7" />
+    </pattern>
+    <filter id="glowLimePwt" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="glowPapayaPwt" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 1. Background -->
+  <rect width="1920" height="1080" fill="url(#bgGlowPwt)" />
+  <rect width="1920" height="1080" fill="url(#cadGridPwt)" />
+  <rect width="1920" height="1080" fill="url(#cadMajorGridPwt)" />
+
+  <!-- 2. Technical Centerline Axis (Bore & Stroke Centerline) -->
+  <line x1="200" y1="540" x2="1720" y2="540" stroke="#00E5FF" stroke-width="1.2" stroke-dasharray="16 4 3 4" opacity="0.5" />
+  <line x1="960" y1="80" x2="960" y2="1000" stroke="#00E5FF" stroke-width="1.2" stroke-dasharray="16 4 3 4" opacity="0.5" />
+
+  <!-- 3. Corner Telemetry Reticles -->
+  <g stroke="#D2FF00" stroke-width="1.5" opacity="0.75">
+    <path d="M 40 70 L 40 40 L 70 40" fill="none" />
+    <text x="80" y="48" fill="#63758D" font-family="monospace" font-size="12">[00.00, 00.00] CYLINDER_AXIS_0</text>
+    <path d="M 1880 70 L 1880 40 L 1850 40" fill="none" />
+    <text x="1740" y="48" fill="#63758D" font-family="monospace" font-size="12">[1920, 00.00] TDC_LIMIT</text>
+    <path d="M 40 1010 L 40 1040 L 70 1040" fill="none" />
+    <text x="80" y="1044" fill="#63758D" font-family="monospace" font-size="12">[00.00, 1080] CRANK_JOURNAL</text>
+    <path d="M 1880 1010 L 1880 1040 L 1850 1040" fill="none" />
+    <text x="1760" y="1044" fill="#63758D" font-family="monospace" font-size="12">[1920, 1080] END_VALVETRAIN</text>
+  </g>
+
+  <!-- 4. Reciprocating Assembly Exploded CAD Technical Geometry -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Cylinder Bore Guideline -->
+    <rect x="740" y="240" width="440" height="600" stroke="#1E293B" stroke-width="2" stroke-dasharray="8 6" />
+    <text x="750" y="270" fill="#64748B" font-family="monospace" font-size="11">CYLINDER BORE ⌀102.0 MM (PTWA PLASMA LINER)</text>
+
+    <!-- [01] Dual Concentric Valve Springs & Retainers (Top-Left) -->
+    <g transform="translate(420, 240)">
+      <ellipse cx="60" cy="40" rx="45" ry="18" stroke="#D2FF00" stroke-width="2" filter="url(#glowLimePwt)" />
+      <!-- Helical Outer Spring -->
+      <path d="M 20 40 Q 60 70 100 40 Q 60 90 20 60 Q 60 110 100 80 Q 60 130 20 100 Q 60 150 100 120"
+            stroke="#D2FF00" stroke-width="2.5" />
+      <!-- Helical Inner Damping Spring -->
+      <path d="M 35 45 Q 60 65 85 45 Q 60 80 35 60 Q 60 95 85 75 Q 60 110 35 90 Q 60 125 85 105"
+            stroke="#00E5FF" stroke-width="1.8" />
+      <!-- Titanium Spring Retainer Cap -->
+      <polygon points="15,35 105,35 95,15 25,15" stroke="#FF8000" stroke-width="2" fill="#FF8000" fill-opacity="0.1" />
+      <text x="-40" y="170" fill="#D2FF00" font-family="monospace" font-size="11" font-weight="bold">DUAL CR-SI SPRINGS</text>
+    </g>
+
+    <!-- [02] Sodium-Cooled Nimonic 80A Poppet Valve -->
+    <g transform="translate(620, 320)">
+      <!-- Valve Stem (Hollow Core with Sodium Cavity) -->
+      <rect x="25" y="0" width="16" height="240" stroke="#00E5FF" stroke-width="2" />
+      <line x1="33" y1="10" x2="33" y2="220" stroke="#00E5FF" stroke-width="1" stroke-dasharray="4 2" />
+      <!-- 45-Degree Hardfaced Valve Head -->
+      <path d="M 0 240 L 66 240 L 45 210 L 21 210 Z" stroke="#00E5FF" stroke-width="2.5" fill="#00E5FF" fill-opacity="0.15" />
+      <text x="-20" y="270" fill="#00E5FF" font-family="monospace" font-size="10">45° STELLITE SEAT</text>
+    </g>
+
+    <!-- [03] 2618-T6 Forged Lightweight Slipper Piston -->
+    <g transform="translate(800, 380)">
+      <!-- Piston Crown with 3D Valve Relief Pockets -->
+      <path d="M 20 50 Q 80 35 160 35 Q 240 35 300 50 L 310 90 L 290 140 L 270 140 L 270 110 L 50 110 L 50 140 L 30 140 L 10 90 Z"
+            stroke="#D2FF00" stroke-width="2.5" fill="#D2FF00" fill-opacity="0.08" filter="url(#glowLimePwt)" />
+      <!-- Ring Lands (Top Compression, Napier Second, 3-Piece Oil Ring) -->
+      <line x1="20" y1="62" x2="300" y2="62" stroke="#64748B" stroke-width="1.5" />
+      <line x1="22" y1="72" x2="298" y2="72" stroke="#64748B" stroke-width="1.5" />
+      <line x1="24" y1="82" x2="296" y2="82" stroke="#64748B" stroke-width="1.5" />
+      <!-- Piston Pin Bore Boss -->
+      <circle cx="160" cy="110" r="28" stroke="#FF8000" stroke-width="2.2" />
+      <circle cx="160" cy="110" r="18" stroke="#FF8000" stroke-width="1.5" stroke-dasharray="4 2" />
+      <text x="90" y="25" fill="#D2FF00" font-family="monospace" font-size="11" font-weight="bold">FORGED 2618-T6 PISTON</text>
+    </g>
+
+    <!-- [04] Floating DLC Wrist Pin -->
+    <g transform="translate(1140, 430)">
+      <rect x="0" y="30" width="130" height="42" rx="6" stroke="#FF8000" stroke-width="2.2" fill="#FF8000" fill-opacity="0.15" filter="url(#glowPapayaPwt)" />
+      <!-- Taper-Bore Inner Profile -->
+      <polygon points="10,38 120,38 105,64 25,64" stroke="#FF8000" stroke-width="1.2" stroke-dasharray="4 2" />
+      <!-- Wire Circlips -->
+      <circle cx="15" cy="51" r="14" stroke="#D2FF00" stroke-width="1.8" stroke-dasharray="24 6" />
+      <circle cx="115" cy="51" r="14" stroke="#D2FF00" stroke-width="1.8" stroke-dasharray="24 6" />
+      <text x="10" y="95" fill="#FF8000" font-family="monospace" font-size="11" font-weight="bold">DLC WRIST PIN ⌀21MM</text>
+    </g>
+
+    <!-- [05] Ti-6Al-4V Grade 5 Titanium H-Beam Connecting Rod -->
+    <g transform="translate(900, 560)">
+      <!-- Small End Eye (Bronze Bushing) -->
+      <circle cx="60" cy="40" r="28" stroke="#D2FF00" stroke-width="2.5" />
+      <circle cx="60" cy="40" r="20" stroke="#00E5FF" stroke-width="1.8" />
+      <!-- H-Beam Forged Shank -->
+      <path d="M 45 68 L 35 220 L 85 220 L 75 68 Z" stroke="#D2FF00" stroke-width="2.5" fill="#D2FF00" fill-opacity="0.05" />
+      <!-- Central H-Section Flange Milling -->
+      <rect x="46" y="85" width="28" height="120" stroke="#00E5FF" stroke-width="1.5" stroke-dasharray="4 2" />
+      <!-- Big End Upper Journal Half -->
+      <path d="M 20 220 C 20 200 100 200 100 220 C 100 260 20 260 20 220 Z" stroke="#D2FF00" stroke-width="2.5" />
+      <text x="-40" y="140" fill="#D2FF00" font-family="monospace" font-size="11" font-weight="bold">TI-6AL-4V H-BEAM ROD</text>
+    </g>
+
+    <!-- [06] Tri-Metal Sputtered Crankshaft Bearing Shells -->
+    <g transform="translate(1120, 740)">
+      <path d="M 10 30 C 10 90 90 90 90 30" stroke="#00E5FF" stroke-width="3.5" />
+      <path d="M 20 30 C 20 80 80 80 80 30" stroke="#D2FF00" stroke-width="1.5" />
+      <!-- Anti-Rotation Tang Notch -->
+      <rect x="8" y="28" width="6" height="8" fill="#00E5FF" />
+      <text x="-10" y="115" fill="#00E5FF" font-family="monospace" font-size="11" font-weight="bold">PVD SPUTTERED BEARING</text>
+    </g>
+
+    <!-- [07] Fracture-Split Rod Cap & [08] Aircraft Rod Bolts -->
+    <g transform="translate(900, 800)">
+      <!-- Fracture-Split Big End Cap -->
+      <path d="M 15 20 C 15 80 105 80 105 20 L 115 40 L 5 40 Z" stroke="#D2FF00" stroke-width="2.5" fill="#D2FF00" fill-opacity="0.08" />
+      <!-- Jagged Interlocking Parting Line -->
+      <path d="M 5 20 L 10 18 L 15 22 L 20 18 L 25 22" stroke="#FF8000" stroke-width="1.5" />
+      <path d="M 95 20 L 100 18 L 105 22 L 110 18 L 115 22" stroke="#FF8000" stroke-width="1.5" />
+      <!-- Rod Bolts (ARP Spec Custom Age 625+) -->
+      <rect x="-2" y="25" width="10" height="70" stroke="#FF8000" stroke-width="2" fill="#FF8000" fill-opacity="0.2" />
+      <rect x="112" y="25" width="10" height="70" stroke="#FF8000" stroke-width="2" fill="#FF8000" fill-opacity="0.2" />
+      <!-- 12-Point Flanged Bolt Heads -->
+      <polygon points="-6,95 2,95 4,105 -4,105" stroke="#FF8000" stroke-width="1.5" />
+      <polygon points="108,95 116,95 118,105 110,105" stroke="#FF8000" stroke-width="1.5" />
+      <text x="-10" y="125" fill="#FF8000" font-family="monospace" font-size="11" font-weight="bold">M9 ARP ROD BOLTS (25 NM + 90°)</text>
+    </g>
+  </g>
+
+  <!-- 5. Dimension & Tolerance Readouts -->
+  <g stroke="#64748B" stroke-width="1" font-family="monospace" font-size="11" fill="#94A3B8">
+    <line x1="800" y1="360" x2="1120" y2="360" stroke="#D2FF00" stroke-width="1.2" />
+    <line x1="800" y1="350" x2="800" y2="370" stroke="#D2FF00" stroke-width="1.5" />
+    <line x1="1120" y1="350" x2="1120" y2="370" stroke="#D2FF00" stroke-width="1.5" />
+    <text x="880" y="352" fill="#D2FF00" font-weight="bold">PISTON DIAMETER: 101.955 MM (±0.005 MM)</text>
+  </g>
+
+  <!-- 6. ISO 7200 Title Block in Bottom-Right -->
+  <g transform="translate(1380, 930)">
+    <rect width="480" height="90" fill="#0D111A" stroke="#223048" stroke-width="1.5" rx="4" />
+    <line x1="0" y1="30" x2="480" y2="30" stroke="#223048" stroke-width="1" />
+    <line x1="0" y1="60" x2="480" y2="60" stroke="#223048" stroke-width="1" />
+    <line x1="240" y1="0" x2="240" y2="60" stroke="#223048" stroke-width="1" />
+
+    <text x="12" y="20" fill="#64748B" font-family="monospace" font-size="9">HOMOLOGATION DOC NO.</text>
+    <text x="12" y="48" fill="#FFFFFF" font-family="monospace" font-size="12" font-weight="bold">CAD-SCHEMATIC-02-POWERTRAIN</text>
+
+    <text x="252" y="20" fill="#64748B" font-family="monospace" font-size="9">METALLURGY / FASTENERS</text>
+    <text x="252" y="48" fill="#D2FF00" font-family="monospace" font-size="12" font-weight="bold">TI-6AL-4V / CUSTOM AGE 625+</text>
+
+    <text x="12" y="78" fill="#64748B" font-family="monospace" font-size="9">REDLINE TOLERANCE: 9,000+ RPM</text>
+    <text x="252" y="78" fill="#FF8000" font-family="monospace" font-size="9" font-weight="bold">COMPRESSION: 13.3:1 (0.045 MM FIT)</text>
+  </g>
+</svg>

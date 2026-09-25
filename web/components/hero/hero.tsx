@@ -31,6 +31,22 @@ export function Hero({
 
   return (
     <div className="rounded-xl border border-stone-800 bg-[#080c14] overflow-hidden shadow-2xl space-y-0">
+      {/* MONOCOQUE Brand Header Banner */}
+      <div className="px-5 py-2.5 bg-[#090D17] border-b border-[#1A2234] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#D2FF00] shadow-[0_0_8px_#D2FF00]" />
+          <span className="text-white font-black tracking-wider text-xs sm:text-sm">
+            MONOCOQUE // AUTOMOTIVE ANATOMY ARCHIVE
+          </span>
+          <span className="text-[#64748B] text-[11px] hidden md:inline">
+            — Interactive Knolling & Exploded Parts Catalog
+          </span>
+        </div>
+        <div className="text-[10px] text-[#A6B2C4] bg-[#121A28] px-2.5 py-1 rounded border border-[#222E42]">
+          HOMOLOGATION BENCHMARKS • ISO 7200
+        </div>
+      </div>
+
       {/* Top Paddock Header: Model Switcher & Live Homologation Tag */}
       <div className="px-5 py-3 border-b border-stone-800/80 bg-[#0d121c] flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Left: Model Switcher Tabs */}
