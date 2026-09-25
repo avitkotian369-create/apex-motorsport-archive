@@ -1,77 +1,68 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { FastForward } from "lucide-react";
+import { Radio } from "lucide-react";
 
 interface RevPreloaderProps {
   onComplete?: () => void;
 }
 
 const GEAR_RUNS = [
-  { gear: 1, minRpm: 1200, maxRpm: 8400 },
-  { gear: 2, minRpm: 5200, maxRpm: 8600 },
-  { gear: 3, minRpm: 5600, maxRpm: 8750 },
-  { gear: 4, minRpm: 6000, maxRpm: 8900 }
+  { gear: 1, minRpm: 1200, maxRpm: 8200 },
+  { gear: 2, minRpm: 4800, maxRpm: 8400 },
+  { gear: 3, minRpm: 5200, maxRpm: 8550 },
+  { gear: 4, minRpm: 5600, maxRpm: 8650 },
+  { gear: 5, minRpm: 6000, maxRpm: 8750 },
+  { gear: 6, minRpm: 6400, maxRpm: 8844 }
 ];
 
 export function RevPreloader({ onComplete }: RevPreloaderProps) {
   const [gear, setGear] = useState(1);
   const [rpm, setRpm] = useState(1200);
-  const [fraction, setFraction] = useState(0);
-  const [punch, setPunch] = useState(false);
-  const [limeFlash, setLimeFlash] = useState(false);
+  const [percent, setPercent] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
-  const prevGearRef = useRef(1);
   const hasFinishedRef = useRef(false);
 
   const finishPreloader = useCallback(() => {
     if (hasFinishedRef.current) return;
     hasFinishedRef.current = true;
     setIsExiting(true);
-    // Smooth fade-out into the homepage
     setTimeout(() => {
       setIsComplete(true);
       if (onComplete) onComplete();
-    }, 350);
+    }, 300);
   }, [onComplete]);
 
   useEffect(() => {
     const startTime = Date.now();
-    const duration = 1400; // Crisp ~1.4s progression across 4 gears
+    const duration = 1500; // 1.5s total launch sequence
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
       const p = Math.min(1, elapsed / duration);
+      const currentPct = Math.floor(p * 100);
+      setPercent(currentPct);
 
+      // Cycle gears 1 through 6
       const totalGears = GEAR_RUNS.length;
       const progressInGears = p * totalGears;
       const gearIndex = Math.min(totalGears - 1, Math.floor(progressInGears));
       const profile = GEAR_RUNS[gearIndex];
       const frac = progressInGears - gearIndex;
-      setFraction(frac);
 
-      // Fast non-linear RPM climb
+      // Realistic progressive RPM curve
       const currentRpm = Math.floor(
         profile.minRpm + Math.pow(frac, 1.25) * (profile.maxRpm - profile.minRpm)
       );
       setRpm(currentRpm);
       setGear(profile.gear);
 
-      // Detect Gear Shift: punch animation & 50ms lime micro-flash
-      if (profile.gear !== prevGearRef.current) {
-        prevGearRef.current = profile.gear;
-        setPunch(true);
-        setLimeFlash(true);
-        setTimeout(() => setLimeFlash(false), 50);
-        setTimeout(() => setPunch(false), 140);
-      }
-
       if (p >= 1) {
         clearInterval(interval);
         setTimeout(() => {
           finishPreloader();
-        }, 120);
+        }, 80);
       }
     }, 20);
 
@@ -92,108 +83,113 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
 
   return (
     <aside
-      aria-label="Launch Control Preloader"
-      className={`fixed inset-0 z-[100] bg-[#06080E] flex flex-col justify-between p-6 sm:p-10 select-none overflow-hidden transition-all duration-350 ease-out ${
-        isExiting ? "opacity-0 scale-105 pointer-events-none" : "opacity-100 scale-100"
+      aria-label="Apex Cockpit Telemetry Preloader"
+      className={`fixed inset-0 z-50 bg-[#07090E] text-white flex flex-col justify-between p-6 sm:p-10 select-none overflow-hidden transition-opacity duration-300 ease-out bg-[repeating-linear-gradient(45deg,rgba(210,255,0,0.025)_0px,rgba(210,255,0,0.025)_1px,transparent_1px,transparent_14px)] ${
+        isExiting ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
     >
-      {/* 50ms Electric Lime Micro-Flash on Gear Shifts */}
-      <div
-        className={`pointer-events-none fixed inset-0 z-50 bg-[#D2FF00]/10 transition-opacity duration-75 ${
-          limeFlash ? "opacity-100" : "opacity-0"
-        }`}
-      />
-
-      {/* Subtle CAD Coordinate Grid & Radial Ambient Spotlight */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-20"
-        style={{
-          backgroundImage: `
-            linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px)
-          `,
-          backgroundSize: "40px 40px"
-        }}
-      />
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_35%,rgba(6,8,14,0.95)_100%)]" />
-
       {/* 1. TOP UTILITY HEADER */}
-      <div className="flex items-center justify-between z-10 font-mono text-xs">
-        {/* Left: Pulsing status indicator */}
-        <div className="flex items-center gap-2.5 text-slate-400">
-          <span className="w-2 h-2 rounded-full bg-[#D2FF00] shadow-[0_0_8px_#D2FF00] animate-ping" />
-          <span className="text-white font-bold tracking-wider text-[11px] uppercase">
-            MONOCOQUE ARCHIVE
+      <div className="flex items-center justify-between border-b border-white/10 pb-4 font-mono text-xs z-10 w-full">
+        {/* Left Column: Status Dot & Warming Core Message */}
+        <div className="flex items-center gap-2.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#D2FF00] shadow-[0_0_8px_#D2FF00] animate-pulse" />
+          <span className="text-white font-bold tracking-wider text-xs">
+            [ APEX COCKPIT TELEMETRY ]
           </span>
-          <span className="text-[#323E54] hidden sm:inline">{"//"}</span>
-          <span className="text-[10px] text-[#8696AE] hidden sm:inline uppercase tracking-wider">
-            CALIBRATION RUN
+          <span className="text-slate-400 font-normal tracking-wide hidden sm:inline">
+            WARMING RUNTIME CORES
           </span>
         </div>
 
-        {/* Right: Clean Bypass [ SKIP ] ⏭ Button */}
-        <button
-          onClick={finishPreloader}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#1E273A] bg-[#0A0D15] hover:border-[#D2FF00]/60 hover:text-[#D2FF00] text-slate-400 font-mono text-xs tracking-wider transition-colors cursor-pointer"
-          aria-label="Skip preloader"
-        >
-          <span>[ SKIP ]</span>
-          <FastForward className="w-3.5 h-3.5" />
-        </button>
+        {/* Right Column: Audio Live Pill & Subtle Skip Trigger */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={finishPreloader}
+            className="bg-[#D2FF00]/10 border border-[#D2FF00]/30 text-[#D2FF00] text-xs font-mono px-3 py-1 rounded-md flex items-center gap-2 hover:bg-[#D2FF00]/20 transition-colors cursor-pointer"
+            aria-label="Audio Live / Click to Skip"
+          >
+            {/* Animated Audio Equalizer Waveform Bars */}
+            <span className="flex items-end gap-0.5 h-3">
+              <span className="w-0.5 h-1.5 bg-[#D2FF00] animate-pulse" />
+              <span className="w-0.5 h-3 bg-[#D2FF00] animate-pulse delay-75" />
+              <span className="w-0.5 h-2 bg-[#D2FF00] animate-pulse delay-150" />
+            </span>
+            <span className="font-bold tracking-wider">ılı. AUDIO LIVE</span>
+            <span className="text-[10px] text-[#D2FF00]/60 hover:text-[#D2FF00] ml-1 pl-1.5 border-l border-[#D2FF00]/30 hidden sm:inline">
+              [ SKIP ]
+            </span>
+          </button>
+        </div>
       </div>
 
-      {/* 2. CENTER STAGE: DYNAMIC GEAR COUNTER & HORIZONTAL TACHOMETER */}
-      <div className="my-auto max-w-md mx-auto w-full flex flex-col items-center justify-center relative z-10 text-center">
-        {/* Dynamic Gear Counter */}
-        <div className="flex items-baseline justify-center gap-2 font-mono">
-          <span
-            className={`text-8xl sm:text-9xl font-black text-white leading-none tracking-tighter transition-transform duration-100 select-none ${
-              punch ? "scale-115 text-[#D2FF00] drop-shadow-[0_0_25px_rgba(210,255,0,0.5)]" : "scale-100"
-            }`}
-          >
+      {/* 2. CENTER LAUNCH CONTROL STAGE */}
+      <div className="my-auto max-w-2xl mx-auto w-full flex flex-col items-center justify-center relative z-10 text-center space-y-6">
+        {/* Mode Tag */}
+        <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-mono font-bold tracking-widest text-[#D2FF00] uppercase">
+          <Radio className="w-4 h-4 animate-pulse text-[#D2FF00]" />
+          <span>((•)) LAUNCH CONTROL SEQUENTIAL CALIBRATION</span>
+        </div>
+
+        {/* Gear Display */}
+        <div className="flex items-baseline justify-center">
+          <span className="text-8xl sm:text-9xl font-black text-white leading-none tracking-tighter drop-shadow-[0_0_35px_rgba(255,255,255,0.2)]">
             {gear}
           </span>
-          <span className="text-sm font-bold tracking-widest text-[#D2FF00] uppercase font-mono">
+          <span className="text-xl sm:text-2xl font-black text-[#D2FF00] ml-2 tracking-widest font-mono">
             GEAR
           </span>
         </div>
 
-        {/* Horizontal Tachometer Line */}
-        <div className="w-64 sm:w-80 h-[2px] bg-[#161F2E] rounded-full mt-4 overflow-hidden relative">
-          <div
-            className="h-full bg-gradient-to-r from-[#FF8000] via-[#D2FF00] to-[#D2FF00] transition-all duration-75"
-            style={{ width: `${Math.min(100, fraction * 100)}%` }}
-          />
+        {/* Tachometer Header & Live RPM Readout */}
+        <div className="space-y-1">
+          <div className="text-[11px] font-mono tracking-widest text-slate-400 uppercase">
+            LIVE PADDOCK TACHOMETER
+          </div>
+          <div className="flex items-baseline justify-center gap-1.5 font-mono">
+            <span className="text-5xl sm:text-6xl font-black text-[#D2FF00] tracking-tight drop-shadow-[0_0_20px_rgba(210,255,0,0.35)]">
+              {rpm.toLocaleString()}
+            </span>
+            <span className="text-lg sm:text-xl font-bold text-[#D2FF00]">
+              RPM
+            </span>
+          </div>
         </div>
 
-        {/* Micro-Labels: 1,200 IDLE (Left) and 9,000 MAX REDLINE (Right) */}
-        <div className="w-64 sm:w-80 flex items-center justify-between font-mono text-[9px] text-[#55657E] mt-1.5 px-0.5 tracking-wider">
-          <span>1,200 IDLE</span>
-          <span>9,000 MAX REDLINE</span>
-        </div>
+        {/* Tachometer Rev Progress Bar */}
+        <div className="w-full max-w-xl mx-auto space-y-2 pt-2">
+          <div className="h-2.5 w-full rounded-full bg-slate-900 border border-white/10 overflow-hidden p-[1px]">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-orange-500 via-yellow-400 to-[#10B981] transition-all duration-75"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
 
-        {/* Clean, High-Impact Monospace RPM Readout */}
-        <div className="mt-4 font-mono text-sm sm:text-base tracking-wider text-white">
-          <span className="font-black text-[#D2FF00] text-lg sm:text-xl drop-shadow-[0_0_12px_rgba(210,255,0,0.3)]">
-            {rpm.toLocaleString()}
-          </span>{" "}
-          <span className="text-slate-400 font-bold text-xs">RPM</span>
+          {/* Micro Telemetry Labels Below The Bar */}
+          <div className="flex items-center justify-between font-mono text-[10px] text-slate-400 tracking-wider px-1">
+            <span>1,200 IDLE</span>
+            <span className="text-white font-bold">{percent}% BOOT COMPLETE</span>
+            <span>9,000 MAX REDLINE</span>
+          </div>
         </div>
       </div>
 
-      {/* 3. BOTTOM STATUS RIBBON */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 items-center border-t border-[#131B2A] pt-4 font-mono text-[10px] text-slate-500 z-10 gap-2">
+      {/* 3. BOTTOM TELEMETRY FOOTER */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 items-center border-t border-white/10 pt-4 font-mono text-[11px] text-slate-500 z-10 w-full gap-2">
         {/* Left */}
-        <div className="tracking-wider uppercase text-slate-400 text-left">
-          SEQUENTIAL DOG-RING TRANSMISSION
+        <div className="text-left uppercase tracking-wider text-slate-400">
+          MOTORSPORT CAD ENGINE V4.4
         </div>
+
         {/* Center */}
-        <div className="tracking-wider uppercase text-slate-500 text-center hidden sm:block">
-          INITIALIZING FACTORY BLUEPRINT ARCHIVE
+        <div className="text-center">
+          <span className="text-white font-bold tracking-widest uppercase">
+            INITIALIZING FACTORY BLUEPRINT ARCHIVE
+          </span>
         </div>
+
         {/* Right */}
-        <div className="text-right text-[#D2FF00] font-bold tracking-wider">
-          GEAR {gear}/4 • ENGAGED
+        <div className="text-right uppercase tracking-wider text-slate-400">
+          SYSTEM RUNTIME: <span className="text-[#10B981] font-bold">OPTIMAL</span>
         </div>
       </div>
     </aside>
