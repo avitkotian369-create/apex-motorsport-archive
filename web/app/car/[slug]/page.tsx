@@ -37,7 +37,7 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     redline: "9,000 RPM",
     dryWeight: "1,450 kg (DIN)",
     aeroBalance: "860 kg @ 285 km/h",
-    defaultCutaway: "/assets/monocoque-exploded-v2.jpg",
+    defaultCutaway: "/assets/porsche-gt3rs-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,457 mm",
       trackFront: "1,630 mm",
@@ -71,7 +71,7 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     redline: "7,500 RPM",
     dryWeight: "1,138 kg (Dry)",
     aeroBalance: "Active Pop-Up Brake Foil",
-    defaultCutaway: "/assets/mclaren-f1-monocoque-exploded-v2.jpg",
+    defaultCutaway: "/assets/mclaren-f1-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,718 mm",
       trackFront: "1,568 mm",
@@ -88,7 +88,7 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     redline: "6,800 RPM",
     dryWeight: "1,551 kg (DIN)",
     aeroBalance: "High-Speed Aero Foil",
-    defaultCutaway: "/assets/vw-golfr-cutaway.jpg",
+    defaultCutaway: "/assets/vw-golfr-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,628 mm",
       trackFront: "1,539 mm",
@@ -105,7 +105,7 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     redline: "7,750 RPM",
     dryWeight: "1,100 kg (Dry)",
     aeroBalance: "Fixed Composite Gurney Wing",
-    defaultCutaway: "/assets/ferrari-f40-cutaway.jpg",
+    defaultCutaway: "/assets/ferrari-f40-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,450 mm",
       trackFront: "1,594 mm",
@@ -122,7 +122,7 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     redline: "8,000 RPM",
     dryWeight: "1,560 kg (DIN)",
     aeroBalance: "Carbon Ground Effect Diffuser",
-    defaultCutaway: "/assets/skyline-r34-cutaway.jpg",
+    defaultCutaway: "/assets/skyline-r34-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,665 mm",
       trackFront: "1,480 mm",

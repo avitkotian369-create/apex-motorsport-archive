@@ -26,7 +26,7 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [showVectorMode, setShowVectorMode] = useState(false);
+  const [showVectorMode, setShowVectorMode] = useState(true);
   const [imageFailed, setImageFailed] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -145,18 +145,18 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
             <span>ORTHOGRAPHIC 4-VIEW SPEC</span>
           </Link>
 
-          {/* Bottom Vector Toggle Button */}
+          {/* Bottom Knolling View Mode Toggle Button */}
           <button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               setShowVectorMode((v) => !v);
             }}
-            className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-[#1E2536] hover:border-[#D2FF00] text-[9px] font-mono text-[#A6B2C4] hover:text-white flex items-center gap-1 z-20 cursor-pointer transition-colors"
-            title="Toggle between studio photography and vector CAD schematic"
+            className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-[#1E2536] hover:border-[#D2FF00] text-[9px] font-mono text-[#A6B2C4] hover:text-white flex items-center gap-1.5 z-20 cursor-pointer transition-colors shadow-lg"
+            title="Toggle between studio knolling photography and interactive PartSouq CAD schematic"
           >
             <Layers className="w-3 h-3 text-[#D2FF00]" />
-            <span>{showVectorMode ? "PHOTO VIEW" : "VECTOR SCHEMATIC"}</span>
+            <span>{showVectorMode ? "STUDIO KNOLLING PHOTO" : "PARTSOUQ CAD SCHEMATIC"}</span>
           </button>
 
           {/* Bottom Left Corner Datum Watermark */}
