@@ -11,13 +11,14 @@ import {
   Award,
   Sliders,
   CheckCircle2,
-  Volume2,
-  VolumeX,
-  Radio,
   Compass
 } from "lucide-react";
 import { VEHICLE_ROSTER } from "@/data/vehicle-roster";
 import { CadTerminalCard } from "@/components/blueprint/cad-terminal-card";
+import { RevPreloader } from "@/components/preloader/rev-preloader";
+import { WindTunnelStream } from "@/components/hero/wind-tunnel-stream";
+
+export type MechanicalCategory = "all" | "na-9000" | "twin-turbo" | "v12";
 
 interface EditorialArticle {
   id: string;
@@ -101,19 +102,16 @@ const EDITORIAL_FEED: EditorialArticle[] = [
 
 
 export default function MotorsportHomePage() {
-  // 1. Full-Bleed Cockpit Bootup Preloader State
+  // 1. Motec Race Dash Preloader State
   const [loading, setLoading] = useState(true);
-  const [loadPercent, setLoadPercent] = useState(0);
-  const [currentGear, setCurrentGear] = useState(1);
-  const [revCounter, setRevCounter] = useState(1200);
-  const [soundActive, setSoundActive] = useState(true);
 
   // 2. Interactive Cursor Radial Spotlight State
   const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: -1000, y: -1000 });
 
-  // Search & filter state
+  // Search & filter state (Mechanical DNA + Marque Brand)
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<MechanicalCategory>("all");
 
   // Expanded article cards state
   const [expandedArticleId, setExpandedArticleId] = useState<string | null>(null);
@@ -121,30 +119,6 @@ export default function MotorsportHomePage() {
   // Scroll transition detection state
   const [scrollProgress, setScrollProgress] = useState(0);
   const deckRef = useRef<HTMLDivElement>(null);
-
-  // Full-bleed cockpit preloader bootup sequence (1.25s)
-  useEffect(() => {
-    const startTime = Date.now();
-    const duration = 1250;
-
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(1, elapsed / duration);
-
-      setLoadPercent(Math.floor(progress * 100));
-      setRevCounter(Math.floor(1200 + progress * 7800)); // 1,200 to 9,000 RPM
-      setCurrentGear(Math.min(6, Math.floor(1 + progress * 5.5)));
-
-      if (progress >= 1) {
-        clearInterval(interval);
-        setTimeout(() => {
-          setLoading(false);
-        }, 180);
-      }
-    }, 25);
-
-    return () => clearInterval(interval);
-  }, []);
 
   // Global mousemove listener for smooth radial cursor spotlight
   useEffect(() => {
@@ -171,6 +145,34 @@ export default function MotorsportHomePage() {
 
   const filteredVehicles = useMemo(() => {
     return VEHICLE_ROSTER.filter((v) => {
+      // 1. Mechanical DNA category filter
+      if (selectedCategory === "na-9000") {
+        const isHighRevNA =
+          v.powertrain.toLowerCase().includes("naturally aspirated") ||
+          v.slug === "porsche-911-gt3-rs" ||
+          v.slug === "mclaren-f1-xp5";
+        if (!isHighRevNA) return false;
+      } else if (selectedCategory === "twin-turbo") {
+        const isTwinTurbo =
+          v.powertrain.toLowerCase().includes("twin-turbo") ||
+          v.engineBlockCode.toLowerCase().includes("tt") ||
+          v.slug === "bmw-m4-csl" ||
+          v.slug === "ferrari-f40" ||
+          v.slug === "nissan-skyline-gtr-r34";
+        if (!isTwinTurbo) return false;
+      } else if (selectedCategory === "v12") {
+        const isV12 =
+          v.powertrain.toLowerCase().includes("v12") ||
+          v.engineBlockCode.toLowerCase().includes("v12") ||
+          v.slug === "mclaren-f1-xp5";
+        if (!isV12) return false;
+      }
+
+      // 2. Brand filter
+      const matchesBrand =
+        !selectedBrand || v.brand.toLowerCase() === selectedBrand.toLowerCase();
+
+      // 3. Search query
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !q ||
@@ -180,12 +182,9 @@ export default function MotorsportHomePage() {
         v.engineBlockCode.toLowerCase().includes(q) ||
         v.powertrain.toLowerCase().includes(q);
 
-      const matchesBrand =
-        !selectedBrand || v.brand.toLowerCase() === selectedBrand.toLowerCase();
-
-      return matchesSearch && matchesBrand;
+      return matchesBrand && matchesSearch;
     });
-  }, [searchQuery, selectedBrand]);
+  }, [searchQuery, selectedBrand, selectedCategory]);
 
   const scrollToVehicles = () => {
     if (deckRef.current) {
@@ -221,93 +220,8 @@ export default function MotorsportHomePage() {
         <div className="absolute top-3/4 left-[30%] w-2 h-2 rounded-full bg-white/20 animate-particle-3" />
       </div>
 
-      {/* 3. FULL-BLEED COCKPIT BOOTUP PRELOADER (Lando Norris / McLaren F1 HUD) */}
-      {loading && (
-        <div className="fixed inset-0 z-[100] bg-[#060709] bg-speed-lines flex flex-col justify-between p-6 sm:p-12 transition-opacity duration-300">
-          {/* Top HUD Telemetry Bar */}
-          <div className="flex items-center justify-between border-b border-[#1E2536] pb-4 font-mono text-xs">
-            <div className="flex items-center gap-3">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#D2FF00] animate-ping" />
-              <span className="text-white font-bold tracking-widest">[ APEX COCKPIT TELEMETRY ]</span>
-              <span className="text-[#8A95A8] hidden sm:inline">WARMING RUNTIME CORES</span>
-            </div>
-
-            {/* Sound Toggle Icon & Wave Animation */}
-            <button
-              onClick={() => setSoundActive(!soundActive)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#222A3B] bg-[#0E131E] text-white hover:border-[#D2FF00] transition-colors cursor-pointer"
-            >
-              {soundActive ? (
-                <>
-                  <div className="flex items-end gap-0.5 h-4">
-                    <span className="w-1 bg-[#D2FF00] rounded animate-audio-1" />
-                    <span className="w-1 bg-[#D2FF00] rounded animate-audio-2" />
-                    <span className="w-1 bg-[#D2FF00] rounded animate-audio-3" />
-                    <span className="w-1 bg-[#D2FF00] rounded animate-audio-4" />
-                  </div>
-                  <Volume2 className="w-4 h-4 text-[#D2FF00]" />
-                  <span className="text-[10px] text-[#D2FF00] font-bold">AUDIO LIVE</span>
-                </>
-              ) : (
-                <>
-                  <VolumeX className="w-4 h-4 text-[#606D82]" />
-                  <span className="text-[10px] text-[#606D82]">MUTED</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Center Full-Bleed Cockpit HUD */}
-          <div className="max-w-4xl mx-auto w-full text-center space-y-8 my-auto relative">
-            <div className="text-[11px] font-mono tracking-widest text-[#D2FF00] uppercase flex items-center justify-center gap-2">
-              <Radio className="w-3.5 h-3.5 animate-pulse" />
-              <span>LAUNCH CONTROL SEQUENTIAL CALIBRATION</span>
-            </div>
-
-            {/* Massive Gear Counter & Rev Gauge */}
-            <div className="relative inline-block">
-              <div className="text-8xl sm:text-9xl font-black text-white font-mono tracking-tighter flex items-center justify-center">
-                <span>{currentGear}</span>
-                <span className="text-lg sm:text-2xl text-[#D2FF00] ml-3 font-sans font-bold uppercase tracking-wider">
-                  GEAR
-                </span>
-              </div>
-            </div>
-
-            {/* Electric Lime Rev Counter readout */}
-            <div className="font-mono">
-              <div className="text-xs uppercase tracking-widest text-[#717A8C]">LIVE PADDOCK TACHOMETER</div>
-              <div className="text-4xl sm:text-6xl font-bold text-[#D2FF00] tracking-tight mt-1">
-                {revCounter.toLocaleString()} <span className="text-lg text-white/50 font-normal">RPM</span>
-              </div>
-            </div>
-
-            {/* High-Voltage Sweeping Rev Arc / Bar */}
-            <div className="max-w-xl mx-auto space-y-2">
-              <div className="w-full h-3.5 bg-[#121622] rounded-full overflow-hidden border border-[#222A3B] p-0.5 shadow-[0_0_20px_rgba(210,255,0,0.15)]">
-                <div
-                  className="h-full bg-gradient-to-r from-[#FF8000] via-[#D2FF00] to-emerald-400 rounded-full transition-all duration-75"
-                  style={{ width: `${loadPercent}%` }}
-                />
-              </div>
-              <div className="flex justify-between items-center text-xs font-mono text-[#8C98AC]">
-                <span>1,200 IDLE</span>
-                <span className="text-white font-bold text-[#D2FF00]">{loadPercent}% BOOT COMPLETE</span>
-                <span>9,000 MAX REDLINE</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Cockpit Status Footer */}
-          <div className="flex flex-col sm:flex-row items-center justify-between border-t border-[#1E2536] pt-4 font-mono text-[11px] text-[#637085] gap-2">
-            <span>MOTORSPORT CAD ENGINE V4.5</span>
-            <span className="text-white font-bold uppercase tracking-widest">
-              INITIALIZING FACTORY BLUEPRINT ARCHIVE
-            </span>
-            <span>SYSTEM RUNTIME: OPTIMAL</span>
-          </div>
-        </div>
-      )}
+      {/* 3. MOTEC RACE DASH INITIALIZATION PRELOADER */}
+      {loading && <RevPreloader onComplete={() => setLoading(false)} />}
 
       {/* TOP EDITORIAL BRANDING BAR (McLaren & Lando Minimalist Style) */}
       <header className="sticky top-0 z-40 bg-[#08090C]/90 backdrop-blur-md border-b border-[#1A1E29]">
@@ -342,6 +256,9 @@ export default function MotorsportHomePage() {
 
       {/* 4. HERO SECTION OVERHAUL WITH GHOSTED WATERMARKS & TECHNICAL ELEVATION LINES */}
       <section className="relative pt-20 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden bg-speed-lines">
+        {/* Aerodynamic Wind Tunnel Particle Stream Canvas */}
+        <WindTunnelStream />
+
         {/* Kinetic Radial Ambient Glow in McLaren Papaya & High-Voltage Lime */}
         <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[800px] h-[450px] bg-gradient-to-r from-[#FF8000]/15 to-[#D2FF00]/10 rounded-full blur-[160px] pointer-events-none animate-pulse-glow" />
 
@@ -435,6 +352,68 @@ export default function MotorsportHomePage() {
           </div>
         </div>
       </section>
+
+      {/* 5. NÜRBURGRING BENCHMARK LAP TIMES KINETIC MARQUEE */}
+      <div className="w-full bg-[#07090E] border-y border-[#1A2234] text-white py-3 overflow-hidden font-mono text-xs sm:text-sm font-bold tracking-widest uppercase select-none shadow-xl relative z-20">
+        <div className="flex items-center animate-marquee-infinite whitespace-nowrap">
+          <span className="inline-flex items-center gap-2 mx-6 text-[#D2FF00]">
+            <span className="w-2 h-2 rounded-full bg-[#D2FF00] animate-ping" />
+            NÜRBURGRING BENCHMARK LAP TIMES:
+          </span>
+          <span className="mx-4 text-white">
+            <span className="text-[#FF8000] font-black">PORSCHE 911 GT3 RS:</span> 6:49.328
+          </span>
+          <span className="text-[#4E5B73]">•</span>
+          <span className="mx-4 text-white">
+            <span className="text-red-400 font-black">BMW M4 CSL:</span> 7:15.677
+          </span>
+          <span className="text-[#4E5B73]">•</span>
+          <span className="mx-4 text-white">
+            <span className="text-[#D2FF00] font-black">MCLAREN F1:</span> 391 KM/H TOP SPEED
+          </span>
+          <span className="text-[#4E5B73]">•</span>
+          <span className="mx-4 text-white">
+            <span className="text-cyan-400 font-black">VW GOLF R:</span> 7:47.310
+          </span>
+          <span className="text-[#4E5B73]">•</span>
+          <span className="mx-4 text-white">
+            <span className="text-red-400 font-black">FERRARI F40:</span> 324 KM/H BENCHMARK
+          </span>
+          <span className="text-[#4E5B73]">•</span>
+          <span className="mx-4 text-white">
+            <span className="text-blue-400 font-black">SKYLINE GT-R R34:</span> 7:52.000
+          </span>
+          <span className="text-[#4E5B73]">•</span>
+          {/* Duplicate loop for infinite marquee */}
+          <span className="inline-flex items-center gap-2 mx-6 text-[#D2FF00]">
+            <span className="w-2 h-2 rounded-full bg-[#D2FF00] animate-ping" />
+            NÜRBURGRING BENCHMARK LAP TIMES:
+          </span>
+          <span className="mx-4 text-white">
+            <span className="text-[#FF8000] font-black">PORSCHE 911 GT3 RS:</span> 6:49.328
+          </span>
+          <span className="text-[#4E5B73]">•</span>
+          <span className="mx-4 text-white">
+            <span className="text-red-400 font-black">BMW M4 CSL:</span> 7:15.677
+          </span>
+          <span className="text-[#4E5B73]">•</span>
+          <span className="mx-4 text-white">
+            <span className="text-[#D2FF00] font-black">MCLAREN F1:</span> 391 KM/H TOP SPEED
+          </span>
+          <span className="text-[#4E5B73]">•</span>
+          <span className="mx-4 text-white">
+            <span className="text-cyan-400 font-black">VW GOLF R:</span> 7:47.310
+          </span>
+          <span className="text-[#4E5B73]">•</span>
+          <span className="mx-4 text-white">
+            <span className="text-red-400 font-black">FERRARI F40:</span> 324 KM/H BENCHMARK
+          </span>
+          <span className="text-[#4E5B73]">•</span>
+          <span className="mx-4 text-white">
+            <span className="text-blue-400 font-black">SKYLINE GT-R R34:</span> 7:52.000
+          </span>
+        </div>
+      </div>
 
       {/* 5. DAILY ENGINEERING, SAFETY & MODIFICATION FEED (Faint Racing Apex Kerb Stripes & Fade Masks) */}
       <section id="daily-editorial" className="py-20 bg-[#06070A] bg-kerb-stripes border-y border-[#161B26] relative">
@@ -586,9 +565,9 @@ export default function MotorsportHomePage() {
           <div>SURFACE TOLERANCE: ±0.05 MM</div>
         </div>
 
-        {/* Sticky-ready prominent Search & Brand Filter Bar */}
-        <div className="sticky top-16 z-30 bg-[#08090C]/95 backdrop-blur-xl border border-[#1F273A] p-6 rounded-2xl shadow-2xl mb-12">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        {/* Sticky-ready prominent Search & Mechanical DNA Filter Bar */}
+        <div className="sticky top-16 z-30 bg-[#08090C]/95 backdrop-blur-xl border border-[#1F273A] p-6 rounded-2xl shadow-2xl mb-12 space-y-5">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
               <div className="text-xs font-mono text-[#D2FF00] font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">
                 <Sliders className="w-3.5 h-3.5" />
@@ -599,37 +578,65 @@ export default function MotorsportHomePage() {
               </h2>
             </div>
 
-            {/* Quick-select Brand Pills */}
+            {/* MECHANICAL DNA CATEGORY FILTER PILLS */}
             <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
               {[
-                { label: "ALL SCHEMATICS", value: null },
-                { label: "PORSCHE", value: "Porsche" },
-                { label: "BMW", value: "BMW" },
-                { label: "MCLAREN", value: "McLaren" },
-                { label: "FERRARI", value: "Ferrari" },
-                { label: "NISSAN", value: "Nissan" },
-                { label: "VOLKSWAGEN", value: "Volkswagen" }
-              ].map((pill) => {
-                const isActive = selectedBrand === pill.value;
+                { label: "ALL MACHINES", value: "all" as MechanicalCategory },
+                { label: "9,000 RPM NATURALLY ASPIRATED", value: "na-9000" as MechanicalCategory },
+                { label: "BI-TURBOCHARGED", value: "twin-turbo" as MechanicalCategory },
+                { label: "V12 HOMOLOGATION", value: "v12" as MechanicalCategory }
+              ].map((category) => {
+                const isActive = selectedCategory === category.value;
                 return (
                   <button
-                    key={pill.label}
-                    onClick={() => setSelectedBrand(pill.value)}
+                    key={category.value}
+                    onClick={() => setSelectedCategory(category.value)}
                     className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
                       isActive
                         ? "bg-[#D2FF00] text-black shadow-[0_0_15px_rgba(210,255,0,0.45)] scale-105"
                         : "bg-[#10141F] border border-[#222A3B] text-[#8C98AC] hover:border-[#D2FF00]/40 hover:text-white"
                     }`}
                   >
-                    {pill.label}
+                    {category.label}
                   </button>
                 );
               })}
             </div>
           </div>
 
+          {/* Quick-select Brand Pills */}
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#182030] font-mono text-xs">
+            <span className="text-[10px] uppercase font-bold text-[#64748B] mr-1 hidden sm:inline">
+              CHASSIS MARQUE:
+            </span>
+            {[
+              { label: "ALL BRANDS", value: null },
+              { label: "PORSCHE", value: "Porsche" },
+              { label: "BMW", value: "BMW" },
+              { label: "MCLAREN", value: "McLaren" },
+              { label: "FERRARI", value: "Ferrari" },
+              { label: "NISSAN", value: "Nissan" },
+              { label: "VOLKSWAGEN", value: "Volkswagen" }
+            ].map((pill) => {
+              const isActive = selectedBrand === pill.value;
+              return (
+                <button
+                  key={pill.label}
+                  onClick={() => setSelectedBrand(pill.value)}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-white text-black shadow-md scale-105"
+                      : "bg-[#0E131E] border border-[#1C2536] text-[#8C98AC] hover:text-white hover:border-[#D2FF00]/40"
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Instant Fuzzy Search Bar */}
-          <div className="mt-5 relative">
+          <div className="relative">
             <Search className="w-4 h-4 text-[#717A8C] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"

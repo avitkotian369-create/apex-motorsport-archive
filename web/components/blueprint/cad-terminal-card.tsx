@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -10,8 +10,9 @@ import {
   Flame,
   Maximize2,
   Crosshair,
-  Layers,
-  Car
+  SlidersHorizontal,
+  Car,
+  Layers
 } from "lucide-react";
 import { VehicleRosterItem } from "@/data/vehicle-roster";
 import { CadExplodedSchematic } from "./cad-exploded-schematic";
@@ -23,18 +24,35 @@ interface CadTerminalCardProps {
 
 export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [showTeardownPreview, setShowTeardownPreview] = useState(false);
-  const [showVectorMode] = useState(false);
+
+  // Interactive X-Ray Teardown Slider State (0 = Full Knolling, 100 = Full Car)
+  const [sliderPosition, setSliderPosition] = useState(100);
+  const [isDraggingSlider, setIsDraggingSlider] = useState(false);
   const [heroImageFailed, setHeroImageFailed] = useState(false);
   const [knollingImageFailed, setKnollingImageFailed] = useState(false);
+  const [showVectorMode] = useState(false);
 
   const heroImage = car.cinematicHeroImageUrl || car.image;
   const teardownImage = car.knollingTeardownImageUrl || car.knollingImageUrl;
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const updateSliderPos = useCallback((clientX: number) => {
+    if (!viewportRef.current) return;
+    const rect = viewportRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setSliderPosition(pct);
+  }, []);
+
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isDraggingSlider) {
+      updateSliderPos(e.clientX);
+      return;
+    }
+
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -42,32 +60,63 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const rotX = ((y - centerY) / centerY) * -6;
-    const rotY = ((x - centerX) / centerX) * 6;
+    const rotX = ((y - centerY) / centerY) * -5;
+    const rotY = ((x - centerX) / centerX) * 5;
 
     setRotateX(rotX);
     setRotateY(rotY);
   };
 
-  const handleMouseLeave = () => {
-    setRotateX(0);
-    setRotateY(0);
-    setIsHovered(false);
+  const handleCardMouseLeave = () => {
+    if (!isDraggingSlider) {
+      setRotateX(0);
+      setRotateY(0);
+      setIsHovered(false);
+    }
+  };
+
+  // Global mouseup and mousemove for smooth drag
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (isDraggingSlider) {
+        updateSliderPos(e.clientX);
+      }
+    };
+    const handleGlobalMouseUp = () => {
+      if (isDraggingSlider) {
+        setIsDraggingSlider(false);
+      }
+    };
+
+    window.addEventListener("mousemove", handleGlobalMouseMove);
+    window.addEventListener("mouseup", handleGlobalMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleGlobalMouseMove);
+      window.removeEventListener("mouseup", handleGlobalMouseUp);
+    };
+  }, [isDraggingSlider, updateSliderPos]);
+
+  // Dynamic status text based on slider position
+  const getStatusText = () => {
+    if (sliderPosition >= 96) return "SHOWROOM SPEC // ASSEMBLED CHASSIS";
+    if (sliderPosition <= 4) return "KNOLLING CAD // FULL MECHANICAL TEARDOWN";
+    return `INTERACTIVE X-RAY TEARDOWN (${Math.round(100 - sliderPosition)}% DECONSTRUCTED)`;
   };
 
   return (
     <div
       ref={cardRef}
-      onMouseMove={handleMouseMove}
+      onMouseMove={handleCardMouseMove}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
+      onMouseLeave={handleCardMouseLeave}
       style={{
         transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${
           isHovered ? 1.015 : 1
         }, ${isHovered ? 1.015 : 1}, 1)`,
-        transition: isHovered ? "transform 0.1s ease-out" : "transform 0.4s ease-out"
+        transition: isHovered && !isDraggingSlider ? "transform 0.1s ease-out" : "transform 0.4s ease-out"
       }}
-      className="bg-[#0C0E14] border border-[#1E2536] hover:border-[#D2FF00] rounded-2xl overflow-hidden group flex flex-col justify-between shadow-2xl hover:shadow-[0_0_40px_rgba(210,255,0,0.18)] relative transition-colors duration-300"
+      className="bg-[#0C0E14] border border-[#1E2536] hover:border-[#D2FF00] rounded-2xl overflow-hidden group flex flex-col justify-between shadow-2xl hover:shadow-[0_0_40px_rgba(210,255,0,0.18)] relative transition-colors duration-300 select-none"
     >
       {/* High-Voltage Top-Right Corner Ambient Glow */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#D2FF00]/15 via-transparent to-transparent pointer-events-none rounded-tr-2xl" />
@@ -98,8 +147,16 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
           </div>
         </div>
 
-        {/* 2. STANDARDIZED 16:10 / 16:9 CAD DARK-ROOM SHOWROOM VIEWPORT */}
-        <div className="relative w-full aspect-[16/10] mt-4 rounded-xl bg-gradient-to-t from-[#06080E] via-[#090D16] to-[#040608] border border-[#182030] overflow-hidden flex items-center justify-center group-hover:border-[#D2FF00]/50 transition-colors shadow-inner">
+        {/* 2. STANDARDIZED 16:10 / 16:9 CAD DARK-ROOM SHOWROOM VIEWPORT WITH X-RAY SLIDER */}
+        <div
+          ref={viewportRef}
+          onMouseDown={(e) => {
+            // Start dragging slider on click inside viewport
+            setIsDraggingSlider(true);
+            updateSliderPos(e.clientX);
+          }}
+          className="relative w-full aspect-[16/10] mt-4 rounded-xl bg-gradient-to-t from-[#06080E] via-[#090D16] to-[#040608] border border-[#182030] overflow-hidden flex items-center justify-center group-hover:border-[#D2FF00]/50 transition-colors shadow-inner cursor-ew-resize"
+        >
           {/* Subtle CAD Background Measurement Grid Lines (opacity-15) */}
           <div
             className="absolute inset-0 pointer-events-none opacity-15"
@@ -120,22 +177,33 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
             className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4/5 h-16 rounded-full blur-2xl pointer-events-none transition-all duration-500 z-5"
             style={{
               background: car.accentColor || "rgba(210, 255, 0, 0.15)",
-              opacity: isHovered || showTeardownPreview ? 0.75 : 0.4
+              opacity: isHovered || sliderPosition < 95 ? 0.75 : 0.4
             }}
           />
 
-          {/* Main Viewport Content: Seamless Cross-Fade Between Assembled Hero and Knolling Teardown */}
+          {/* Main Viewport Content: Interactive Before/After Comparison Layers */}
           {showVectorMode ? (
             <CadExplodedSchematic slug={car.slug} className="p-2 z-10" />
           ) : (
-            <div className="relative w-full h-full flex items-center justify-center z-10">
-              {/* Assembled Cinematic Hero Photo (Default) */}
+            <div className="relative w-full h-full flex items-center justify-center z-10 pointer-events-none">
+              {/* Base Layer: Deconstructed Knolling Teardown Photograph (Right / Underneath) */}
+              <div className="absolute inset-0">
+                <Image
+                  src={knollingImageFailed ? heroImage : teardownImage}
+                  alt={`${car.brand} ${car.model} Exploded Knolling Mechanical Teardown`}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-contain p-2 filter brightness-100 contrast-105 group-hover:scale-[1.02] transition-transform duration-500"
+                  onError={() => setKnollingImageFailed(true)}
+                />
+              </div>
+
+              {/* Overlaid Clipped Layer: Assembled Cinematic Hero Car (Left / Top) */}
               <div
-                className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                  !showTeardownPreview
-                    ? "opacity-100 scale-100"
-                    : "opacity-0 scale-95 pointer-events-none"
-                }`}
+                className="absolute inset-0 overflow-hidden transition-[clip-path] duration-75"
+                style={{
+                  clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`
+                }}
               >
                 <Image
                   src={heroImageFailed ? teardownImage : heroImage}
@@ -148,38 +216,32 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
                 />
               </div>
 
-              {/* Exploded Knolling Mechanical Teardown Photo (Interactive Preview) */}
-              <div
-                className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                  showTeardownPreview
-                    ? "opacity-100 scale-100"
-                    : "opacity-0 scale-95 pointer-events-none"
-                }`}
-              >
-                <Image
-                  src={knollingImageFailed ? heroImage : teardownImage}
-                  alt={`${car.brand} ${car.model} Exploded Knolling Mechanical Teardown`}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-contain p-2 filter brightness-100 contrast-105 group-hover:scale-[1.02] transition-transform duration-500"
-                  onError={() => setKnollingImageFailed(true)}
-                />
-              </div>
+              {/* Vertical Laser Beam Divider & Electric Lime Handle */}
+              {sliderPosition > 0 && sliderPosition < 100 && (
+                <div
+                  className="absolute top-0 bottom-0 z-20 pointer-events-none flex items-center justify-center -translate-x-1/2"
+                  style={{ left: `${sliderPosition}%` }}
+                >
+                  {/* Glowing Laser Vertical Line */}
+                  <div className="w-[2px] h-full bg-[#D2FF00] shadow-[0_0_12px_#D2FF00,0_0_24px_rgba(210,255,0,0.6)]" />
+
+                  {/* Circular High-Tech Handle */}
+                  <div className="absolute w-8 h-8 rounded-full bg-[#080B11] border-2 border-[#D2FF00] text-[#D2FF00] flex items-center justify-center shadow-[0_0_18px_rgba(210,255,0,0.7)] text-[9px] font-mono font-black pointer-events-auto cursor-ew-resize">
+                    <span>◄►</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Top-Left: Active Mode Indicator */}
+          {/* Top-Left: Active Mode Dynamic Indicator */}
           <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/85 backdrop-blur-md border border-[#D2FF00]/50 text-[10px] font-mono font-bold text-[#D2FF00] flex items-center gap-2 shadow-[0_0_15px_rgba(210,255,0,0.3)] z-20">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D2FF00] opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D2FF00]" />
             </span>
             <Crosshair className="w-3 h-3 text-[#D2FF00]" />
-            <span>
-              {showTeardownPreview
-                ? "● KNOLLING TEARDOWN PREVIEW"
-                : "● ASSEMBLED CHASSIS // SHOWROOM"}
-            </span>
+            <span>● {getStatusText()}</span>
           </div>
 
           {/* Top-Right: "↗ ORTHOGRAPHIC 4-VIEW SPEC" button */}
@@ -192,40 +254,56 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
             <span>ORTHOGRAPHIC 4-VIEW SPEC</span>
           </Link>
 
-          {/* Bottom Right: Interactive Teaser / Flip Button */}
-          <div className="absolute bottom-3 right-3 flex items-center gap-2 z-20">
+          {/* Bottom Right: Quick Toggle Pill Group: [ FULL CAR ] | [ X-RAY SLIDER ] | [ FULL KNOLLING ] */}
+          <div
+            className="absolute bottom-3 right-3 flex items-center gap-1 bg-black/90 backdrop-blur-md p-1 rounded-xl border border-[#1E2536] z-20 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setShowTeardownPreview((v) => !v);
-              }}
-              className={`px-3 py-1.5 rounded-lg backdrop-blur-md border text-[9px] font-mono font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-xl ${
-                showTeardownPreview
-                  ? "bg-[#D2FF00] text-black border-[#D2FF00] shadow-[0_0_15px_rgba(210,255,0,0.4)]"
-                  : "bg-black/85 text-[#A6B2C4] hover:text-white border-[#1E2536] hover:border-[#D2FF00]"
+              onClick={() => setSliderPosition(100)}
+              className={`px-2.5 py-1 rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                sliderPosition >= 96
+                  ? "bg-[#D2FF00] text-black shadow-[0_0_12px_rgba(210,255,0,0.5)]"
+                  : "text-[#8C98AC] hover:text-white"
               }`}
-              title="Toggle preview between assembled chassis and knolling teardown"
+              title="Show fully assembled car"
             >
-              {showTeardownPreview ? (
-                <>
-                  <Car className="w-3 h-3 text-current" />
-                  <span>VIEW ASSEMBLED CHASSIS</span>
-                </>
-              ) : (
-                <>
-                  <Layers className="w-3 h-3 text-[#D2FF00]" />
-                  <span>PREVIEW TEARDOWN</span>
-                </>
-              )}
+              <Car className="w-3 h-3" />
+              <span>FULL CAR</span>
+            </button>
+            <button
+              onClick={() => setSliderPosition(50)}
+              className={`px-2.5 py-1 rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                sliderPosition > 4 && sliderPosition < 96
+                  ? "bg-[#D2FF00] text-black shadow-[0_0_12px_rgba(210,255,0,0.5)]"
+                  : "text-[#8C98AC] hover:text-white"
+              }`}
+              title="Interactive X-Ray comparison slider"
+            >
+              <SlidersHorizontal className="w-3 h-3" />
+              <span>X-RAY SLIDER</span>
+            </button>
+            <button
+              onClick={() => setSliderPosition(0)}
+              className={`px-2.5 py-1 rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                sliderPosition <= 4
+                  ? "bg-[#D2FF00] text-black shadow-[0_0_12px_rgba(210,255,0,0.5)]"
+                  : "text-[#8C98AC] hover:text-white"
+              }`}
+              title="Show exploded mechanical knolling teardown"
+            >
+              <Layers className="w-3 h-3" />
+              <span>FULL KNOLLING</span>
             </button>
           </div>
 
           {/* Bottom Left Corner Datum Watermark */}
           <div className="absolute bottom-3 left-3 text-[9px] font-mono text-[#55647A] z-20 hidden sm:block">
-            {showTeardownPreview
+            {sliderPosition <= 4
               ? "ISO 7200 KNOLLING CAD // ±0.05 MM"
-              : "MONOCOQUE SHOWROOM SPEC // ASSEMBLED"}
+              : sliderPosition >= 96
+              ? "MONOCOQUE SHOWROOM SPEC // ASSEMBLED"
+              : "MONOCOQUE DUAL-STAGE X-RAY COMPARISON"}
           </div>
         </div>
       </div>
@@ -295,4 +373,3 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
 }
 
 export default CadTerminalCard;
-
