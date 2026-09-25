@@ -10,24 +10,24 @@ interface NavbarProps {
 
 export function Navbar({ currentCarSlug }: NavbarProps) {
   return (
-    <header className="sticky top-0 z-50 bg-[#08090C]/95 backdrop-blur-xl border-b border-[#1A1E29] transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 bg-[#08090C]/95 backdrop-blur-xl border-b border-[#1A1E29] transition-all overflow-hidden no-scrollbar">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4 overflow-visible">
         {/* Brand identity: MONOCOQUE // Automotive Anatomy Archive */}
-        <Link href="/" className="flex items-center gap-3 group cursor-pointer">
-          <div className="w-9 h-9 rounded-lg bg-[#D2FF00] flex items-center justify-center text-black font-mono font-black text-sm tracking-tighter shadow-[0_0_15px_rgba(210,255,0,0.4)] group-hover:scale-105 transition-transform">
+        <Link href="/" className="flex items-center gap-3 group cursor-pointer shrink-0 overflow-visible select-none">
+          <div className="w-9 h-9 shrink-0 rounded-lg bg-[#D2FF00] flex items-center justify-center text-black font-mono font-black text-sm tracking-tighter shadow-[0_0_15px_rgba(210,255,0,0.4)] group-hover:scale-105 transition-transform overflow-hidden">
             MQ
           </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="font-mono font-black tracking-wider text-sm sm:text-base text-white group-hover:text-[#D2FF00] transition-colors">
+          <div className="flex flex-col justify-center overflow-visible">
+            <div className="flex items-center gap-2 overflow-visible">
+              <span className="font-mono font-black tracking-wider text-sm sm:text-base text-white group-hover:text-[#D2FF00] transition-colors leading-none">
                 MONOCOQUE
               </span>
-              <span className="text-[#3A475C] font-mono text-xs hidden sm:inline">{"//"}</span>
-              <span className="font-mono text-xs text-[#A6B2C4] uppercase tracking-wider hidden sm:inline">
+              <span className="text-[#3A475C] font-mono text-xs hidden sm:inline leading-none">{"//"}</span>
+              <span className="font-mono text-xs text-[#A6B2C4] uppercase tracking-wider hidden sm:inline leading-none">
                 Automotive Anatomy Archive
               </span>
             </div>
-            <span className="text-[10px] font-mono text-[#637085] hidden md:block">
+            <span className="text-[10px] font-mono text-[#637085] hidden md:block mt-1 leading-none">
               Interactive Knolling & Exploded Parts Catalog
             </span>
           </div>
