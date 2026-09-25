@@ -1,166 +1,23 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import {
   Search,
-  Zap,
-  Gauge,
-  Scale,
   ShieldAlert,
-  Flame,
   ArrowRight,
   BookOpen,
   ChevronDown,
-  Compass,
-  Award,
-  Maximize2,
   ChevronRight,
+  Award,
   Sliders,
   CheckCircle2,
   Volume2,
   VolumeX,
   Radio,
-  Crosshair
+  Compass
 } from "lucide-react";
-
-interface VehicleArchiveCard {
-  slug: string;
-  brand: string;
-  model: string;
-  trim: string;
-  year: number;
-  engineCode: string;
-  powertrain: string;
-  output: string;
-  torque: string;
-  redline: string;
-  weight: string;
-  downforce: string;
-  topSpeed: string;
-  zeroToHundred: string;
-  image: string;
-  badge: string;
-  accent: string;
-}
-
-const VEHICLES: VehicleArchiveCard[] = [
-  {
-    slug: "porsche-911-gt3-rs",
-    brand: "Porsche",
-    model: "911 GT3 RS",
-    trim: "Weissach Homologation Spec (992.1)",
-    year: 2024,
-    engineCode: "MA1.77",
-    powertrain: "4.0L Naturally Aspirated Flat-6 (Dry Sump)",
-    output: "525 PS (386 kW)",
-    torque: "465 Nm @ 6,300 RPM",
-    redline: "9,000 RPM",
-    weight: "1,450 kg (DIN)",
-    downforce: "860 kg @ 285 km/h",
-    topSpeed: "296 km/h",
-    zeroToHundred: "3.2s",
-    image: "/assets/porsche-gt3rs-cutaway.jpg",
-    badge: "MOTORSPORT HOMOLOGATION",
-    accent: "border-[#FF8000]/60 text-[#FF8000] bg-[#FF8000]/10"
-  },
-  {
-    slug: "bmw-m4-csl",
-    brand: "BMW",
-    model: "M4 CSL",
-    trim: "G82 Competition Sport Lightweight",
-    year: 2023,
-    engineCode: "S58B30T0",
-    powertrain: "3.0L Twin-Turbo Inline-6 (Closed Deck)",
-    output: "550 PS (405 kW)",
-    torque: "650 Nm @ 2,750 RPM",
-    redline: "7,200 RPM",
-    weight: "1,625 kg (DIN)",
-    downforce: "CSL Carbon Ducktail & Splitter (220 kg)",
-    topSpeed: "307 km/h",
-    zeroToHundred: "3.7s",
-    image: "/assets/bmw-m4-knolling-teardown.jpg",
-    badge: "CSL LIGHTWEIGHT HOMOLOGATION",
-    accent: "border-red-500/60 text-red-400 bg-red-500/10"
-  },
-  {
-    slug: "volkswagen-golf-r-mk8",
-    brand: "Volkswagen",
-    model: "Golf R",
-    trim: "Mk8 20 Years Edition (Torque Vectoring)",
-    year: 2024,
-    engineCode: "EA888 Gen 4",
-    powertrain: "2.0L TSI Cast-Iron Turbocharged 4-Cyl",
-    output: "320 PS (235 kW)",
-    torque: "420 Nm @ 2,100 RPM",
-    redline: "6,800 RPM",
-    weight: "1,551 kg (DIN)",
-    downforce: "R-Performance Aero Foil",
-    topSpeed: "270 km/h",
-    zeroToHundred: "4.6s",
-    image: "/assets/vw-golfr-cutaway.jpg",
-    badge: "MQB EVO ARCHITECTURE",
-    accent: "border-cyan-500/60 text-cyan-400 bg-cyan-500/10"
-  },
-  {
-    slug: "mclaren-f1-xp5",
-    brand: "McLaren",
-    model: "F1 (XP5)",
-    trim: "Central Cockpit Le Mans Benchmark",
-    year: 1993,
-    engineCode: "BMW S70/2",
-    powertrain: "6.1L Naturally Aspirated 60° V12",
-    output: "627 PS (461 kW)",
-    torque: "650 Nm @ 5,600 RPM",
-    redline: "7,500 RPM",
-    weight: "1,138 kg (Dry)",
-    downforce: "Active Dynamic Brake Foil",
-    topSpeed: "386.4 km/h",
-    zeroToHundred: "3.2s",
-    image: "/assets/mclaren-f1-cutaway.jpg",
-    badge: "CARBON TUB PIONEER",
-    accent: "border-[#D2FF00]/60 text-[#D2FF00] bg-[#D2FF00]/10"
-  },
-  {
-    slug: "ferrari-f40",
-    brand: "Ferrari",
-    model: "F40",
-    trim: "Tipo F120A Homologation",
-    year: 1987,
-    engineCode: "Tipo F120A",
-    powertrain: "2.9L Twin-Turbocharged 90° V8",
-    output: "478 PS (352 kW)",
-    torque: "577 Nm @ 4,000 RPM",
-    redline: "7,750 RPM",
-    weight: "1,100 kg (Dry)",
-    downforce: "High-Downforce Gurney Wing",
-    topSpeed: "324 km/h",
-    zeroToHundred: "3.8s",
-    image: "/assets/ferrari-f40-cutaway.jpg",
-    badge: "KEVLAR TUBULAR SPACEFRAME",
-    accent: "border-red-500/60 text-red-400 bg-red-500/10"
-  },
-  {
-    slug: "nissan-skyline-gtr-r34",
-    brand: "Nissan",
-    model: "Skyline GT-R (R34)",
-    trim: "V-Spec II Nürburgring Spec",
-    year: 1999,
-    engineCode: "RB26DETT",
-    powertrain: "2.6L Twin-Turbo Cast-Iron Inline-6",
-    output: "280+ PS (206 kW)",
-    torque: "392 Nm @ 4,400 RPM",
-    redline: "8,000 RPM",
-    weight: "1,560 kg (DIN)",
-    downforce: "Carbon Ground Effect Diffuser",
-    topSpeed: "266 km/h",
-    zeroToHundred: "4.8s",
-    image: "/assets/skyline-r34-cutaway.jpg",
-    badge: "ATTESA E-TS PRO AWD",
-    accent: "border-blue-400/60 text-blue-400 bg-blue-500/10"
-  }
-];
+import { VEHICLE_ROSTER } from "@/data/vehicle-roster";
+import { CadTerminalCard } from "@/components/blueprint/cad-terminal-card";
 
 interface EditorialArticle {
   id: string;
@@ -241,152 +98,7 @@ const EDITORIAL_FEED: EditorialArticle[] = [
   }
 ];
 
-// Interactive 3D Card Tilt Component for vehicles
-function TiltVehicleCard({ car }: { car: VehicleArchiveCard }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [rotateX, setRotateX] = useState(0);
-  const [rotateY, setRotateY] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const rotX = ((y - centerY) / centerY) * -7;
-    const rotY = ((x - centerX) / centerX) * 7;
-
-    setRotateX(rotX);
-    setRotateY(rotY);
-  };
-
-  const handleMouseLeave = () => {
-    setRotateX(0);
-    setRotateY(0);
-    setIsHovered(false);
-  };
-
-  return (
-    <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${isHovered ? 1.02 : 1}, ${isHovered ? 1.02 : 1}, 1)`,
-        transition: isHovered ? "transform 0.1s ease-out" : "transform 0.4s ease-out"
-      }}
-      className="bg-[#0C0E14] border border-[#1E2536] hover:border-[#D2FF00] rounded-2xl overflow-hidden group flex flex-col justify-between shadow-2xl hover:shadow-[0_0_40px_rgba(210,255,0,0.18)] relative"
-    >
-      {/* High-Voltage Corner Accent */}
-      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[#D2FF00]/15 to-transparent pointer-events-none rounded-tr-2xl" />
-
-      {/* Card Header & Full-Bleed Cutaway */}
-      <div className="p-6 border-b border-[#171E2D] relative">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div>
-            <span className={`px-2.5 py-1 rounded-md text-[9px] font-mono font-bold tracking-wider uppercase border ${car.accent}`}>
-              {car.badge}
-            </span>
-            <h3 className="text-2xl sm:text-3xl font-black text-white mt-2 group-hover:text-[#D2FF00] transition-colors">
-              {car.brand} {car.model}
-            </h3>
-            <div className="text-xs font-mono text-[#717A8C] mt-0.5">{car.trim}</div>
-          </div>
-          <div className="text-right font-mono bg-[#07090E] px-3 py-2 rounded-lg border border-[#1A2233]">
-            <span className="text-[9px] text-[#616E82] uppercase tracking-wider block">ENGINE BLOCK</span>
-            <span className="text-xs font-bold text-[#D2FF00]">{car.engineCode}</span>
-          </div>
-        </div>
-
-        {/* Hero Cutaway Viewport with Full-Bleed look & Glowing Lime Online Badge */}
-        <div className="relative w-full h-64 mt-4 rounded-xl bg-[#06080E] border border-[#182030] overflow-hidden flex items-center justify-center group-hover:border-[#D2FF00]/50 transition-colors">
-          <Image
-            src={car.image}
-            alt={`${car.brand} ${car.model} Technical CAD Cutaway`}
-            fill
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-contain p-3 filter brightness-95 contrast-105 group-hover:scale-105 transition-transform duration-500"
-            priority
-          />
-
-          {/* Glowing #D2FF00 reticle badge */}
-          <div className="absolute top-3 left-3 px-2.5 py-1 rounded bg-black/80 backdrop-blur-md border border-[#D2FF00]/50 text-[10px] font-mono font-bold text-[#D2FF00] flex items-center gap-1.5 shadow-[0_0_12px_rgba(210,255,0,0.3)]">
-            <span className="w-2 h-2 rounded-full bg-[#D2FF00] animate-ping" />
-            <Crosshair className="w-3 h-3 text-[#D2FF00]" />
-            <span>ONLINE CAD</span>
-          </div>
-
-          <div className="absolute top-3 right-3 px-2.5 py-1 rounded bg-black/80 backdrop-blur-md border border-[#252C3D] text-[9px] font-mono text-[#8C98AC] flex items-center gap-1.5">
-            <Maximize2 className="w-3 h-3 text-[#FF8000]" />
-            <span>ORTHOGRAPHIC 4-VIEW SPEC</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Immediate Technical Badges Grid */}
-      <div className="p-6 space-y-6">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-          <div className="p-3 rounded-lg bg-[#07090F] border border-[#161D2B]">
-            <div className="flex items-center gap-1 text-[9px] text-[#637085] uppercase">
-              <Zap className="w-3 h-3 text-[#D2FF00]" />
-              <span>OUTPUT</span>
-            </div>
-            <div className="font-bold text-white mt-1 text-sm">{car.output}</div>
-          </div>
-
-          <div className="p-3 rounded-lg bg-[#07090F] border border-[#161D2B]">
-            <div className="flex items-center gap-1 text-[9px] text-[#637085] uppercase">
-              <Gauge className="w-3 h-3 text-cyan-400" />
-              <span>REDLINE</span>
-            </div>
-            <div className="font-bold text-white mt-1 text-sm">{car.redline}</div>
-          </div>
-
-          <div className="p-3 rounded-lg bg-[#07090F] border border-[#161D2B]">
-            <div className="flex items-center gap-1 text-[9px] text-[#637085] uppercase">
-              <Scale className="w-3 h-3 text-[#FF8000]" />
-              <span>CURB WEIGHT</span>
-            </div>
-            <div className="font-bold text-white mt-1 text-sm">{car.weight}</div>
-          </div>
-
-          <div className="p-3 rounded-lg bg-[#07090F] border border-[#161D2B]">
-            <div className="flex items-center gap-1 text-[9px] text-[#637085] uppercase">
-              <Flame className="w-3 h-3 text-red-400" />
-              <span>DOWNFORCE</span>
-            </div>
-            <div className="font-bold text-white mt-1 text-sm truncate">{car.downforce}</div>
-          </div>
-        </div>
-
-        {/* Powertrain Detail strip */}
-        <div className="p-3.5 bg-[#07090F] border border-[#161D2B] rounded-lg text-xs font-mono flex items-center justify-between text-[#8A95A8]">
-          <span className="text-[#647185] uppercase text-[10px]">POWERTRAIN:</span>
-          <span className="text-white font-medium">{car.powertrain}</span>
-        </div>
-
-        {/* Primary CTA button with Pulsing "READY FOR DISSECTION" indicator */}
-        <Link
-          href={`/car/${car.slug}`}
-          className="w-full py-4 px-5 rounded-xl bg-gradient-to-r from-[#FF8000] to-[#D2FF00] hover:from-[#ff9426] hover:to-[#e1ff33] text-black font-black font-mono text-xs uppercase tracking-widest transition-all duration-200 shadow-[0_0_25px_rgba(255,128,0,0.3)] flex items-center justify-between group/btn cursor-pointer"
-        >
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-black animate-ping" />
-            <span>INSPECT SCHEMATIC</span>
-          </div>
-          <div className="flex items-center gap-2 text-[10px] tracking-normal font-bold">
-            <span className="bg-black/20 px-2 py-0.5 rounded text-black font-mono">READY FOR DISSECTION</span>
-            <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1.5" />
-          </div>
-        </Link>
-      </div>
-    </div>
-  );
-}
 
 export default function MotorsportHomePage() {
   // 1. Full-Bleed Cockpit Bootup Preloader State
@@ -458,14 +170,14 @@ export default function MotorsportHomePage() {
   }, []);
 
   const filteredVehicles = useMemo(() => {
-    return VEHICLES.filter((v) => {
+    return VEHICLE_ROSTER.filter((v) => {
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !q ||
         v.brand.toLowerCase().includes(q) ||
         v.model.toLowerCase().includes(q) ||
         v.trim.toLowerCase().includes(q) ||
-        v.engineCode.toLowerCase().includes(q) ||
+        v.engineBlockCode.toLowerCase().includes(q) ||
         v.powertrain.toLowerCase().includes(q);
 
       const matchesBrand =
@@ -887,15 +599,16 @@ export default function MotorsportHomePage() {
               </h2>
             </div>
 
-            {/* Quick-select Brand Pills (All, Porsche, Volkswagen, McLaren, Ferrari) */}
+            {/* Quick-select Brand Pills */}
             <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
               {[
                 { label: "ALL SCHEMATICS", value: null },
                 { label: "PORSCHE", value: "Porsche" },
-                { label: "VOLKSWAGEN", value: "Volkswagen" },
+                { label: "BMW", value: "BMW" },
                 { label: "MCLAREN", value: "McLaren" },
                 { label: "FERRARI", value: "Ferrari" },
-                { label: "NISSAN", value: "Nissan" }
+                { label: "NISSAN", value: "Nissan" },
+                { label: "VOLKSWAGEN", value: "Volkswagen" }
               ].map((pill) => {
                 const isActive = selectedBrand === pill.value;
                 return (
@@ -920,7 +633,7 @@ export default function MotorsportHomePage() {
             <Search className="w-4 h-4 text-[#717A8C] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search by chassis code, model, or engine (e.g. GT3, EA888, Flat-6, 4.0L, 992.1)..."
+              placeholder="Search by chassis code, model, or engine (e.g. GT3, M4 CSL, S58, V12, F40, RB26, EA888)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-4 py-3.5 bg-[#0C1019] border border-[#222A3B] rounded-xl text-sm text-white placeholder-[#5A6578] focus:outline-none focus:border-[#D2FF00] font-mono transition-colors shadow-inner"
@@ -936,10 +649,10 @@ export default function MotorsportHomePage() {
           </div>
         </div>
 
-        {/* Visual Vehicle Showcase Cards with 3D Mouse Perspective Tilt */}
+        {/* Visual Vehicle Showcase Cards with unified CAD Terminal Card */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {filteredVehicles.map((car) => (
-            <TiltVehicleCard key={car.slug} car={car} />
+          {filteredVehicles.map((car, idx) => (
+            <CadTerminalCard key={car.slug} car={car} priority={idx < 2} />
           ))}
         </div>
 

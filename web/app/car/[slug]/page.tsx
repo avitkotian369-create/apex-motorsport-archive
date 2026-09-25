@@ -30,7 +30,7 @@ interface PageProps {
 
 export const CAR_META: Record<string, BenchmarkCarMeta> = {
   "porsche-911-gt3-rs": {
-    name: "PORSCHE 911 GT3 RS (992.1)",
+    name: "PORSCHE 911 GT3 RS (Weissach Package)",
     badge: "WEISSACH HOMOLOGATION",
     engine: "4.0L FLAT-6 NA (MA1.77)",
     power: "525 PS (386 kW)",
@@ -47,7 +47,7 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     }
   },
   "bmw-m4-csl": {
-    name: "BMW M4 CSL (G82)",
+    name: "BMW M4 CSL (Competition Sport Lightweight)",
     badge: "CSL LIGHTWEIGHT HOMOLOGATION",
     engine: "3.0L TWIN-TURBO I6 (S58B30T0)",
     power: "550 PS (405 kW)",
@@ -64,8 +64,8 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     }
   },
   "mclaren-f1-xp5": {
-    name: "MCLAREN F1 (XP5)",
-    badge: "CARBON MONOCOQUE BENCHMARK",
+    name: "MCLAREN F1 XP5 (Le Mans Benchmark)",
+    badge: "LE MANS BENCHMARK HOMOLOGATION",
     engine: "6.1L BMW S70/2 60° V12",
     power: "627 PS (461 kW)",
     redline: "7,500 RPM",
@@ -81,8 +81,8 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     }
   },
   "volkswagen-golf-r-mk8": {
-    name: "VOLKSWAGEN GOLF R (MK8)",
-    badge: "MQB EVO 4MOTION",
+    name: "VOLKSWAGEN GOLF R MK8 (20 Years Edition)",
+    badge: "20 YEARS HOMOLOGATION SPEC",
     engine: "2.0L TSI TURBO (EA888 GEN 4)",
     power: "320 PS (235 kW)",
     redline: "6,800 RPM",
@@ -98,9 +98,9 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     }
   },
   "ferrari-f40": {
-    name: "FERRARI F40 (TIPO F120A)",
-    badge: "KEVLAR TUBULAR HOMOLOGATION",
-    engine: "2.9L TWIN-TURBO 90° V8",
+    name: "FERRARI F40 (Tipo F120AB)",
+    badge: "TIPO F120AB HOMOLOGATION",
+    engine: "2.9L TWIN-TURBO 90° V8 (TIPO F120A)",
     power: "478 PS (352 kW)",
     redline: "7,750 RPM",
     dryWeight: "1,100 kg (Dry)",
@@ -115,8 +115,8 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     }
   },
   "nissan-skyline-gtr-r34": {
-    name: "NISSAN SKYLINE GT-R (R34)",
-    badge: "ATTESA E-TS PRO V-SPEC II",
+    name: "NISSAN SKYLINE GT-R R34 (V-Spec II Nürburgring)",
+    badge: "V-SPEC II NÜRBURGRING HOMOLOGATION",
     engine: "2.6L TWIN-TURBO RB26DETT",
     power: "280+ PS (206 kW)",
     redline: "8,000 RPM",
