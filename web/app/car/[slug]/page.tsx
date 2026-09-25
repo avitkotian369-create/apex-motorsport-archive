@@ -41,6 +41,8 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     dryWeight: "1,450 kg (DIN)",
     aeroBalance: "860 kg @ 285 km/h",
     defaultCutaway: "/assets/porsche-gt3rs-knolling-teardown.jpg",
+    cinematicHeroImageUrl: "/assets/porsche-gt3rs-hero.jpg",
+    knollingTeardownImageUrl: "/assets/porsche-gt3rs-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,457 mm",
       trackFront: "1,630 mm",
@@ -60,6 +62,8 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     dryWeight: "1,625 kg (DIN)",
     aeroBalance: "220 kg @ 250 km/h",
     defaultCutaway: "/assets/bmw-m4-knolling-teardown.jpg",
+    cinematicHeroImageUrl: "/assets/bmw-m4-hero.jpg",
+    knollingTeardownImageUrl: "/assets/bmw-m4-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,857 mm",
       trackFront: "1,623 mm",
@@ -79,6 +83,8 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     dryWeight: "1,138 kg (Dry)",
     aeroBalance: "Active Dynamic Brake Foil",
     defaultCutaway: "/assets/mclaren-f1-knolling-teardown.jpg",
+    cinematicHeroImageUrl: "/assets/mclaren-f1-hero.jpg",
+    knollingTeardownImageUrl: "/assets/mclaren-f1-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,718 mm",
       trackFront: "1,568 mm",
@@ -98,6 +104,8 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     dryWeight: "1,551 kg (DIN)",
     aeroBalance: "R-Performance Aero Foil",
     defaultCutaway: "/assets/vw-golfr-knolling-teardown.jpg",
+    cinematicHeroImageUrl: "/assets/vw-golfr-hero.jpg",
+    knollingTeardownImageUrl: "/assets/vw-golfr-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,628 mm",
       trackFront: "1,539 mm",
@@ -117,6 +125,8 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     dryWeight: "1,100 kg (Dry)",
     aeroBalance: "Fixed Composite Gurney Wing",
     defaultCutaway: "/assets/ferrari-f40-knolling-teardown.jpg",
+    cinematicHeroImageUrl: "/assets/ferrari-f40-hero.jpg",
+    knollingTeardownImageUrl: "/assets/ferrari-f40-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,450 mm",
       trackFront: "1,594 mm",
@@ -136,6 +146,8 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     dryWeight: "1,560 kg (DIN)",
     aeroBalance: "Carbon Ground Effect Diffuser",
     defaultCutaway: "/assets/skyline-r34-knolling-teardown.jpg",
+    cinematicHeroImageUrl: "/assets/skyline-r34-hero.jpg",
+    knollingTeardownImageUrl: "/assets/skyline-r34-knolling-teardown.jpg",
     dimensions: {
       wheelbase: "2,665 mm",
       trackFront: "1,480 mm",

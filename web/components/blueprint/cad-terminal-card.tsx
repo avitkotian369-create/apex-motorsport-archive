@@ -10,8 +10,8 @@ import {
   Flame,
   Maximize2,
   Crosshair,
-  ArrowRight,
-  Layers
+  Layers,
+  Car
 } from "lucide-react";
 import { VehicleRosterItem } from "@/data/vehicle-roster";
 import { CadExplodedSchematic } from "./cad-exploded-schematic";
@@ -26,8 +26,13 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [showVectorMode, setShowVectorMode] = useState(false);
-  const [imageFailed, setImageFailed] = useState(false);
+  const [showTeardownPreview, setShowTeardownPreview] = useState(false);
+  const [showVectorMode] = useState(false);
+  const [heroImageFailed, setHeroImageFailed] = useState(false);
+  const [knollingImageFailed, setKnollingImageFailed] = useState(false);
+
+  const heroImage = car.cinematicHeroImageUrl || car.image;
+  const teardownImage = car.knollingTeardownImageUrl || car.knollingImageUrl;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -93,75 +98,134 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
           </div>
         </div>
 
-        {/* 2. STANDARDIZED 16:10 / 16:9 CAD DARK-ROOM VIEWPORT */}
-        <div className="relative w-full aspect-[16/10] mt-4 rounded-xl bg-[#080B10] border border-[#182030] overflow-hidden flex items-center justify-center group-hover:border-[#D2FF00]/50 transition-colors">
-          {/* Subtle CAD Background Measurement Grid */}
+        {/* 2. STANDARDIZED 16:10 / 16:9 CAD DARK-ROOM SHOWROOM VIEWPORT */}
+        <div className="relative w-full aspect-[16/10] mt-4 rounded-xl bg-gradient-to-t from-[#06080E] via-[#090D16] to-[#040608] border border-[#182030] overflow-hidden flex items-center justify-center group-hover:border-[#D2FF00]/50 transition-colors shadow-inner">
+          {/* Subtle CAD Background Measurement Grid Lines (opacity-15) */}
           <div
-            className="absolute inset-0 pointer-events-none opacity-40"
+            className="absolute inset-0 pointer-events-none opacity-15"
             style={{
               backgroundImage: `
-                linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px)
+                linear-gradient(to right, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.15) 1px, transparent 1px)
               `,
               backgroundSize: "32px 32px"
             }}
           />
 
-          {/* Vignette Rim */}
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_60%,rgba(6,8,14,0.85)_100%)] z-10" />
+          {/* Dark Vignette Overlay & Floor Horizon */}
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_45%,rgba(4,6,8,0.92)_100%)] z-10 shadow-[inset_0_0_50px_rgba(0,0,0,0.85)]" />
 
-          {/* Display Exploded Studio Knolling Photography by Default */}
-          {showVectorMode || imageFailed ? (
-            <CadExplodedSchematic slug={car.slug} className="p-2" />
+          {/* Floor Ambient Glow Beneath the Tires Matching Car Theme */}
+          <div
+            className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4/5 h-16 rounded-full blur-2xl pointer-events-none transition-all duration-500 z-5"
+            style={{
+              background: car.accentColor || "rgba(210, 255, 0, 0.15)",
+              opacity: isHovered || showTeardownPreview ? 0.75 : 0.4
+            }}
+          />
+
+          {/* Main Viewport Content: Seamless Cross-Fade Between Assembled Hero and Knolling Teardown */}
+          {showVectorMode ? (
+            <CadExplodedSchematic slug={car.slug} className="p-2 z-10" />
           ) : (
-            <Image
-              src={car.knollingImageUrl || car.image}
-              alt={`${car.brand} ${car.model} Exploded Knolling Mechanical Teardown`}
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-contain p-2 filter brightness-100 contrast-105 group-hover:scale-[1.02] transition-transform duration-500"
-              priority={priority}
-              onError={() => setImageFailed(true)}
-            />
+            <div className="relative w-full h-full flex items-center justify-center z-10">
+              {/* Assembled Cinematic Hero Photo (Default) */}
+              <div
+                className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+                  !showTeardownPreview
+                    ? "opacity-100 scale-100"
+                    : "opacity-0 scale-95 pointer-events-none"
+                }`}
+              >
+                <Image
+                  src={heroImageFailed ? teardownImage : heroImage}
+                  alt={`${car.brand} ${car.model} Cinematic Assembled Chassis`}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-contain p-2 filter brightness-100 contrast-105 group-hover:scale-[1.02] transition-transform duration-500"
+                  priority={priority}
+                  onError={() => setHeroImageFailed(true)}
+                />
+              </div>
+
+              {/* Exploded Knolling Mechanical Teardown Photo (Interactive Preview) */}
+              <div
+                className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+                  showTeardownPreview
+                    ? "opacity-100 scale-100"
+                    : "opacity-0 scale-95 pointer-events-none"
+                }`}
+              >
+                <Image
+                  src={knollingImageFailed ? heroImage : teardownImage}
+                  alt={`${car.brand} ${car.model} Exploded Knolling Mechanical Teardown`}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-contain p-2 filter brightness-100 contrast-105 group-hover:scale-[1.02] transition-transform duration-500"
+                  onError={() => setKnollingImageFailed(true)}
+                />
+              </div>
+            </div>
           )}
 
-          {/* Top-Left: "● ONLINE CAD MECHANICAL TEARDOWN" active indicator */}
+          {/* Top-Left: Active Mode Indicator */}
           <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/85 backdrop-blur-md border border-[#D2FF00]/50 text-[10px] font-mono font-bold text-[#D2FF00] flex items-center gap-2 shadow-[0_0_15px_rgba(210,255,0,0.3)] z-20">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D2FF00] opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D2FF00]" />
             </span>
             <Crosshair className="w-3 h-3 text-[#D2FF00]" />
-            <span>ONLINE CAD MECHANICAL TEARDOWN</span>
+            <span>
+              {showTeardownPreview
+                ? "● KNOLLING TEARDOWN PREVIEW"
+                : "● ASSEMBLED CHASSIS // SHOWROOM"}
+            </span>
           </div>
 
           {/* Top-Right: "↗ ORTHOGRAPHIC 4-VIEW SPEC" button */}
           <Link
             href={`/car/${car.slug}`}
             className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-black/85 backdrop-blur-md border border-[#252C3D] hover:border-[#D2FF00] text-[9px] font-mono text-[#8C98AC] hover:text-[#D2FF00] flex items-center gap-1.5 transition-colors z-20 cursor-pointer"
-            title="Open Deep 4-View Orthographic Blueprint"
+            title="Open Deep CAD Mechanical Teardown"
           >
             <Maximize2 className="w-3 h-3 text-[#FF8000]" />
             <span>ORTHOGRAPHIC 4-VIEW SPEC</span>
           </Link>
 
-          {/* Bottom Knolling View Mode Toggle Button */}
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setShowVectorMode((v) => !v);
-            }}
-            className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-[#1E2536] hover:border-[#D2FF00] text-[9px] font-mono text-[#A6B2C4] hover:text-white flex items-center gap-1.5 z-20 cursor-pointer transition-colors shadow-lg"
-            title="Toggle between studio knolling photography and interactive PartSouq CAD schematic"
-          >
-            <Layers className="w-3 h-3 text-[#D2FF00]" />
-            <span>{showVectorMode ? "STUDIO PHOTO VIEW" : "CAD VECTOR OVERLAY"}</span>
-          </button>
+          {/* Bottom Right: Interactive Teaser / Flip Button */}
+          <div className="absolute bottom-3 right-3 flex items-center gap-2 z-20">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowTeardownPreview((v) => !v);
+              }}
+              className={`px-3 py-1.5 rounded-lg backdrop-blur-md border text-[9px] font-mono font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-xl ${
+                showTeardownPreview
+                  ? "bg-[#D2FF00] text-black border-[#D2FF00] shadow-[0_0_15px_rgba(210,255,0,0.4)]"
+                  : "bg-black/85 text-[#A6B2C4] hover:text-white border-[#1E2536] hover:border-[#D2FF00]"
+              }`}
+              title="Toggle preview between assembled chassis and knolling teardown"
+            >
+              {showTeardownPreview ? (
+                <>
+                  <Car className="w-3 h-3 text-current" />
+                  <span>VIEW ASSEMBLED CHASSIS</span>
+                </>
+              ) : (
+                <>
+                  <Layers className="w-3 h-3 text-[#D2FF00]" />
+                  <span>PREVIEW TEARDOWN</span>
+                </>
+              )}
+            </button>
+          </div>
 
           {/* Bottom Left Corner Datum Watermark */}
           <div className="absolute bottom-3 left-3 text-[9px] font-mono text-[#55647A] z-20 hidden sm:block">
-            ISO 7200 KNOLLING CAD // ±0.05 MM
+            {showTeardownPreview
+              ? "ISO 7200 KNOLLING CAD // ±0.05 MM"
+              : "MONOCOQUE SHOWROOM SPEC // ASSEMBLED"}
           </div>
         </div>
       </div>
@@ -213,17 +277,16 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
           <span className="text-white font-medium truncate">{car.powertrain}</span>
         </div>
 
-        {/* 4. FOOTER ACTION CALLOUT */}
+        {/* 4. FOOTER ACTION CALLOUT WITH PROMINENT CAD TEARDOWN CTA */}
         <div className="pt-2 flex items-center justify-between gap-3 font-mono">
           <div className="text-[10px] text-[#55647A] hidden sm:block">
             ARCHIVE STATUS: <span className="text-[#D2FF00] font-bold">12 PARTS DECOMPOSED</span>
           </div>
           <Link
             href={`/car/${car.slug}`}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#0E1422] hover:bg-[#D2FF00] text-[#A6B2C4] hover:text-black border border-[#1E2536] hover:border-[#D2FF00] text-xs font-bold transition-all flex items-center justify-center gap-2 group/btn cursor-pointer shadow-lg"
+            className="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#0E1422] hover:bg-[#D2FF00] text-white hover:text-black border border-[#1E2536] hover:border-[#D2FF00] text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 group/btn cursor-pointer shadow-lg hover:shadow-[0_0_25px_rgba(210,255,0,0.35)]"
           >
-            <span>EXPLORE MECHANICAL TEARDOWN</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+            <span>[ ⤹ ENTER CAD MECHANICAL TEARDOWN → ]</span>
           </Link>
         </div>
       </div>
@@ -232,3 +295,4 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
 }
 
 export default CadTerminalCard;
+

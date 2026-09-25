@@ -14,6 +14,8 @@ export interface VehicleRosterItem {
   downforce: string;
   topSpeed: string;
   zeroToHundred: string;
+  cinematicHeroImageUrl: string;
+  knollingTeardownImageUrl: string;
   image: string;
   knollingImageUrl: string;
   explodedImage?: string;
@@ -47,7 +49,9 @@ export const VEHICLE_ROSTER: VehicleRosterItem[] = [
     downforce: "860 kg @ 285 km/h",
     topSpeed: "296 km/h",
     zeroToHundred: "3.2s",
-    image: "/assets/porsche-gt3rs-knolling-teardown.jpg",
+    cinematicHeroImageUrl: "/assets/porsche-gt3rs-hero.jpg",
+    knollingTeardownImageUrl: "/assets/porsche-gt3rs-knolling-teardown.jpg",
+    image: "/assets/porsche-gt3rs-hero.jpg",
     knollingImageUrl: "/assets/porsche-gt3rs-knolling-teardown.jpg",
     explodedImage: "/assets/porsche-gt3rs-knolling-teardown.jpg",
     accentColor: "rgba(255, 128, 0, 0.15)",
@@ -78,7 +82,9 @@ export const VEHICLE_ROSTER: VehicleRosterItem[] = [
     downforce: "220 kg @ 250 km/h",
     topSpeed: "307 km/h",
     zeroToHundred: "3.7s",
-    image: "/assets/bmw-m4-knolling-teardown.jpg",
+    cinematicHeroImageUrl: "/assets/bmw-m4-hero.jpg",
+    knollingTeardownImageUrl: "/assets/bmw-m4-knolling-teardown.jpg",
+    image: "/assets/bmw-m4-hero.jpg",
     knollingImageUrl: "/assets/bmw-m4-knolling-teardown.jpg",
     explodedImage: "/assets/bmw-m4-knolling-teardown.jpg",
     accentColor: "rgba(239, 68, 68, 0.15)",
@@ -109,7 +115,9 @@ export const VEHICLE_ROSTER: VehicleRosterItem[] = [
     downforce: "Active Dynamic Brake Foil",
     topSpeed: "386.4 km/h",
     zeroToHundred: "3.2s",
-    image: "/assets/mclaren-f1-knolling-teardown.jpg",
+    cinematicHeroImageUrl: "/assets/mclaren-f1-hero.jpg",
+    knollingTeardownImageUrl: "/assets/mclaren-f1-knolling-teardown.jpg",
+    image: "/assets/mclaren-f1-hero.jpg",
     knollingImageUrl: "/assets/mclaren-f1-knolling-teardown.jpg",
     explodedImage: "/assets/mclaren-f1-knolling-teardown.jpg",
     accentColor: "rgba(210, 255, 0, 0.15)",
@@ -140,7 +148,9 @@ export const VEHICLE_ROSTER: VehicleRosterItem[] = [
     downforce: "Fixed High-Downforce Gurney",
     topSpeed: "324 km/h",
     zeroToHundred: "3.8s",
-    image: "/assets/ferrari-f40-knolling-teardown.jpg",
+    cinematicHeroImageUrl: "/assets/ferrari-f40-hero.jpg",
+    knollingTeardownImageUrl: "/assets/ferrari-f40-knolling-teardown.jpg",
+    image: "/assets/ferrari-f40-hero.jpg",
     knollingImageUrl: "/assets/ferrari-f40-knolling-teardown.jpg",
     explodedImage: "/assets/ferrari-f40-knolling-teardown.jpg",
     accentColor: "rgba(239, 68, 68, 0.15)",
@@ -171,7 +181,9 @@ export const VEHICLE_ROSTER: VehicleRosterItem[] = [
     downforce: "Carbon Ground Effect Diffuser",
     topSpeed: "266 km/h",
     zeroToHundred: "4.8s",
-    image: "/assets/skyline-r34-knolling-teardown.jpg",
+    cinematicHeroImageUrl: "/assets/skyline-r34-hero.jpg",
+    knollingTeardownImageUrl: "/assets/skyline-r34-knolling-teardown.jpg",
+    image: "/assets/skyline-r34-hero.jpg",
     knollingImageUrl: "/assets/skyline-r34-knolling-teardown.jpg",
     explodedImage: "/assets/skyline-r34-knolling-teardown.jpg",
     accentColor: "rgba(59, 130, 246, 0.15)",
@@ -202,7 +214,9 @@ export const VEHICLE_ROSTER: VehicleRosterItem[] = [
     downforce: "R-Performance Aero Foil",
     topSpeed: "270 km/h",
     zeroToHundred: "4.6s",
-    image: "/assets/vw-golfr-knolling-teardown.jpg",
+    cinematicHeroImageUrl: "/assets/vw-golfr-hero.jpg",
+    knollingTeardownImageUrl: "/assets/vw-golfr-knolling-teardown.jpg",
+    image: "/assets/vw-golfr-hero.jpg",
     knollingImageUrl: "/assets/vw-golfr-knolling-teardown.jpg",
     explodedImage: "/assets/vw-golfr-knolling-teardown.jpg",
     accentColor: "rgba(6, 182, 212, 0.15)",

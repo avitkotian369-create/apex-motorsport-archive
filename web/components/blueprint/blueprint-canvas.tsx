@@ -22,6 +22,8 @@ export interface BenchmarkCarMeta {
   dryWeight: string;
   aeroBalance: string;
   defaultCutaway: string;
+  cinematicHeroImageUrl?: string;
+  knollingTeardownImageUrl?: string;
   subtitle?: string;
   engineSubtext?: string;
   dimensions: {
@@ -75,6 +77,8 @@ const DEFAULT_CAR_META: BenchmarkCarMeta = {
   dryWeight: "1,450 kg (DIN)",
   aeroBalance: "860 kg @ 285 km/h",
   defaultCutaway: "/assets/porsche-gt3rs-knolling-teardown.jpg",
+  cinematicHeroImageUrl: "/assets/porsche-gt3rs-hero.jpg",
+  knollingTeardownImageUrl: "/assets/porsche-gt3rs-knolling-teardown.jpg",
   dimensions: {
     wheelbase: "2,457 mm",
     trackFront: "1,630 mm",
@@ -171,6 +175,9 @@ export function BlueprintCanvas({
 
   // Vehicle Knolling teardown photo selection
   const primaryKnollingImage = useMemo(() => {
+    if (carInfo?.knollingTeardownImageUrl) {
+      return carInfo.knollingTeardownImageUrl;
+    }
     if (carInfo?.defaultCutaway && carInfo.defaultCutaway.includes("knolling-teardown")) {
       return carInfo.defaultCutaway;
     }
@@ -192,17 +199,53 @@ export function BlueprintCanvas({
     }
     // Default: Porsche 911 GT3 RS knolling teardown
     return "/assets/porsche-gt3rs-knolling-teardown.jpg";
-  }, [carKey, carInfo?.defaultCutaway]);
+  }, [carKey, carInfo?.knollingTeardownImageUrl, carInfo?.defaultCutaway]);
 
-  const [currentImageSrc, setCurrentImageSrc] = useState<string>(primaryKnollingImage);
+  // Vehicle Assembled Hero photo selection
+  const assembledHeroImage = useMemo(() => {
+    if (carInfo?.cinematicHeroImageUrl) {
+      return carInfo.cinematicHeroImageUrl;
+    }
+    const key = (carKey || "").toLowerCase();
+    if (key.includes("bmw") || key.includes("m4") || key.includes("csl") || key.includes("g82")) {
+      return "/assets/bmw-m4-hero.jpg";
+    }
+    if (key.includes("mclaren") || key.includes("f1") || key.includes("xp5")) {
+      return "/assets/mclaren-f1-hero.jpg";
+    }
+    if (key.includes("golf") || key.includes("vw") || key.includes("volkswagen")) {
+      return "/assets/vw-golfr-hero.jpg";
+    }
+    if (key.includes("ferrari") || key.includes("f40")) {
+      return "/assets/ferrari-f40-hero.jpg";
+    }
+    if (key.includes("skyline") || key.includes("r34") || key.includes("gtr") || key.includes("nissan")) {
+      return "/assets/skyline-r34-hero.jpg";
+    }
+    return "/assets/porsche-gt3rs-hero.jpg";
+  }, [carKey, carInfo?.cinematicHeroImageUrl]);
+
+  const [showAssembledChassis, setShowAssembledChassis] = useState(false);
+  const [currentKnollingSrc, setCurrentKnollingSrc] = useState<string>(primaryKnollingImage);
+  const [currentHeroSrc, setCurrentHeroSrc] = useState<string>(assembledHeroImage);
 
   useEffect(() => {
-    setCurrentImageSrc(primaryKnollingImage);
+    setCurrentKnollingSrc(primaryKnollingImage);
   }, [primaryKnollingImage]);
 
+  useEffect(() => {
+    setCurrentHeroSrc(assembledHeroImage);
+  }, [assembledHeroImage]);
+
   const handleImageError = () => {
-    setCurrentImageSrc("/assets/bmw-m4-knolling-teardown.jpg");
+    if (showAssembledChassis) {
+      setCurrentHeroSrc(currentKnollingSrc);
+    } else {
+      setCurrentKnollingSrc("/assets/bmw-m4-knolling-teardown.jpg");
+    }
   };
+
+  const activeDisplaySrc = showAssembledChassis ? currentHeroSrc : currentKnollingSrc;
 
   // Tracking mouse movement for caliper and pan
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -393,6 +436,21 @@ export function BlueprintCanvas({
           </div>
         </div>
 
+        {/* Floating Preview Pill in Top-Right Corner */}
+        <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
+          <button
+            onClick={() => setShowAssembledChassis((prev) => !prev)}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-2 backdrop-blur-xl border shadow-2xl transition-all cursor-pointer ${
+              showAssembledChassis
+                ? "bg-[#D2FF00] text-black border-[#D2FF00] shadow-[0_0_20px_rgba(210,255,0,0.45)] scale-105"
+                : "bg-[#090C12]/90 hover:bg-[#121824] text-white hover:text-[#D2FF00] border-[#1E2536] hover:border-[#D2FF00]"
+            }`}
+            title="Toggle between assembled chassis and knolling teardown"
+          >
+            <span>{showAssembledChassis ? "⚙️ VIEW KNOLLING TEARDOWN" : "🚗 VIEW ASSEMBLED CHASSIS"}</span>
+          </button>
+        </div>
+
         {/* Floating Zoom & Reset Overlay Buttons (Bottom Right of Viewport) */}
         <div className="absolute bottom-4 right-4 z-30 flex items-center gap-1.5 bg-[#0B0E17]/90 backdrop-blur-xl border border-[#1E2536] p-1.5 rounded-xl shadow-2xl">
           <button
@@ -479,10 +537,14 @@ export function BlueprintCanvas({
           }}
         >
           <div className="relative w-full max-w-5xl aspect-video max-h-full flex items-center justify-center">
-            {/* Exploded Teardown Photography / Knolling Schematic */}
+            {/* Exploded Teardown Photography / Assembled Hero Photo */}
             <Image
-              src={currentImageSrc}
-              alt={`${carInfo.name} Exploded Mechanical Teardown Knolling`}
+              src={activeDisplaySrc}
+              alt={
+                showAssembledChassis
+                  ? `${carInfo.name} Cinematic Fully Assembled Chassis`
+                  : `${carInfo.name} Exploded Mechanical Teardown Knolling`
+              }
               fill
               priority
               sizes="(max-width: 1400px) 100vw, 1200px"
@@ -490,71 +552,72 @@ export function BlueprintCanvas({
               className="object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.95)] pointer-events-none transition-all duration-300"
             />
 
-            {/* 4. CLEAN 24PX CIRCULAR NUMBERED BADGES (ZERO TEXT ON CANVAS) */}
-            {pins.map((callout) => {
-              const isSelected = activeSelectedId === callout.id;
-              const isHovered = hoveredPinId === callout.id;
+            {/* 4. CLEAN 24PX CIRCULAR NUMBERED BADGES (ZERO TEXT ON CANVAS - HIDDEN IN ASSEMBLED VIEW) */}
+            {!showAssembledChassis &&
+              pins.map((callout) => {
+                const isSelected = activeSelectedId === callout.id;
+                const isHovered = hoveredPinId === callout.id;
 
-              // Layer Isolation: Dim pins not belonging to active tier
-              const isTierMatch = activeTier === "all" || callout.tier === activeTier;
+                // Layer Isolation: Dim pins not belonging to active tier
+                const isTierMatch = activeTier === "all" || callout.tier === activeTier;
 
-              const isPapaya = glowColor === "papaya" && isSelected;
-              const pingColor = isPapaya ? "bg-[#FF8000]" : "bg-[#D2FF00]";
-              const activeBorderColor = isPapaya ? "border-[#FF8000]" : "border-[#D2FF00]";
-              const shadowGlow = isPapaya
-                ? "shadow-[0_0_20px_#FF8000]"
-                : "shadow-[0_0_20px_#D2FF00]";
+                const isPapaya = glowColor === "papaya" && isSelected;
+                const pingColor = isPapaya ? "bg-[#FF8000]" : "bg-[#D2FF00]";
+                const activeBorderColor = isPapaya ? "border-[#FF8000]" : "border-[#D2FF00]";
+                const shadowGlow = isPapaya
+                  ? "shadow-[0_0_20px_#FF8000]"
+                  : "shadow-[0_0_20px_#D2FF00]";
 
-              return (
-                <div
-                  key={callout.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelect(callout.id);
-                  }}
-                  onMouseEnter={() => {
-                    if (onHoverPin) onHoverPin(callout.id);
-                  }}
-                  onMouseLeave={() => {
-                    if (onHoverPin) onHoverPin(null);
-                  }}
-                  style={{
-                    left: `${callout.x_percent}%`,
-                    top: `${callout.y_percent}%`,
-                  }}
-                  className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-30 group transition-all duration-200 ${
-                    isTierMatch
-                      ? "opacity-100 scale-100"
-                      : "opacity-25 scale-90 pointer-events-none"
-                  }`}
-                  title={`${callout.num}. ${callout.name}`}
-                >
-                  {/* Pulsing Radar Ring on Select or Hover */}
-                  <span
-                    className={`absolute -inset-2.5 rounded-full pointer-events-none transition-all ${
-                      isSelected || isHovered
-                        ? `animate-ping opacity-85 ${pingColor}`
-                        : `opacity-0 group-hover:opacity-60 group-hover:animate-ping ${pingColor}`
-                    }`}
-                  />
-
-                  {/* Clean 24px Circular Numbered Badge (Zero text clutter) */}
+                return (
                   <div
-                    className={`relative flex items-center justify-center w-6 h-6 rounded-full transition-all duration-200 ${
-                      isSelected || isHovered
-                        ? isPapaya
-                          ? `bg-[#FF8000] text-black ${shadowGlow} scale-125 border-2 border-white font-black`
-                          : `bg-[#D2FF00] text-black ${shadowGlow} scale-125 border-2 border-white font-black`
-                        : `bg-[#090B10] border ${activeBorderColor} text-[#D2FF00] hover:scale-120 hover:bg-[#D2FF00] hover:text-black font-bold shadow-lg`
+                    key={callout.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelect(callout.id);
+                    }}
+                    onMouseEnter={() => {
+                      if (onHoverPin) onHoverPin(callout.id);
+                    }}
+                    onMouseLeave={() => {
+                      if (onHoverPin) onHoverPin(null);
+                    }}
+                    style={{
+                      left: `${callout.x_percent}%`,
+                      top: `${callout.y_percent}%`,
+                    }}
+                    className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-30 group transition-all duration-200 ${
+                      isTierMatch
+                        ? "opacity-100 scale-100"
+                        : "opacity-25 scale-90 pointer-events-none"
                     }`}
+                    title={`${callout.num}. ${callout.name}`}
                   >
-                    <span className="text-[10px] font-mono leading-none select-none font-black">
-                      {callout.num}
-                    </span>
+                    {/* Pulsing Radar Ring on Select or Hover */}
+                    <span
+                      className={`absolute -inset-2.5 rounded-full pointer-events-none transition-all ${
+                        isSelected || isHovered
+                          ? `animate-ping opacity-85 ${pingColor}`
+                          : `opacity-0 group-hover:opacity-60 group-hover:animate-ping ${pingColor}`
+                      }`}
+                    />
+
+                    {/* Clean 24px Circular Numbered Badge (Zero text clutter) */}
+                    <div
+                      className={`relative flex items-center justify-center w-6 h-6 rounded-full transition-all duration-200 ${
+                        isSelected || isHovered
+                          ? isPapaya
+                            ? `bg-[#FF8000] text-black ${shadowGlow} scale-125 border-2 border-white font-black`
+                            : `bg-[#D2FF00] text-black ${shadowGlow} scale-125 border-2 border-white font-black`
+                          : `bg-[#090B10] border ${activeBorderColor} text-[#D2FF00] hover:scale-120 hover:bg-[#D2FF00] hover:text-black font-bold shadow-lg`
+                      }`}
+                    >
+                      <span className="text-[10px] font-mono leading-none select-none font-black">
+                        {callout.num}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
       </div>
@@ -562,14 +625,18 @@ export function BlueprintCanvas({
       {/* 5. CANVAS FOOTER STATUS STRIP */}
       <div className="px-5 py-2.5 bg-[#080B10] border-t border-[#1E2536] flex flex-wrap items-center justify-between text-[11px] font-mono text-[#63758D]">
         <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#D2FF00]" />
-          <span className="text-white font-bold">MONOCOQUE EXPLODED MECHANICAL TEARDOWN</span>
+          <span className={`w-1.5 h-1.5 rounded-full ${showAssembledChassis ? "bg-cyan-400" : "bg-[#D2FF00]"}`} />
+          <span className="text-white font-bold">
+            {showAssembledChassis
+              ? "MONOCOQUE SHOWROOM SPEC // ASSEMBLED CHASSIS"
+              : "MONOCOQUE EXPLODED MECHANICAL TEARDOWN"}
+          </span>
           <span className="text-[#3A475C]">•</span>
-          <span>ISO 7200 KNOLLING CAD SPECIFICATION</span>
+          <span>{showAssembledChassis ? "STUDIO HIGH-RES PHOTOGRAPHY" : "ISO 7200 KNOLLING CAD SPECIFICATION"}</span>
         </div>
         <div className="flex items-center gap-4 text-[10px]">
           <span>DATUM: <span className="text-cyan-400 font-bold">{cursorCoords ? `${cursorCoords.x}%, ${cursorCoords.y}%` : "CALIBRATED"}</span></span>
-          <span>ACTIVE TIER: <span className="text-[#D2FF00] font-bold uppercase">{activeTier}</span></span>
+          <span>STAGE: <span className="text-[#D2FF00] font-bold uppercase">{showAssembledChassis ? "SHOWROOM" : activeTier}</span></span>
           <span>PINS INDEXED: <span className="text-white font-bold">{pins.length}</span></span>
           <span>TOLERANCE: <span className="text-[#FF8000] font-bold">±0.05 MM</span></span>
         </div>
