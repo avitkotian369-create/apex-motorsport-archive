@@ -411,18 +411,48 @@ export default function MotorsportHomePage() {
         </div>
       </section>
 
-      {/* 7. FACTORY CAD INSPECTION REGISTRY & VEHICLE SCHEMATICS */}
+      {/* 7. GLOWING NEON WARNING TICKER (Directly above vehicle catalog transition) */}
+      <div className="w-full bg-[#D2FF00] py-2.5 shadow-[0_0_30px_rgba(210,255,0,0.3)] overflow-hidden select-none relative z-20">
+        <div className="animate-marquee-infinite whitespace-nowrap text-black font-black text-sm tracking-widest uppercase">
+          <span className="mx-4">CARBON MONOCOQUE DISSECTION /// 860 KG ACTIVE DRS DOWNFORCE /// EA888 TSI 4MOTION /// APEX MOTORSPORT CAD ARCHIVE /// 9,000 RPM FLAT-6 /// FIA HOMOLOGATED VEHICLES ///</span>
+          <span className="mx-4">CARBON MONOCOQUE DISSECTION /// 860 KG ACTIVE DRS DOWNFORCE /// EA888 TSI 4MOTION /// APEX MOTORSPORT CAD ARCHIVE /// 9,000 RPM FLAT-6 /// FIA HOMOLOGATED VEHICLES ///</span>
+          <span className="mx-4">CARBON MONOCOQUE DISSECTION /// 860 KG ACTIVE DRS DOWNFORCE /// EA888 TSI 4MOTION /// APEX MOTORSPORT CAD ARCHIVE /// 9,000 RPM FLAT-6 /// FIA HOMOLOGATED VEHICLES ///</span>
+          <span className="mx-4">CARBON MONOCOQUE DISSECTION /// 860 KG ACTIVE DRS DOWNFORCE /// EA888 TSI 4MOTION /// APEX MOTORSPORT CAD ARCHIVE /// 9,000 RPM FLAT-6 /// FIA HOMOLOGATED VEHICLES ///</span>
+        </div>
+      </div>
+
+      {/* 8. PADDOCK CAD MOUSE SCROLL PROMPT */}
+      <div
+        onClick={scrollToVehicles}
+        className="py-14 flex flex-col items-center justify-center text-center cursor-pointer group select-none relative z-10 transition-transform duration-300 hover:scale-105"
+      >
+        <span className="text-xs font-mono tracking-widest text-[#D2FF00] uppercase mb-3.5 group-hover:text-white transition-colors">
+          — SCROLL TO ENTER PADDOCK CAD DARKROOM —
+        </span>
+
+        {/* Illuminated Computer Mouse Contour with animated pulsing lime scroll wheel */}
+        <div className="w-6 h-10 border-2 border-[#2C364A] group-hover:border-[#D2FF00] rounded-full flex items-start justify-center p-1.5 transition-colors shadow-[0_0_15px_rgba(210,255,0,0.2)]">
+          <div className="w-1 h-2 bg-[#D2FF00] rounded-full animate-mouse-wheel" />
+        </div>
+
+        {/* Subtle Bouncing Chevron */}
+        <span className="text-[#D2FF00] group-hover:text-white mt-2 font-mono text-sm leading-none animate-bounce">
+          ⌄
+        </span>
+      </div>
+
+      {/* 9. FACTORY CAD INSPECTION REGISTRY & VEHICLE SCHEMATICS */}
       <section
         id="vehicle-cad-deck"
         ref={deckRef}
-        className="pt-12 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10"
+        className="pt-6 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10"
       >
         {/* Sticky Search & Brand Filter Bar */}
         <div className="sticky top-16 z-30 bg-[#07090E]/95 border border-white/10 p-6 rounded-2xl shadow-2xl mb-10 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div className="text-xs font-mono text-[#D2FF00] font-bold uppercase tracking-widest mb-1">
-                [ 02. FACTORY CAD INSPECTION REGISTRY ]
+              <div className="text-xs font-mono text-[#D2FF00] font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                <span>[ 02. FACTORY CAD INSPECTION REGISTRY ]</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">
                 ACTIVE VEHICLE SCHEMATICS
@@ -436,15 +466,15 @@ export default function MotorsportHomePage() {
             </div>
           </div>
 
-          {/* Authentic Milled Billet Search Bar */}
+          {/* Styled Terminal Input with Subtle Inner Glow */}
           <div className="relative">
-            <Search className="w-4 h-4 text-[#717A8C] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-4 h-4 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               placeholder="Search by chassis code, model, or engine (e.g. GT3, M4 CSL, S58, V12, F40, RB26, EA888)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-[#0B0F17] border border-white/15 focus:border-[#D2FF00] rounded-lg text-sm text-white placeholder-[#5A6578] font-mono transition-colors shadow-inner outline-none"
+              className="w-full pl-11 pr-4 py-3.5 bg-[#07090E] border border-white/15 focus:border-[#D2FF00] rounded-xl text-sm text-slate-200 placeholder:text-slate-600 font-mono transition-colors shadow-[inset_0_1px_4px_rgba(0,0,0,0.6)] outline-none"
             />
             {searchQuery && (
               <button
@@ -462,23 +492,23 @@ export default function MotorsportHomePage() {
               CHASSIS MARQUE:
             </span>
             {[
-              { label: "ALL", value: null },
+              { label: "ALL SCHEMATICS", value: null },
               { label: "PORSCHE", value: "Porsche" },
-              { label: "BMW", value: "BMW" },
+              { label: "VOLKSWAGEN", value: "Volkswagen" },
               { label: "MCLAREN", value: "McLaren" },
               { label: "FERRARI", value: "Ferrari" },
-              { label: "NISSAN", value: "Nissan" },
-              { label: "VOLKSWAGEN", value: "Volkswagen" }
+              { label: "BMW", value: "BMW" },
+              { label: "NISSAN", value: "Nissan" }
             ].map((pill) => {
               const isActive = selectedBrand === pill.value;
               return (
                 <button
                   key={pill.label}
                   onClick={() => setSelectedBrand(pill.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-4 py-1.5 rounded-md text-xs font-mono uppercase transition-colors cursor-pointer ${
                     isActive
-                      ? "bg-[#D2FF00] text-black shadow-[0_0_15px_rgba(210,255,0,0.4)] scale-105"
-                      : "bg-[#0E131E] border border-[#1C2536] text-[#8C98AC] hover:text-white hover:border-[#D2FF00]/40"
+                      ? "bg-[#D2FF00] text-black font-bold shadow-[0_0_15px_rgba(210,255,0,0.4)]"
+                      : "bg-[#10141D] hover:bg-white/10 text-slate-300 border border-white/5"
                   }`}
                 >
                   {pill.label}

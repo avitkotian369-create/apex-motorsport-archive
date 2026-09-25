@@ -100,10 +100,10 @@ body {
 
 @keyframes marqueeInfinite {
   0% {
-    transform: translateX(0%);
+    transform: translate3d(0%, 0, 0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
@@ -132,6 +132,21 @@ body {
     transform: translateX(100vw) translateY(-25px);
     opacity: 0;
   }
+}
+
+@keyframes mouseWheelDrop {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.animate-mouse-wheel {
+  animation: mouseWheelDrop 1.5s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
 @keyframes particleFloat {
