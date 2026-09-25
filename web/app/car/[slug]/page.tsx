@@ -22,6 +22,7 @@ import {
   BlueprintCanvas,
   BenchmarkCarMeta
 } from "@/components/blueprint/blueprint-canvas";
+import { ChassisSwitcher } from "@/components/navigation/chassis-switcher";
 import { automotiveApi } from "@/lib/api";
 
 interface PageProps {
@@ -145,15 +146,6 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
   }
 };
 
-const ROSTER_PILLS = [
-  { slug: "porsche-911-gt3-rs", label: "GT3 RS" },
-  { slug: "bmw-m4-csl", label: "M4 CSL" },
-  { slug: "mclaren-f1-xp5", label: "F1 XP5" },
-  { slug: "ferrari-f40", label: "F40" },
-  { slug: "nissan-skyline-gtr-r34", label: "GT-R R34" },
-  { slug: "volkswagen-golf-r-mk8", label: "GOLF R" }
-];
-
 export default function CarCadTerminalPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const rawSlug = resolvedParams.slug.toLowerCase();
@@ -254,34 +246,19 @@ export default function CarCadTerminalPage({ params }: PageProps) {
           {/* Left: Sleek back navigation link */}
           <Link
             href="/"
-            className="group inline-flex items-center gap-2 text-xs font-mono font-medium text-slate-400 hover:text-white transition-colors cursor-pointer"
+            className="group inline-flex items-center gap-2 text-xs font-mono font-medium text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#D2FF00] group-hover:-translate-x-1 transition-all" />
             <span className="tracking-wider uppercase">SHOWROOM / ARCHIVE</span>
           </Link>
 
-          {/* Center: Smooth horizontal car selector pill bar */}
-          <nav className="flex items-center gap-1 p-1 rounded-full bg-[#0D121D] border border-[#1E273A] shadow-inner overflow-x-auto scrollbar-none max-w-[55%] sm:max-w-none">
-            {ROSTER_PILLS.map((pill) => {
-              const isActive = carKey === pill.slug;
-              return (
-                <Link
-                  key={pill.slug}
-                  href={`/car/${pill.slug}`}
-                  className={`px-3 py-1 rounded-full text-[11px] font-mono font-bold tracking-wide whitespace-nowrap transition-all cursor-pointer ${
-                    isActive
-                      ? "bg-[#D2FF00] text-black shadow-[0_0_12px_rgba(210,255,0,0.35)] font-black"
-                      : "text-slate-400 hover:text-white hover:bg-[#161F30]"
-                  }`}
-                >
-                  {pill.label}
-                </Link>
-              );
-            })}
-          </nav>
+          {/* Center: Compact & Scalable Chassis Switcher Dropdown */}
+          <div className="flex-1 flex justify-center">
+            <ChassisSwitcher currentSlug={carKey} />
+          </div>
 
           {/* Right: Subtle CAD terminal metadata */}
-          <div className="hidden md:flex items-center gap-2 text-[10px] font-mono text-slate-500 tracking-wider">
+          <div className="hidden md:flex items-center gap-2 text-[10px] font-mono text-slate-500 tracking-wider shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-[#D2FF00] animate-pulse" />
             <span>MONOCOQUE CAD // ISO 7200</span>
           </div>
