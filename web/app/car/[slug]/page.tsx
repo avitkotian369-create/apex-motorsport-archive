@@ -11,7 +11,7 @@ import {
   Flame,
   Scale,
   Wrench,
-  Box
+  Wind
 } from "lucide-react";
 import {
   TargetCallout,
@@ -30,9 +30,11 @@ interface PageProps {
 
 export const CAR_META: Record<string, BenchmarkCarMeta> = {
   "porsche-911-gt3-rs": {
-    name: "PORSCHE 911 GT3 RS (Weissach Package)",
-    badge: "WEISSACH HOMOLOGATION",
+    name: "PORSCHE 911 GT3 RS",
+    subtitle: "992.1 Weissach Package Track Homologation",
+    badge: "WEISSACH TRACK HOMOLOGATION",
     engine: "MA1.77 // 4.0L FLAT-6",
+    engineSubtext: "Naturally Aspirated Direct Injection • Dry Sump",
     power: "525 PS (386 kW)",
     redline: "9,000 RPM",
     dryWeight: "1,450 kg (DIN)",
@@ -47,9 +49,11 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     }
   },
   "bmw-m4-csl": {
-    name: "BMW M4 CSL (Competition Sport Lightweight)",
+    name: "BMW M4 CSL",
+    subtitle: "G82 Competition Sport Lightweight (-100 kg)",
     badge: "CSL LIGHTWEIGHT HOMOLOGATION",
     engine: "S58B30T0 // 3.0L TWIN-TURBO",
+    engineSubtext: "Closed-Deck Bi-Turbo I6 • 3D Printed Head Core",
     power: "550 PS (405 kW)",
     redline: "7,200 RPM",
     dryWeight: "1,625 kg (DIN)",
@@ -64,9 +68,11 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     }
   },
   "mclaren-f1-xp5": {
-    name: "MCLAREN F1 XP5 (Le Mans Benchmark)",
+    name: "MCLAREN F1 (XP5)",
+    subtitle: "Central Cockpit Le Mans Production Speed Record",
     badge: "LE MANS BENCHMARK HOMOLOGATION",
     engine: "BMW S70/2 // 6.1L 60° V12",
+    engineSubtext: "Naturally Aspirated 48-Valve • Pure Gold Foil Bay",
     power: "627 PS (461 kW)",
     redline: "7,500 RPM",
     dryWeight: "1,138 kg (Dry)",
@@ -81,9 +87,11 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     }
   },
   "volkswagen-golf-r-mk8": {
-    name: "VOLKSWAGEN GOLF R MK8 (20 Years Edition)",
+    name: "VOLKSWAGEN GOLF R",
+    subtitle: "Mk8 20 Years Edition • MQB Evo Architecture",
     badge: "20 YEARS HOMOLOGATION SPEC",
     engine: "EA888 GEN 4 // 2.0L TSI",
+    engineSubtext: "Continental Turbocharged Direct Injection • 350 Bar",
     power: "320 PS (235 kW)",
     redline: "6,800 RPM",
     dryWeight: "1,551 kg (DIN)",
@@ -98,9 +106,11 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     }
   },
   "ferrari-f40": {
-    name: "FERRARI F40 (Tipo F120AB)",
+    name: "FERRARI F40",
+    subtitle: "Tipo F120AB Kevlar-Nomex Clamshell Homologation",
     badge: "TIPO F120AB HOMOLOGATION",
     engine: "TIPO F120A // 2.9L TT V8",
+    engineSubtext: "Twin IHI Turbocharged 90° V8 • Behr Intercooled",
     power: "478 PS (352 kW)",
     redline: "7,750 RPM",
     dryWeight: "1,100 kg (Dry)",
@@ -115,9 +125,11 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
     }
   },
   "nissan-skyline-gtr-r34": {
-    name: "NISSAN SKYLINE GT-R R34 (V-Spec II Nürburgring)",
+    name: "NISSAN SKYLINE GT-R (R34)",
+    subtitle: "V-Spec II Nürburgring Spec • ATTESA E-TS Pro AWD",
     badge: "V-SPEC II NÜRBURGRING HOMOLOGATION",
     engine: "RB26DETT // 2.6L TT I6",
+    engineSubtext: "Twin Ceramic Turbochargers • 6 Individual Throttles",
     power: "280+ PS (206 kW)",
     redline: "8,000 RPM",
     dryWeight: "1,560 kg (DIN)",
@@ -133,13 +145,13 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
   }
 };
 
-const ROSTER_LINKS = [
-  { slug: "porsche-911-gt3-rs", label: "PORSCHE 911 GT3 RS" },
-  { slug: "mclaren-f1-xp5", label: "MCLAREN F1 (XP5)" },
-  { slug: "ferrari-f40", label: "FERRARI F40" },
-  { slug: "nissan-skyline-gtr-r34", label: "NISSAN SKYLINE GT-R" },
-  { slug: "volkswagen-golf-r-mk8", label: "VW GOLF R (MK8)" },
-  { slug: "bmw-m4-csl", label: "BMW M4 CSL" }
+const ROSTER_PILLS = [
+  { slug: "porsche-911-gt3-rs", label: "GT3 RS" },
+  { slug: "bmw-m4-csl", label: "M4 CSL" },
+  { slug: "mclaren-f1-xp5", label: "F1 XP5" },
+  { slug: "ferrari-f40", label: "F40" },
+  { slug: "nissan-skyline-gtr-r34", label: "GT-R R34" },
+  { slug: "volkswagen-golf-r-mk8", label: "GOLF R" }
 ];
 
 export default function CarCadTerminalPage({ params }: PageProps) {
@@ -235,110 +247,200 @@ export default function CarCadTerminalPage({ params }: PageProps) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#08090C] text-[#E2E8F0] selection:bg-[#D2FF00] selection:text-black flex flex-col font-sans relative overflow-x-hidden bg-cad-grid">
-      {/* 1. TOP COCKPIT NAVIGATION & LIVE TELEMETRY STRIP */}
-      <header className="border-b border-[#1E2536] bg-[#090C12]/95 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          {/* Back Breadcrumb & Active Car Title */}
-          <div className="flex items-center gap-3 sm:gap-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#222A3B] hover:border-[#D2FF00] bg-[#0E131E] text-xs font-mono font-bold text-[#A6B2C4] hover:text-[#D2FF00] transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4 text-[#D2FF00]" />
-              <span className="hidden sm:inline">EXIT TO MONOCOQUE ARCHIVE</span>
-              <span className="sm:hidden">EXIT</span>
-            </Link>
+    <div className="min-h-screen bg-[#06080E] text-[#E2E8F0] selection:bg-[#D2FF00] selection:text-black flex flex-col font-sans relative overflow-x-hidden bg-cad-grid">
+      {/* 1. TIER 1: MINIMALIST UTILITY NAVIGATION (HEIGHT: ~48PX) */}
+      <header className="border-b border-[#161F30] bg-[#07090E]/95 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between gap-4">
+          {/* Left: Sleek back navigation link */}
+          <Link
+            href="/"
+            className="group inline-flex items-center gap-2 text-xs font-mono font-medium text-slate-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-slate-500 group-hover:text-[#D2FF00] group-hover:-translate-x-1 transition-all" />
+            <span className="tracking-wider uppercase">SHOWROOM / ARCHIVE</span>
+          </Link>
 
-            <div className="h-6 w-[1px] bg-[#1E2536] hidden sm:block" />
+          {/* Center: Smooth horizontal car selector pill bar */}
+          <nav className="flex items-center gap-1 p-1 rounded-full bg-[#0D121D] border border-[#1E273A] shadow-inner overflow-x-auto scrollbar-none max-w-[55%] sm:max-w-none">
+            {ROSTER_PILLS.map((pill) => {
+              const isActive = carKey === pill.slug;
+              return (
+                <Link
+                  key={pill.slug}
+                  href={`/car/${pill.slug}`}
+                  className={`px-3 py-1 rounded-full text-[11px] font-mono font-bold tracking-wide whitespace-nowrap transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-[#D2FF00] text-black shadow-[0_0_12px_rgba(210,255,0,0.35)] font-black"
+                      : "text-slate-400 hover:text-white hover:bg-[#161F30]"
+                  }`}
+                >
+                  {pill.label}
+                </Link>
+              );
+            })}
+          </nav>
 
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs sm:text-sm font-mono font-black text-white uppercase tracking-wider">
-                  {carInfo.name}
-                </span>
-                <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold tracking-wider uppercase border border-red-500/60 text-red-400 bg-red-500/10 shadow-[0_0_12px_rgba(239,68,68,0.2)]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  {carInfo.badge}
-                </span>
-              </div>
-              <div className="text-[10px] font-mono text-[#637085] hidden md:block">
-                MONOCOQUE // AUTOMOTIVE ANATOMY ARCHIVE • ISO 7200 STANDARDS
-              </div>
-            </div>
+          {/* Right: Subtle CAD terminal metadata */}
+          <div className="hidden md:flex items-center gap-2 text-[10px] font-mono text-slate-500 tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D2FF00] animate-pulse" />
+            <span>MONOCOQUE CAD // ISO 7200</span>
           </div>
-
-          <div className="flex items-center gap-3">
-            {/* Inset dark box with #D2FF00 electric lime engine code */}
-            <div className="text-right font-mono bg-[#07090E] px-3 py-1.5 rounded-xl border border-[#1A2233] shadow-inner shrink-0 hidden sm:block">
-              <span className="text-[8px] text-[#616E82] uppercase tracking-wider block font-bold leading-none">
-                ENGINE BLOCK
-              </span>
-              <span className="text-xs font-bold text-[#D2FF00] tracking-wide block mt-0.5">
-                {carInfo.engine}
-              </span>
-            </div>
-
-            {/* Live Telemetry Matrix (4 Columns) */}
-            <div className="hidden lg:flex items-center gap-2 font-mono text-xs">
-              {/* 1. Output */}
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0E131E] border border-[#1E2536]">
-                <Zap className="w-3.5 h-3.5 text-[#D2FF00]" />
-                <span className="text-[#647087]">OUTPUT:</span>
-                <span className="text-white font-bold">{carInfo.power}</span>
-              </div>
-
-              {/* 2. Redline */}
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0E131E] border border-[#1E2536]">
-                <Gauge className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="text-[#647087]">REDLINE:</span>
-                <span className="text-cyan-400 font-bold">{carInfo.redline}</span>
-              </div>
-
-              {/* 3. Curb Weight */}
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0E131E] border border-[#1E2536]">
-                <Scale className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-[#647087]">CURB WT:</span>
-                <span className="text-amber-400 font-bold">{carInfo.dryWeight}</span>
-              </div>
-
-              {/* 4. Downforce */}
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0E131E] border border-[#1E2536]">
-                <Flame className="w-3.5 h-3.5 text-red-400" />
-                <span className="text-[#647087]">AERO:</span>
-                <span className="text-red-400 font-bold max-w-[130px] truncate">{carInfo.aeroBalance}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 6-Car Homologation Roster Switcher Bar */}
-        <div className="border-t border-[#161C2A] bg-[#07090E] px-4 sm:px-6 lg:px-8 py-1.5 overflow-x-auto scrollbar-none flex items-center gap-2 font-mono text-[11px]">
-          <span className="text-[#55647A] font-bold uppercase tracking-wider shrink-0 flex items-center gap-1">
-            <Box className="w-3 h-3 text-[#D2FF00]" />
-            ROSTER:
-          </span>
-          {ROSTER_LINKS.map((item) => {
-            const isCurrent = carKey === item.slug;
-            return (
-              <Link
-                key={item.slug}
-                href={`/car/${item.slug}`}
-                className={`px-2.5 py-1 rounded text-[10px] font-bold whitespace-nowrap transition-all cursor-pointer ${
-                  isCurrent
-                    ? "bg-[#D2FF00] text-black shadow-[0_0_10px_rgba(210,255,0,0.3)] font-black"
-                    : "bg-[#0E131E] text-[#8A95A8] hover:text-white hover:bg-[#161E2E] border border-[#1E2536]"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
         </div>
       </header>
 
       {/* 2. MAIN CAD WORKSPACE STAGE */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col space-y-6 w-full">
+        {/* TIER 2: VEHICLE HERO IDENTITY & STAMPED ENGINE PLATE */}
+        <section className="w-full flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-[#161F30]">
+          {/* Left Column: Hero Title, Subtitle, Homologation Badge */}
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Refined Red Homologation Pill */}
+              <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border border-red-500/60 text-red-400 bg-red-500/10 shadow-[0_0_14px_rgba(239,68,68,0.25)]">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                {carInfo.badge}
+              </span>
+              <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">
+                AUTOMOTIVE ANATOMY ARCHIVE // VIN #MQ-{carInfo.dimensions.wheelbase.replace(/\D/g, "")}
+              </span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-sans tracking-tight text-white uppercase leading-none pt-1">
+              {carInfo.name}
+            </h1>
+
+            <p className="text-xs sm:text-sm font-mono text-slate-400 tracking-wide">
+              {carInfo.subtitle}
+            </p>
+          </div>
+
+          {/* Right Column: Billet Aluminum Stamped VIN / Engine ID Plate */}
+          <div className="relative rounded-xl border border-slate-700/60 bg-gradient-to-br from-[#141B28] via-[#0B0F19] to-[#06080E] p-4 sm:px-5 sm:py-3.5 shadow-2xl shrink-0 min-w-[280px] sm:min-w-[340px] overflow-hidden group">
+            {/* Stamped Corner Rivets */}
+            <span className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full bg-slate-500 border border-slate-300/40 shadow-inner" />
+            <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-slate-500 border border-slate-300/40 shadow-inner" />
+            <span className="absolute bottom-2 left-2 w-1.5 h-1.5 rounded-full bg-slate-500 border border-slate-300/40 shadow-inner" />
+            <span className="absolute bottom-2 right-2 w-1.5 h-1.5 rounded-full bg-slate-500 border border-slate-300/40 shadow-inner" />
+
+            {/* Subtle Stamped Metal Header Bar */}
+            <div className="flex items-center justify-between text-[9px] font-mono font-bold tracking-wider text-slate-400 border-b border-slate-800/80 pb-1.5 mb-2">
+              <span className="flex items-center gap-1.5 text-slate-400 uppercase">
+                <Wrench className="w-3 h-3 text-[#D2FF00]" />
+                ENGINE PLATFORM
+              </span>
+              <span className="text-slate-500 tracking-widest uppercase">OEM STAMPED</span>
+            </div>
+
+            {/* Engine Code in Electric Lime */}
+            <div className="text-base sm:text-lg font-mono font-black text-[#D2FF00] tracking-wide">
+              {carInfo.engine}
+            </div>
+
+            {/* Engine Subtext */}
+            <div className="text-[11px] font-mono text-slate-400 mt-0.5">
+              {carInfo.engineSubtext}
+            </div>
+          </div>
+        </section>
+
+        {/* TIER 3: FLOATING TELEMETRY HUD STRIP (4 CLEAN PILLARS) */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-mono">
+          {/* Column 1: OUTPUT */}
+          <div className="group relative rounded-xl border border-[#182236] hover:border-[#D2FF00]/50 bg-[#0A0D15]/90 backdrop-blur-md p-3.5 sm:p-4 shadow-lg transition-all duration-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+                <Zap className="w-3.5 h-3.5 text-[#D2FF00] group-hover:scale-110 transition-transform" />
+                <span>OUTPUT</span>
+              </div>
+              <span className="text-[9px] text-[#D2FF00] bg-[#D2FF00]/10 border border-[#D2FF00]/30 px-1.5 py-0.2 rounded font-bold">
+                PEAK
+              </span>
+            </div>
+            <div className="text-lg sm:text-xl font-black text-white mt-1.5 tracking-tight">
+              {carInfo.power}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">
+              Peak Track Power
+            </div>
+            {/* Plain English tooltip on hover */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute bottom-full left-0 right-0 mb-2 p-2.5 rounded-lg bg-[#05070A]/95 border border-[#1E2536] text-[11px] text-slate-300 font-sans z-30 pointer-events-none shadow-2xl">
+              Maximum continuous mechanical work delivered to the driveline.
+            </div>
+          </div>
+
+          {/* Column 2: REDLINE */}
+          <div className="group relative rounded-xl border border-[#182236] hover:border-cyan-400/50 bg-[#0A0D15]/90 backdrop-blur-md p-3.5 sm:p-4 shadow-lg transition-all duration-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+                <Gauge className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <span>REDLINE</span>
+              </div>
+              {/* Mini glowing tachometer arc micro-indicator */}
+              <svg className="w-4 h-4 text-cyan-400 group-hover:rotate-12 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M4 16 A 8 8 0 0 1 20 16" strokeDasharray="2 2" />
+                <line x1="12" y1="16" x2="17" y2="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </div>
+            <div className="text-lg sm:text-xl font-black text-cyan-400 mt-1.5 tracking-tight">
+              {carInfo.redline}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">
+              Maximum Engine Speed
+            </div>
+            {/* Plain English tooltip on hover */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute bottom-full left-0 right-0 mb-2 p-2.5 rounded-lg bg-[#05070A]/95 border border-[#1E2536] text-[11px] text-slate-300 font-sans z-30 pointer-events-none shadow-2xl">
+              Peak rotational engine crankshaft limit before ignition cut to protect the valvetrain.
+            </div>
+          </div>
+
+          {/* Column 3: CURB WEIGHT */}
+          <div className="group relative rounded-xl border border-[#182236] hover:border-amber-400/50 bg-[#0A0D15]/90 backdrop-blur-md p-3.5 sm:p-4 shadow-lg transition-all duration-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+                <Scale className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+                <span>CURB WEIGHT</span>
+              </div>
+              <span className="text-[9px] text-amber-400 bg-amber-400/10 border border-amber-400/30 px-1.5 py-0.2 rounded font-bold">
+                DIN
+              </span>
+            </div>
+            <div className="text-lg sm:text-xl font-black text-amber-400 mt-1.5 tracking-tight">
+              {carInfo.dryWeight}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">
+              DIN Unladen Weight
+            </div>
+            {/* Plain English tooltip on hover */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute bottom-full left-0 right-0 mb-2 p-2.5 rounded-lg bg-[#05070A]/95 border border-[#1E2536] text-[11px] text-slate-300 font-sans z-30 pointer-events-none shadow-2xl">
+              Complete vehicle mass with 90% fuel and all operating fluids ready for track operation.
+            </div>
+          </div>
+
+          {/* Column 4: DOWNFORCE */}
+          <div className="group relative rounded-xl border border-[#182236] hover:border-red-400/50 bg-[#0A0D15]/90 backdrop-blur-md p-3.5 sm:p-4 shadow-lg transition-all duration-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+                <Flame className="w-3.5 h-3.5 text-red-400 group-hover:scale-110 transition-transform" />
+                <span>DOWNFORCE</span>
+              </div>
+              {/* Aero Wind Chevron */}
+              <div className="flex items-center text-[9px] text-red-400 bg-red-400/10 border border-red-400/30 px-1.5 py-0.2 rounded font-bold gap-0.5">
+                <Wind className="w-2.5 h-2.5" />
+                <span>AERO</span>
+              </div>
+            </div>
+            <div className="text-lg sm:text-xl font-black text-red-400 mt-1.5 tracking-tight truncate">
+              {carInfo.aeroBalance}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">
+              High-Speed Aero Load
+            </div>
+            {/* Plain English tooltip on hover */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute bottom-full left-0 right-0 mb-2 p-2.5 rounded-lg bg-[#05070A]/95 border border-[#1E2536] text-[11px] text-slate-300 font-sans z-30 pointer-events-none shadow-2xl">
+              Generates enough negative lift to pin the car firmly through high-speed track curves.
+            </div>
+          </div>
+        </section>
         {/* EXPLODED ISOMETRIC KNOLLING CANVAS */}
         <section className="w-full relative">
           <BlueprintCanvas

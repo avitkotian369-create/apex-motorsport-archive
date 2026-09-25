@@ -22,6 +22,8 @@ export interface BenchmarkCarMeta {
   dryWeight: string;
   aeroBalance: string;
   defaultCutaway: string;
+  subtitle?: string;
+  engineSubtext?: string;
   dimensions: {
     wheelbase: string;
     trackFront: string;
@@ -63,9 +65,11 @@ export interface BlueprintCanvasProps {
 }
 
 const DEFAULT_CAR_META: BenchmarkCarMeta = {
-  name: "PORSCHE 911 GT3 RS (992.1)",
-  badge: "WEISSACH HOMOLOGATION",
-  engine: "4.0L FLAT-6 NA (MA1.77)",
+  name: "PORSCHE 911 GT3 RS",
+  subtitle: "992.1 Weissach Package Track Homologation",
+  badge: "WEISSACH TRACK HOMOLOGATION",
+  engine: "MA1.77 // 4.0L FLAT-6",
+  engineSubtext: "Naturally Aspirated Direct Injection • Dry Sump",
   power: "525 PS (386 kW)",
   redline: "9,000 RPM",
   dryWeight: "1,450 kg (DIN)",
