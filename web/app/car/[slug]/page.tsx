@@ -135,11 +135,11 @@ export const CAR_META: Record<string, BenchmarkCarMeta> = {
 
 const ROSTER_LINKS = [
   { slug: "porsche-911-gt3-rs", label: "PORSCHE 911 GT3 RS" },
-  { slug: "bmw-m4-csl", label: "BMW M4 CSL" },
   { slug: "mclaren-f1-xp5", label: "MCLAREN F1 (XP5)" },
-  { slug: "volkswagen-golf-r-mk8", label: "VW GOLF R (MK8)" },
   { slug: "ferrari-f40", label: "FERRARI F40" },
-  { slug: "nissan-skyline-gtr-r34", label: "NISSAN SKYLINE GT-R" }
+  { slug: "nissan-skyline-gtr-r34", label: "NISSAN SKYLINE GT-R" },
+  { slug: "volkswagen-golf-r-mk8", label: "VW GOLF R (MK8)" },
+  { slug: "bmw-m4-csl", label: "BMW M4 CSL" }
 ];
 
 export default function CarCadTerminalPage({ params }: PageProps) {
@@ -167,6 +167,7 @@ export default function CarCadTerminalPage({ params }: PageProps) {
 
   // Progressive disclosure drawer tracking per card
   const [expandedCardIds, setExpandedCardIds] = useState<Record<number, boolean>>({});
+  const [filterIsolatedOnly, setFilterIsolatedOnly] = useState<boolean>(false);
 
   const toggleCardDossier = (partId: number) => {
     setExpandedCardIds((prev) => ({
@@ -188,6 +189,14 @@ export default function CarCadTerminalPage({ params }: PageProps) {
   const allPins: TargetCallout[] = useMemo(() => {
     return getHomologatedVehicleKnollingPins(carKey, "all");
   }, [carKey]);
+
+  // Filtered or full pins list depending on user preference
+  const displayedPins = useMemo(() => {
+    if (filterIsolatedOnly && activeTier !== "all") {
+      return allPins.filter((p) => p.tier === activeTier);
+    }
+    return allPins;
+  }, [allPins, filterIsolatedOnly, activeTier]);
 
   // Active callout (defaults to first pin)
   const activeCallout = useMemo(() => {
@@ -364,25 +373,38 @@ export default function CarCadTerminalPage({ params }: PageProps) {
             </div>
 
             {/* Active Tier Filter Status */}
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="text-[#717E94] text-[11px]">ACTIVE ISOLATION:</span>
               <span className="px-2.5 py-1 rounded-lg bg-[#D2FF00]/10 text-[#D2FF00] border border-[#D2FF00]/30 font-bold uppercase text-[11px]">
-                {activeTier === "all" ? "ALL PARTS (12/12)" : `${activeTier.toUpperCase()} LAYER`}
+                {activeTier === "all"
+                  ? `ALL PARTS (${allPins.length}/${allPins.length})`
+                  : `${activeTier.toUpperCase()} LAYER (${allPins.filter((p) => p.tier === activeTier).length} PARTS)`}
               </span>
               {activeTier !== "all" && (
-                <button
-                  onClick={() => setActiveTier("all")}
-                  className="text-[10px] text-[#A6B2C4] hover:text-white underline cursor-pointer"
-                >
-                  Reset
-                </button>
+                <>
+                  <button
+                    onClick={() => setFilterIsolatedOnly((f) => !f)}
+                    className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold border border-[#2B384E] bg-[#121824] text-[#A6B2C4] hover:text-[#D2FF00] hover:border-[#D2FF00]/50 transition-colors cursor-pointer"
+                  >
+                    {filterIsolatedOnly ? "SHOW FULL GRID (DIMMED)" : "FILTER ISOLATED ONLY"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveTier("all");
+                      setFilterIsolatedOnly(false);
+                    }}
+                    className="text-[10px] text-[#A6B2C4] hover:text-white underline cursor-pointer"
+                  >
+                    Reset
+                  </button>
+                </>
               )}
             </div>
           </div>
 
           {/* Cards Grid: 1 or 2 columns of clean, beginner-friendly cards */}
           <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            {allPins.map((part) => {
+            {displayedPins.map((part) => {
               const isSelected = activeCallout?.id === part.id;
               const isHovered = hoveredCalloutId === part.id;
               const isTierMatch = activeTier === "all" || part.tier === activeTier;
