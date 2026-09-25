@@ -4,12 +4,97 @@ import React, { useState, useMemo, useRef } from "react";
 import {
   Search,
   ShieldAlert,
-  Compass
+  Compass,
+  CheckCircle2,
+  ChevronRight,
+  Database,
+  Wind,
+  Layers,
+  Cpu
 } from "lucide-react";
 import { VEHICLE_ROSTER } from "@/data/vehicle-roster";
 import { CadTerminalCard } from "@/components/blueprint/cad-terminal-card";
 import { RevPreloader } from "@/components/preloader/rev-preloader";
 import { Hero } from "@/components/hero/hero";
+
+interface EditorialArticle {
+  id: string;
+  number: string;
+  tag: string;
+  tagColor: string;
+  title: string;
+  readTime: string;
+  summary: string;
+  author: string;
+  bulletPoints: string[];
+  specs: { label: string; value: string }[];
+}
+
+const EDITORIAL_FEED: EditorialArticle[] = [
+  {
+    id: "crankshaft-kinematics",
+    number: "01",
+    tag: "DAILY CAR & MOTORSPORT INSIGHT",
+    tagColor: "text-[#D2FF00] border-[#D2FF00]/40 bg-[#D2FF00]/10",
+    title: "Flat-Plane vs. Cross-Plane Crankshaft Harmonics, Secondary Balance & Scavenging",
+    readTime: "4 MIN READ",
+    summary:
+      "Why 180° flat-plane configurations spool effortlessly to 9,000 RPM with 35% lower rotational inertia, and how secondary order vertical shaking forces are mitigated via hollow titanium rods and dry-sump dampening.",
+    author: "Powertrain Dynamics Lab",
+    bulletPoints: [
+      "Cross-plane counterweights add parasitic rotating mass; 180° flat journals shed 18 kg inertia.",
+      "Even-firing alternate exhaust pulses eliminate exhaust pulse collision for optimal scavenging.",
+      "Inherent secondary imbalance at 2x engine speed is absorbed via high-rigidity structural bedplates."
+    ],
+    specs: [
+      { label: "REV CEILING", value: "9,000 RPM" },
+      { label: "CRANKPIN OFFSET", value: "180° FLAT" },
+      { label: "ROTATIONAL DELTA", value: "-35% INERTIA" }
+    ]
+  },
+  {
+    id: "chassis-safety-geometry",
+    number: "02",
+    tag: "CHASSIS DYNAMICS & TRACK SAFETY",
+    tagColor: "text-[#FF8000] border-[#FF8000]/40 bg-[#FF8000]/10",
+    title: "Roll-Cage Node Triangulation, Harness Angles & Sustained Brake Boiling Points",
+    readTime: "5 MIN READ",
+    summary:
+      "Deconstructing structural load distribution under 4.2G apex compression, critical 10°–20° harness departure geometry, and fluid compressibility thresholds under 750°C carbon-ceramic rotor loads.",
+    author: "Safety & Chassis Engineering",
+    bulletPoints: [
+      "Node-to-node gusset triangulation increases chassis torsional rigidity by up to 140%.",
+      "Harness shoulder belts must maintain a 10° to 20° downward angle to prevent spinal compression.",
+      "High dry boiling point racing fluid (>325°C) prevents vapor lock under repetitive 250 km/h braking."
+    ],
+    specs: [
+      { label: "HARNESS ANGLE", value: "10° - 20°" },
+      { label: "TORSIONAL GAIN", value: "+140% kNm/deg" },
+      { label: "DRY BOILING PT", value: "> 325°C" }
+    ]
+  },
+  {
+    id: "performance-laptime-science",
+    number: "03",
+    tag: "PERFORMANCE MODIFICATION GUIDE",
+    tagColor: "text-emerald-400 border-emerald-500/40 bg-emerald-500/10",
+    title: "Unsprung Rotational Mass ROI vs. Static Horsepower & Dynamic Camber Curves",
+    readTime: "6 MIN READ",
+    summary:
+      "Why reducing 1 kg of wheel and brake rotor mass equals a 4x kinetic inertia reduction during acceleration and braking, and how elastokinematic camber recovery dictates contact patch grip.",
+    author: "Aerodynamics & Setup Team",
+    bulletPoints: [
+      "Forged magnesium/aluminum wheels dramatically reduce shock damper velocity overload.",
+      "Dynamic camber compliance bushings prevent outer tire shoulder roll scrub under sustained apex G.",
+      "Bolt-on cold-air intakes yield minimal delta compared to proper heat shielding and brake ducting."
+    ],
+    specs: [
+      { label: "UNSPRUNG RATIO", value: "1 kg : 4 kg" },
+      { label: "OPTIMAL STATIC CAMBER", value: "-2.8° FRONT" },
+      { label: "ROTATING MASS", value: "-14.4 kg FORGED" }
+    ]
+  }
+];
 
 export default function MotorsportHomePage() {
   // 1. Launch Control Preloader State
@@ -18,12 +103,20 @@ export default function MotorsportHomePage() {
   // Search & filter state (Mechanical DNA + Marque Brand)
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [expandedArticleId, setExpandedArticleId] = useState<string | null>(null);
 
   const deckRef = useRef<HTMLDivElement>(null);
+  const dispatchRef = useRef<HTMLElement>(null);
 
   const scrollToVehicles = () => {
     if (deckRef.current) {
       deckRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const scrollToDispatch = () => {
+    if (dispatchRef.current) {
+      dispatchRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -84,10 +177,10 @@ export default function MotorsportHomePage() {
         </div>
       </header>
 
-      {/* 3. Hero Section */}
+      {/* 3. Hero Section with Blueprint Grid & Watermark Typography */}
       <Hero
         onExploreClick={scrollToVehicles}
-        onTelemetryClick={scrollToVehicles}
+        onDispatchClick={scrollToDispatch}
       />
 
       {/* 4. Single Clean Nürburgring Lap-Time Benchmark Ticker */}
@@ -153,7 +246,172 @@ export default function MotorsportHomePage() {
         </div>
       </div>
 
-      {/* 5. Direct Flow into Vehicle Search Deck & CAD Darkroom */}
+      {/* 5. TOP 4 TELEMETRY SPEC MODULES (Positioned directly above Anatomy & Dynamics archives) */}
+      <section className="pt-12 pb-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Module 1: SCHEMATICS DATABASE */}
+          <div className="bg-[#0B0F17] border border-white/10 p-5 rounded-lg flex flex-col justify-between hover:border-[#D2FF00]/40 transition-colors shadow-lg">
+            <div className="flex items-center justify-between text-xs font-mono text-[#8C98AC]">
+              <div className="flex items-center gap-1.5 uppercase font-bold tracking-wider">
+                <Database className="w-3.5 h-3.5 text-[#D2FF00]" />
+                <span>SCHEMATICS DATABASE</span>
+              </div>
+              <span className="w-2 h-2 rounded-full bg-[#D2FF00] animate-pulse" />
+            </div>
+            <div className="mt-3">
+              <div className="text-xl font-black text-white font-mono">HOMOLOGATION CAD</div>
+              <div className="text-xs font-mono text-[#D2FF00] mt-1 flex items-center gap-1.5">
+                <span>●</span> GT3 RS & MK8 GOLF R
+              </div>
+            </div>
+          </div>
+
+          {/* Module 2: AERO DOWNFORCE */}
+          <div className="bg-[#0B0F17] border border-white/10 p-5 rounded-lg flex flex-col justify-between hover:border-cyan-400/40 transition-colors shadow-lg">
+            <div className="flex items-center justify-between text-xs font-mono text-[#8C98AC]">
+              <div className="flex items-center gap-1.5 uppercase font-bold tracking-wider">
+                <Wind className="w-3.5 h-3.5 text-cyan-400" />
+                <span>AERO DOWNFORCE</span>
+              </div>
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            </div>
+            <div className="mt-3">
+              <div className="text-xl font-black text-white font-mono">860 KG @ 285 KM/H</div>
+              <div className="text-xs font-mono text-cyan-400 mt-1 flex items-center gap-1.5">
+                <span>●</span> ACTIVE HYDRAULIC DRS
+              </div>
+            </div>
+          </div>
+
+          {/* Module 3: ALLOY CHEMISTRY */}
+          <div className="bg-[#0B0F17] border border-white/10 p-5 rounded-lg flex flex-col justify-between hover:border-[#FF8000]/40 transition-colors shadow-lg">
+            <div className="flex items-center justify-between text-xs font-mono text-[#8C98AC]">
+              <div className="flex items-center gap-1.5 uppercase font-bold tracking-wider">
+                <Cpu className="w-3.5 h-3.5 text-[#FF8000]" />
+                <span>ALLOY CHEMISTRY</span>
+              </div>
+              <span className="w-2 h-2 rounded-full bg-[#FF8000] animate-pulse" />
+            </div>
+            <div className="mt-3">
+              <div className="text-xl font-black text-white font-mono">AZ31B & TI-6AL-4V</div>
+              <div className="text-xs font-mono text-amber-400 mt-1 flex items-center gap-1.5">
+                <span>●</span> FULL TRACEABILITY
+              </div>
+            </div>
+          </div>
+
+          {/* Module 4: SUBSYSTEM ISOLATION */}
+          <div className="bg-[#0B0F17] border border-white/10 p-5 rounded-lg flex flex-col justify-between hover:border-emerald-400/40 transition-colors shadow-lg">
+            <div className="flex items-center justify-between text-xs font-mono text-[#8C98AC]">
+              <div className="flex items-center gap-1.5 uppercase font-bold tracking-wider">
+                <Layers className="w-3.5 h-3.5 text-emerald-400" />
+                <span>SUBSYSTEM ISOLATION</span>
+              </div>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            </div>
+            <div className="mt-3">
+              <div className="text-xl font-black text-white font-mono">3 ISOLATED TIERS</div>
+              <div className="text-xs font-mono text-emerald-400 mt-1 flex items-center gap-1.5">
+                <span>●</span> CHASSIS • ENGINE • CABIN
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. DAILY MOTORSPORT ENGINEERING & MODIFICATION DISPATCH (ANATOMY, DYNAMICS & SETUP ARCHIVES) */}
+      <section
+        id="daily-editorial"
+        ref={dispatchRef}
+        className="py-12 bg-[#06070A] bg-kerb-stripes border-y border-white/10 relative z-10"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div>
+              <div className="text-[#D2FF00] font-mono text-xs font-bold tracking-widest uppercase mb-1.5 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#D2FF00]" />
+                DAILY MOTORSPORT ENGINEERING & MODIFICATION DISPATCH
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tight">
+                ANATOMY, DYNAMICS & SETUP ARCHIVES
+              </h2>
+            </div>
+            <p className="text-xs font-mono text-[#717A8C] max-w-md leading-relaxed">
+              Curated by race engineers, powertrain tuners, and chassis dynamics specialists. Strictly component physics,
+              fastener tolerances, and track lap-time ROI.
+            </p>
+          </div>
+
+          {/* Dynamic 3-Column Editorial Grid with Expanding Hover States */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {EDITORIAL_FEED.map((article) => {
+              const isExpanded = expandedArticleId === article.id;
+              return (
+                <div
+                  key={article.id}
+                  onMouseEnter={() => setExpandedArticleId(article.id)}
+                  onMouseLeave={() => setExpandedArticleId(null)}
+                  className={`bg-[#0D121D] border rounded-xl p-6 flex flex-col justify-between transition-all duration-300 group shadow-xl ${
+                    isExpanded
+                      ? "border-[#D2FF00] bg-[#0E1524] shadow-[0_0_30px_rgba(210,255,0,0.15)] -translate-y-1"
+                      : "border-white/10 hover:border-white/20"
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-bold text-[#6B788E]">{article.number}</span>
+                        <span className={`px-2.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase border ${article.tagColor}`}>
+                          {article.tag}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono text-[#626E82]">{article.readTime}</span>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-white group-hover:text-[#D2FF00] transition-colors leading-snug mb-3">
+                      {article.title}
+                    </h3>
+
+                    <p className="text-xs text-[#909CB0] leading-relaxed mb-6 font-normal">
+                      {article.summary}
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-2 mb-6 p-2.5 bg-[#080A10] rounded-lg border border-[#171C27] text-center font-mono">
+                      {article.specs.map((s, idx) => (
+                        <div key={idx}>
+                          <div className="text-[8px] text-[#606D82] uppercase">{s.label}</div>
+                          <div className="text-[11px] font-bold text-white mt-0.5">{s.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="space-y-2.5 mb-6 border-t border-[#181E2B] pt-4">
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-[#D2FF00] font-bold">
+                        Mechanical Insights
+                      </div>
+                      {article.bulletPoints.map((bp, i) => (
+                        <div key={i} className="flex items-start gap-2 text-[11px] text-[#A6B2C4] leading-tight">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#D2FF00] shrink-0 mt-0.5" />
+                          <span>{bp}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-[#161B26] flex items-center justify-between text-xs font-mono text-[#6E7B91]">
+                    <span>{article.author}</span>
+                    <span className="group-hover:translate-x-1.5 transition-transform text-white font-bold flex items-center gap-1 text-xs">
+                      READ DOSSIER <ChevronRight className="w-3.5 h-3.5 text-[#D2FF00]" />
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* 7. FACTORY CAD INSPECTION REGISTRY & VEHICLE SCHEMATICS */}
       <section
         id="vehicle-cad-deck"
         ref={deckRef}
@@ -258,7 +516,7 @@ export default function MotorsportHomePage() {
         )}
       </section>
 
-      {/* 6. Footer */}
+      {/* 8. Footer */}
       <footer className="mt-12 border-t border-white/10 bg-[#07090E] py-10 text-center text-xs font-mono text-[#5A6578] relative z-10">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
