@@ -26,7 +26,7 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [showVectorMode, setShowVectorMode] = useState(true);
+  const [showVectorMode, setShowVectorMode] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -110,16 +110,16 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
           {/* Vignette Rim */}
           <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_60%,rgba(6,8,14,0.85)_100%)] z-10" />
 
-          {/* Display Vector Mode or Cutaway Photo */}
+          {/* Display Exploded Studio Knolling Photography by Default */}
           {showVectorMode || imageFailed ? (
-            <CadExplodedSchematic slug={car.slug} className="p-4" />
+            <CadExplodedSchematic slug={car.slug} className="p-2" />
           ) : (
             <Image
-              src={car.image}
-              alt={`${car.brand} ${car.model} CAD Blueprint Schematic`}
+              src={car.knollingImageUrl || car.image}
+              alt={`${car.brand} ${car.model} Exploded Knolling Mechanical Teardown`}
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-contain p-3.5 filter brightness-95 contrast-105 group-hover:scale-105 transition-transform duration-500"
+              className="object-contain p-2 filter brightness-100 contrast-105 group-hover:scale-[1.02] transition-transform duration-500"
               priority={priority}
               onError={() => setImageFailed(true)}
             />
@@ -156,7 +156,7 @@ export function CadTerminalCard({ car, priority = false }: CadTerminalCardProps)
             title="Toggle between studio knolling photography and interactive PartSouq CAD schematic"
           >
             <Layers className="w-3 h-3 text-[#D2FF00]" />
-            <span>{showVectorMode ? "STUDIO KNOLLING PHOTO" : "PARTSOUQ CAD SCHEMATIC"}</span>
+            <span>{showVectorMode ? "STUDIO PHOTO VIEW" : "CAD VECTOR OVERLAY"}</span>
           </button>
 
           {/* Bottom Left Corner Datum Watermark */}

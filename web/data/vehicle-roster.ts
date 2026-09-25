@@ -15,6 +15,7 @@ export interface VehicleRosterItem {
   topSpeed: string;
   zeroToHundred: string;
   image: string;
+  knollingImageUrl: string;
   explodedImage?: string;
   accentColor: string;
   accentBorder: string;
@@ -47,6 +48,7 @@ export const VEHICLE_ROSTER: VehicleRosterItem[] = [
     topSpeed: "296 km/h",
     zeroToHundred: "3.2s",
     image: "/assets/porsche-gt3rs-knolling-teardown.jpg",
+    knollingImageUrl: "/assets/porsche-gt3rs-knolling-teardown.jpg",
     explodedImage: "/assets/porsche-gt3rs-knolling-teardown.jpg",
     accentColor: "rgba(255, 128, 0, 0.15)",
     accentBorder: "border-[#FF8000]/60",
@@ -77,6 +79,7 @@ export const VEHICLE_ROSTER: VehicleRosterItem[] = [
     topSpeed: "307 km/h",
     zeroToHundred: "3.7s",
     image: "/assets/bmw-m4-knolling-teardown.jpg",
+    knollingImageUrl: "/assets/bmw-m4-knolling-teardown.jpg",
     explodedImage: "/assets/bmw-m4-knolling-teardown.jpg",
     accentColor: "rgba(239, 68, 68, 0.15)",
     accentBorder: "border-red-500/60",
@@ -107,6 +110,7 @@ export const VEHICLE_ROSTER: VehicleRosterItem[] = [
     topSpeed: "386.4 km/h",
     zeroToHundred: "3.2s",
     image: "/assets/mclaren-f1-knolling-teardown.jpg",
+    knollingImageUrl: "/assets/mclaren-f1-knolling-teardown.jpg",
     explodedImage: "/assets/mclaren-f1-knolling-teardown.jpg",
     accentColor: "rgba(210, 255, 0, 0.15)",
     accentBorder: "border-[#D2FF00]/60",
@@ -137,6 +141,7 @@ export const VEHICLE_ROSTER: VehicleRosterItem[] = [
     topSpeed: "324 km/h",
     zeroToHundred: "3.8s",
     image: "/assets/ferrari-f40-knolling-teardown.jpg",
+    knollingImageUrl: "/assets/ferrari-f40-knolling-teardown.jpg",
     explodedImage: "/assets/ferrari-f40-knolling-teardown.jpg",
     accentColor: "rgba(239, 68, 68, 0.15)",
     accentBorder: "border-red-500/60",
@@ -167,6 +172,7 @@ export const VEHICLE_ROSTER: VehicleRosterItem[] = [
     topSpeed: "266 km/h",
     zeroToHundred: "4.8s",
     image: "/assets/skyline-r34-knolling-teardown.jpg",
+    knollingImageUrl: "/assets/skyline-r34-knolling-teardown.jpg",
     explodedImage: "/assets/skyline-r34-knolling-teardown.jpg",
     accentColor: "rgba(59, 130, 246, 0.15)",
     accentBorder: "border-blue-500/60",
@@ -197,6 +203,7 @@ export const VEHICLE_ROSTER: VehicleRosterItem[] = [
     topSpeed: "270 km/h",
     zeroToHundred: "4.6s",
     image: "/assets/vw-golfr-knolling-teardown.jpg",
+    knollingImageUrl: "/assets/vw-golfr-knolling-teardown.jpg",
     explodedImage: "/assets/vw-golfr-knolling-teardown.jpg",
     accentColor: "rgba(6, 182, 212, 0.15)",
     accentBorder: "border-cyan-500/60",
