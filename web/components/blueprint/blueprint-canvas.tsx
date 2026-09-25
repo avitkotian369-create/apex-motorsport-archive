@@ -585,7 +585,9 @@ export function BlueprintCanvas({
                       left: `${callout.x_percent}%`,
                       top: `${callout.y_percent}%`,
                     }}
-                    className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-30 group transition-all duration-200 ${
+                    className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer group transition-all duration-200 ${
+                      isSelected || isHovered ? "z-40" : "z-30"
+                    } ${
                       isTierMatch
                         ? "opacity-100 scale-100"
                         : "opacity-25 scale-90 pointer-events-none"
@@ -601,13 +603,24 @@ export function BlueprintCanvas({
                       }`}
                     />
 
+                    {/* Active Pulsing Halo Ring on Hover/Select */}
+                    {(isSelected || isHovered) && (
+                      <span
+                        className={`absolute -inset-3.5 rounded-full pointer-events-none animate-pulse border-2 ${
+                          isPapaya
+                            ? "border-[#FF8000] shadow-[0_0_20px_#FF8000]"
+                            : "border-[#D2FF00] shadow-[0_0_25px_#D2FF00]"
+                        }`}
+                      />
+                    )}
+
                     {/* Clean 24px Circular Numbered Badge (Zero text clutter) */}
                     <div
                       className={`relative flex items-center justify-center w-6 h-6 rounded-full transition-all duration-200 ${
                         isSelected || isHovered
                           ? isPapaya
-                            ? `bg-[#FF8000] text-black ${shadowGlow} scale-125 border-2 border-white font-black`
-                            : `bg-[#D2FF00] text-black ${shadowGlow} scale-125 border-2 border-white font-black`
+                            ? `bg-[#FF8000] text-black ${shadowGlow} scale-125 border-2 border-white font-black ring-4 ring-[#FF8000]/60`
+                            : `bg-[#D2FF00] text-black ${shadowGlow} scale-125 border-2 border-white font-black ring-4 ring-[#D2FF00]/60`
                           : `bg-[#090B10] border ${activeBorderColor} text-[#D2FF00] hover:scale-120 hover:bg-[#D2FF00] hover:text-black font-bold shadow-lg`
                       }`}
                     >

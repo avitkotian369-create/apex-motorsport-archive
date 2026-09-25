@@ -242,6 +242,12 @@ export default function CarCadTerminalPage({ params }: PageProps) {
 
   const handlePinHover = useCallback((pinId: number | null) => {
     setHoveredCalloutId(pinId);
+    if (pinId !== null) {
+      const cardEl = cardRefs.current[pinId];
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }
   }, []);
 
   // Handler: Ledger card clicked -> Illuminates pin with McLaren Papaya or Lime glow
@@ -538,7 +544,7 @@ export default function CarCadTerminalPage({ params }: PageProps) {
                         ? "bg-[#16110B] border-[#FF8000] shadow-[0_0_20px_rgba(255,128,0,0.25)] ring-1 ring-[#FF8000]"
                         : "bg-[#11160B] border-[#D2FF00] shadow-[0_0_20px_rgba(210,255,0,0.25)] ring-1 ring-[#D2FF00]"
                       : isHovered
-                      ? "bg-[#111724] border-[#D2FF00]/60"
+                      ? "bg-[#111724] border-[#D2FF00] shadow-[0_0_25px_rgba(210,255,0,0.35)] ring-2 ring-[#D2FF00] scale-[1.01]"
                       : "bg-[#0B0E17] border-[#1C2538] hover:border-[#2D3B54]"
                   }`}
                 >
@@ -553,7 +559,7 @@ export default function CarCadTerminalPage({ params }: PageProps) {
                               ? "bg-[#FF8000] text-black shadow-[0_0_12px_#FF8000] border border-white"
                               : "bg-[#D2FF00] text-black shadow-[0_0_12px_#D2FF00] border border-white"
                             : isHovered
-                            ? "bg-[#D2FF00] text-black shadow-[0_0_10px_#D2FF00]"
+                            ? "bg-[#D2FF00] text-black shadow-[0_0_15px_#D2FF00] scale-110 border border-white"
                             : "bg-[#121824] text-[#D2FF00] border border-[#D2FF00]/40"
                         }`}
                       >
@@ -562,7 +568,7 @@ export default function CarCadTerminalPage({ params }: PageProps) {
 
                       {/* Common Name */}
                       <div>
-                        <h3 className="text-sm font-bold font-sans text-white group-hover:text-[#D2FF00] leading-snug">
+                        <h3 className={`text-sm font-bold font-sans transition-colors leading-snug ${isHovered ? "text-[#D2FF00]" : "text-white group-hover:text-[#D2FF00]"}`}>
                           {part.num}. {part.name}
                         </h3>
                         <span className="text-[10px] text-[#637085] font-mono">

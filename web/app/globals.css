@@ -204,3 +204,23 @@ body {
 .animate-particle-3 {
   animation: particleFloat 10s ease-in-out infinite 4s;
 }
+
+@keyframes aeroDash {
+  0% {
+    stroke-dashoffset: 200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-aero-dash {
+  stroke-dasharray: 10 10;
+  animation: aeroDash 2.4s linear infinite;
+}
+
+.animate-aero-dash-fast {
+  stroke-dasharray: 14 8;
+  animation: aeroDash 1.4s linear infinite;
+}
+

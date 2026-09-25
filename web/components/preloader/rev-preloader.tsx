@@ -132,7 +132,7 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
 
         {/* Gear Display */}
         <div className="flex items-baseline justify-center">
-          <span className="text-8xl sm:text-9xl font-black text-white leading-none tracking-tighter drop-shadow-[0_0_35px_rgba(255,255,255,0.2)]">
+          <span className="text-8xl sm:text-9xl font-black text-white leading-none tracking-tighter drop-shadow-[0_0_35px_rgba(255,255,255,0.2)] tabular-nums font-mono inline-block w-28 sm:w-36 text-center">
             {gear}
           </span>
           <span className="text-xl sm:text-2xl font-black text-[#D2FF00] ml-2 tracking-widest font-mono">
@@ -146,10 +146,10 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
             LIVE PADDOCK TACHOMETER
           </div>
           <div className="flex items-baseline justify-center gap-1.5 font-mono">
-            <span className="text-5xl sm:text-6xl font-black text-[#D2FF00] tracking-tight drop-shadow-[0_0_20px_rgba(210,255,0,0.35)]">
+            <span className="text-5xl sm:text-6xl font-black text-[#D2FF00] tracking-tight drop-shadow-[0_0_20px_rgba(210,255,0,0.35)] tabular-nums font-mono inline-block min-w-[200px] sm:min-w-[250px] text-right">
               {rpm.toLocaleString()}
             </span>
-            <span className="text-lg sm:text-xl font-bold text-[#D2FF00]">
+            <span className="text-lg sm:text-xl font-bold text-[#D2FF00] w-12 text-left">
               RPM
             </span>
           </div>
@@ -166,9 +166,9 @@ export function RevPreloader({ onComplete }: RevPreloaderProps) {
 
           {/* Micro Telemetry Labels Below The Bar */}
           <div className="flex items-center justify-between font-mono text-[10px] text-slate-400 tracking-wider px-1">
-            <span>1,200 IDLE</span>
-            <span className="text-white font-bold">{percent}% BOOT COMPLETE</span>
-            <span>9,000 MAX REDLINE</span>
+            <span className="tabular-nums">1,200 IDLE</span>
+            <span className="text-white font-bold tabular-nums">{percent}% BOOT COMPLETE</span>
+            <span className="tabular-nums">9,000 MAX REDLINE</span>
           </div>
         </div>
       </div>
