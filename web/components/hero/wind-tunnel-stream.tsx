@@ -1,142 +1,100 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-
-interface StreamParticle {
-  x: number;
-  y: number;
-  length: number;
-  speed: number;
-  color: string;
-  opacity: number;
-  thickness: number;
-  waviness: number;
-  phase: number;
-}
+import React from "react";
 
 export function WindTunnelStream() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const isVisibleRef = useRef<boolean>(true);
-  const animationFrameRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let width = (canvas.width = canvas.offsetWidth);
-    let height = (canvas.height = canvas.offsetHeight);
-
-    const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = canvas.offsetWidth;
-      height = canvas.height = canvas.offsetHeight;
-    };
-    window.addEventListener("resize", handleResize);
-
-    // Color palette matching MONOCOQUE obsidian theme: electric lime, cyan, papaya, white
-    const colors = ["#D2FF00", "#38BDF8", "#FF8000", "#FFFFFF"];
-
-    const particlesCount = 70;
-    const particles: StreamParticle[] = Array.from({ length: particlesCount }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      length: 50 + Math.random() * 120,
-      speed: 3 + Math.random() * 6,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      opacity: 0.15 + Math.random() * 0.45,
-      thickness: 0.75 + Math.random() * 1.5,
-      waviness: 0.8 + Math.random() * 2,
-      phase: Math.random() * Math.PI * 2
-    }));
-
-    const render = () => {
-      if (!isVisibleRef.current) return;
-
-      ctx.clearRect(0, 0, width, height);
-
-      particles.forEach((p) => {
-        p.x += p.speed;
-        p.phase += 0.02;
-
-        // Wrap around when exiting screen
-        if (p.x - p.length > width) {
-          p.x = -p.length;
-          p.y = Math.random() * height;
-        }
-
-        // Draw aerodynamic streamline gradient trail
-        const yOffset = Math.sin(p.phase) * p.waviness;
-        const grad = ctx.createLinearGradient(p.x - p.length, p.y + yOffset, p.x, p.y + yOffset);
-        grad.addColorStop(0, "transparent");
-        grad.addColorStop(0.7, p.color);
-        grad.addColorStop(1, "#FFFFFF");
-
-        ctx.beginPath();
-        ctx.strokeStyle = grad;
-        ctx.globalAlpha = p.opacity;
-        ctx.lineWidth = p.thickness;
-        ctx.lineCap = "round";
-
-        ctx.moveTo(p.x - p.length, p.y + yOffset);
-        // Slight aerodynamic camber curve
-        ctx.quadraticCurveTo(
-          p.x - p.length * 0.4,
-          p.y + yOffset + Math.sin(p.phase * 1.5) * 4,
-          p.x,
-          p.y + yOffset
-        );
-        ctx.stroke();
-
-        // Tiny luminous stagnation head at particle tip
-        ctx.beginPath();
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = Math.min(1, p.opacity * 1.5);
-        ctx.arc(p.x, p.y + yOffset, p.thickness * 1.2, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      ctx.globalAlpha = 1.0;
-      animationFrameRef.current = requestAnimationFrame(render);
-    };
-
-    // Attach IntersectionObserver to pause off-screen canvas loops
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const wasVisible = isVisibleRef.current;
-        isVisibleRef.current = entry.isIntersecting;
-
-        if (entry.isIntersecting && !wasVisible) {
-          // Resume animation loop
-          animationFrameRef.current = requestAnimationFrame(render);
-        } else if (!entry.isIntersecting && animationFrameRef.current) {
-          // Cancel active frame to free CPU/GPU
-          cancelAnimationFrame(animationFrameRef.current);
-          animationFrameRef.current = null;
-        }
-      },
-      { threshold: 0.05 }
-    );
-
-    observer.observe(canvas);
-    animationFrameRef.current = requestAnimationFrame(render);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      observer.disconnect();
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, []);
-
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-80"
-      style={{ mixBlendMode: "screen", transform: "translateZ(0)" }}
-    />
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
+      <svg
+        viewBox="0 0 1920 1080"
+        preserveAspectRatio="xMidYMid slice"
+        className="w-full h-full object-cover"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          {/* Subtle aerodynamic trail gradients */}
+          <linearGradient id="streamGradLime" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#D2FF00" stopOpacity="0.05" />
+            <stop offset="30%" stopColor="#D2FF00" stopOpacity="0.8" />
+            <stop offset="70%" stopColor="#FFFFFF" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#D2FF00" stopOpacity="0.1" />
+          </linearGradient>
+
+          <linearGradient id="streamGradCyan" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.05" />
+            <stop offset="35%" stopColor="#00E5FF" stopOpacity="0.85" />
+            <stop offset="75%" stopColor="#FFFFFF" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#00E5FF" stopOpacity="0.1" />
+          </linearGradient>
+
+          {/* Aerodynamic Soft Glow Filter */}
+          <filter id="aeroGlow" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {/* 6 CONTINUOUS ULTRA-FINE DASHED VECTOR STREAMLINES */}
+        <g fill="none" strokeLinecap="round" filter="url(#aeroGlow)">
+          {/* Streamline 1: Upper Chamber Boundary Layer (Cyan) */}
+          <path
+            d="M -80 180 Q 480 170 960 185 T 1980 175"
+            stroke="url(#streamGradCyan)"
+            strokeWidth="1.2"
+            opacity="0.18"
+            className="animate-wind-stream-1"
+          />
+
+          {/* Streamline 2: High Airfoil Suction & Active Rear Wing Chord (Electric Lime) */}
+          <path
+            d="M -80 270 Q 520 260 1020 250 Q 1480 230 1720 215 Q 1840 220 1980 255"
+            stroke="url(#streamGradLime)"
+            strokeWidth="1.5"
+            opacity="0.24"
+            className="animate-wind-stream-2"
+          />
+
+          {/* Streamline 3: Cockpit Canopy & Roof Apex Flow (Cyan) */}
+          <path
+            d="M -80 390 Q 580 375 1060 345 Q 1280 340 1480 410 Q 1740 470 1980 480"
+            stroke="url(#streamGradCyan)"
+            strokeWidth="1.3"
+            opacity="0.20"
+            className="animate-wind-stream-3"
+          />
+
+          {/* Streamline 4: Waistline & Side Radiator Scoop Vortex (Electric Lime) */}
+          <path
+            d="M -80 520 Q 540 515 980 495 Q 1380 500 1620 540 Q 1800 565 1980 560"
+            stroke="url(#streamGradLime)"
+            strokeWidth="1.4"
+            opacity="0.22"
+            className="animate-wind-stream-4"
+          />
+
+          {/* Streamline 5: Front Fascia, Hood Extraction & Beltline (Cyan) */}
+          <path
+            d="M -80 635 Q 520 625 840 590 Q 1120 570 1460 630 Q 1760 670 1980 675"
+            stroke="url(#streamGradCyan)"
+            strokeWidth="1.3"
+            opacity="0.19"
+            className="animate-wind-stream-5"
+          />
+
+          {/* Streamline 6: Underfloor Venturi Ground Effect & Rear Diffuser Expansion (Electric Lime) */}
+          <path
+            d="M -80 820 Q 520 815 820 810 Q 1240 810 1560 800 Q 1760 760 1980 735"
+            stroke="url(#streamGradLime)"
+            strokeWidth="1.6"
+            opacity="0.25"
+            className="animate-wind-stream-6"
+          />
+        </g>
+      </svg>
+    </div>
   );
 }
 

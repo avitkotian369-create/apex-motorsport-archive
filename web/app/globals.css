@@ -224,3 +224,49 @@ body {
   animation: aeroDash 1.4s linear infinite;
 }
 
+/* Authentic Wind-Tunnel Laminar Streamline Flow Animations */
+@keyframes windTunnelLaminar {
+  0% {
+    stroke-dashoffset: 600;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-wind-stream-1 {
+  stroke-dasharray: 14 22;
+  animation: windTunnelLaminar 4.2s linear infinite;
+  will-change: stroke-dashoffset;
+}
+
+.animate-wind-stream-2 {
+  stroke-dasharray: 18 26;
+  animation: windTunnelLaminar 3.4s linear infinite;
+  will-change: stroke-dashoffset;
+}
+
+.animate-wind-stream-3 {
+  stroke-dasharray: 12 18;
+  animation: windTunnelLaminar 4.8s linear infinite;
+  will-change: stroke-dashoffset;
+}
+
+.animate-wind-stream-4 {
+  stroke-dasharray: 16 24;
+  animation: windTunnelLaminar 3.1s linear infinite;
+  will-change: stroke-dashoffset;
+}
+
+.animate-wind-stream-5 {
+  stroke-dasharray: 20 28;
+  animation: windTunnelLaminar 2.6s linear infinite;
+  will-change: stroke-dashoffset;
+}
+
+.animate-wind-stream-6 {
+  stroke-dasharray: 14 20;
+  animation: windTunnelLaminar 3.9s linear infinite;
+  will-change: stroke-dashoffset;
+}
+

@@ -3,6 +3,7 @@
 import React from "react";
 import { BookOpen } from "lucide-react";
 import { WindTunnelStream } from "./wind-tunnel-stream";
+import { HeroCadBackdrop } from "./hero-cad-backdrop";
 
 interface HeroProps {
   onExploreClick?: () => void;
@@ -13,19 +14,48 @@ interface HeroProps {
 export function Hero({ onExploreClick, onDispatchClick }: HeroProps) {
   return (
     <section className="relative w-full overflow-hidden bg-cad-grid">
-      {/* Aerodynamic Wind Tunnel Particle Stream Canvas flowing across stage */}
+      {/* 1. Full-Bleed CAD Blueprint & Chassis Backdrop (Wireframe, Station Lines & Coordinate Crosshairs) */}
+      <HeroCadBackdrop />
+
+      {/* 2. Dynamic Wind-Tunnel Streamline Flow (Laminar Horizontal Vector Streams) */}
       <WindTunnelStream />
 
-      {/* Volumetric Darkroom Overhead Spotlight with Electric Lime Falloff */}
-      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(210,255,0,0.04)_0%,transparent_70%)] rounded-full blur-[140px] pointer-events-none animate-pulse-glow" />
+      {/* 3. Refined Architectural Overhead Studio Spotlight */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{
+          background:
+            "radial-gradient(circle 800px at 50% -10%, rgba(210,255,0,0.07) 0%, rgba(13,18,29,0.3) 60%, transparent 100%)"
+        }}
+      />
 
-      {/* Large Technical Monospace Watermark Typography in Background */}
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 font-mono font-black text-7xl sm:text-9xl text-white opacity-[0.03] select-none pointer-events-none tracking-tighter leading-none text-right z-0">
-        <div>{"// APEX SPEC"}</div>
-        <div>{"MONOCOQUE ARCHIVE"}</div>
+      {/* 4. Background Monospace Watermark */}
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 font-mono font-black text-7xl sm:text-9xl text-white opacity-[0.025] select-none pointer-events-none tracking-tighter leading-none text-right z-0">
+        <div>{"// SKUNKWORKS"}</div>
+        <div>{"CAD TERMINAL"}</div>
       </div>
 
-      {/* Clean Full-Width Hero Editorial Container */}
+      {/* 5. CAD Studio Corner Telemetry Reticles */}
+      {/* Top-Left Telemetry Bracket */}
+      <div className="absolute top-4 sm:top-6 left-4 sm:left-8 z-10 font-mono text-[10px] sm:text-xs text-[#78859B]/70 tracking-widest uppercase flex items-center gap-2 select-none pointer-events-none">
+        <span className="text-[#D2FF00]/60">┌</span>
+        <span className="w-1.5 h-1.5 rounded-full bg-[#D2FF00] animate-pulse" />
+        <span>[ SYS_CAD // CALIBRATION ACTIVE ]</span>
+      </div>
+
+      {/* Top-Right Telemetry Bracket */}
+      <div className="absolute top-4 sm:top-6 right-4 sm:right-8 z-10 font-mono text-[10px] sm:text-xs text-[#78859B]/70 tracking-widest uppercase flex items-center gap-2 select-none pointer-events-none">
+        <span>⌖ LAT: 48.8584 // VELOCITY: 285 KM/H</span>
+        <span className="text-[#D2FF00]/60">┐</span>
+      </div>
+
+      {/* Bottom-Right Telemetry Grid Coordinates */}
+      <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-8 z-10 font-mono text-[10px] sm:text-xs text-[#78859B]/60 tracking-widest uppercase flex items-center gap-2 select-none pointer-events-none">
+        <span>GRID: ISO-7200 CLASS-A</span>
+        <span className="text-[#D2FF00]/60">┘</span>
+      </div>
+
+      {/* 6. Clean High-Impact Editorial Hero Content */}
       <div className="relative z-10 max-w-5xl mx-auto px-6 sm:px-12 pt-24 pb-20 flex flex-col items-start justify-center min-h-[70vh]">
         {/* Sleek Pill Badge */}
         <div className="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full border border-[#D2FF00]/20 bg-[#D2FF00]/10 text-[#D2FF00] font-mono text-xs tracking-wider uppercase mb-6 shadow-[0_0_12px_rgba(210,255,0,0.15)]">
@@ -33,8 +63,8 @@ export function Hero({ onExploreClick, onDispatchClick }: HeroProps) {
           <span className="font-bold">APEX ARCHIVE — THE MOTORSPORT & AUTOMOTIVE ANATOMY TERMINAL</span>
         </div>
 
-        {/* Headline */}
-        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-[-0.04em] text-white leading-[0.92] mb-6">
+        {/* Headline with Crisp High-Contrast Drop Shadow */}
+        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-[-0.04em] text-white leading-[0.92] mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
           DECONSTRUCT<br />
           MOTORSPORT<br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-[#D2FF00]">
