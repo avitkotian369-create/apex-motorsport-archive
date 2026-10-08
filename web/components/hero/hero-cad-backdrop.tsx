@@ -8,7 +8,7 @@ export function HeroCadBackdrop() {
       <svg
         viewBox="0 0 1920 1080"
         preserveAspectRatio="xMidYMid slice"
-        className="w-full h-full object-cover opacity-[0.11]"
+        className="w-full h-full object-cover opacity-[0.09]"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -35,21 +35,21 @@ export function HeroCadBackdrop() {
         <rect width="1920" height="1080" fill="url(#heroCadSubGrid)" />
 
         {/* 2. CAD STATION LINES (STA) - Vertical Engineering Datums */}
-        <g stroke="#64748B" strokeWidth="0.8" strokeDasharray="4 4" opacity="0.45" font-family="monospace" fontSize="9" fill="#94A3B8">
+        <g stroke="#64748B" strokeWidth="0.8" strokeDasharray="4 4" opacity="0.5" fontFamily="monospace" fontSize="9" fill="#94A3B8">
           {/* STA -200 (Front Splitter Edge) */}
           <line x1="580" y1="120" x2="580" y2="940" />
           <text x="585" y="140">STA -200 [SPLITTER]</text>
           <text x="585" y="930">STA -200</text>
 
           {/* STA 00 (Front Axle Centerline Datum) */}
-          <line x1="840" y1="80" x2="840" y2="980" stroke="#D2FF00" strokeWidth="1" strokeDasharray="8 4" opacity="0.65" />
+          <line x1="840" y1="80" x2="840" y2="980" stroke="#D2FF00" strokeWidth="1" strokeDasharray="8 4" opacity="0.75" />
           <text x="845" y="100" fill="#D2FF00" fontWeight="bold">STA 00 [REF_DATUM_FRONT]</text>
           <text x="845" y="970" fill="#D2FF00">STA 00</text>
 
           {/* STA 500 (Forward Monocoque Bulkhead) */}
-          <line x1="1040" y1="120" x2="1040" y2="940" />
-          <text x="1045" y="140">STA 500 [FWD_BULKHEAD]</text>
-          <text x="1045" y="930">STA 500</text>
+          <line x1="1040" y1="120" x2="1040" y2="940" stroke="#00E5FF" strokeWidth="1" strokeDasharray="6 3" opacity="0.7" />
+          <text x="1045" y="140" fill="#00E5FF" fontWeight="bold">STA 500 [FWD_BULKHEAD]</text>
+          <text x="1045" y="930" fill="#00E5FF">STA 500</text>
 
           {/* STA 1200 (Cockpit Centerline / Roll Hoop) */}
           <line x1="1280" y1="80" x2="1280" y2="980" stroke="#00E5FF" strokeWidth="1" strokeDasharray="8 4" opacity="0.6" />
@@ -62,24 +62,24 @@ export function HeroCadBackdrop() {
           <text x="1505" y="930">STA 1800</text>
 
           {/* STA 2450 (Rear Axle Centerline Datum) */}
-          <line x1="1720" y1="80" x2="1720" y2="980" stroke="#D2FF00" strokeWidth="1" strokeDasharray="8 4" opacity="0.65" />
+          <line x1="1720" y1="80" x2="1720" y2="980" stroke="#D2FF00" strokeWidth="1" strokeDasharray="8 4" opacity="0.75" />
           <text x="1600" y="100" fill="#D2FF00" fontWeight="bold">STA 2450 [REAR_AXLE_REF]</text>
           <text x="1600" y="970" fill="#D2FF00">STA 2450</text>
         </g>
 
         {/* 3. CAD WATERLINES (WL) - Horizontal Elevation Datums */}
-        <g stroke="#64748B" strokeWidth="0.8" strokeDasharray="4 4" opacity="0.45" font-family="monospace" fontSize="9" fill="#94A3B8">
+        <g stroke="#64748B" strokeWidth="0.8" strokeDasharray="4 4" opacity="0.5" fontFamily="monospace" fontSize="9" fill="#94A3B8">
           {/* WL 00 (Ground Reference Plane) */}
           <line x1="480" y1="860" x2="1860" y2="860" stroke="#00E5FF" strokeWidth="1" opacity="0.5" />
           <text x="500" y="852" fill="#00E5FF">WL 00 [GROUND_PLANE_REF]</text>
 
-          {/* WL 180 (Chassis Underside / Venturi Troughs) */}
-          <line x1="480" y1="780" x2="1860" y2="780" />
-          <text x="500" y="772">WL 180 [VENTURI_FLOOR]</text>
+          {/* WL 200 (Chassis Underfloor / Venturi Troughs Datum) */}
+          <line x1="480" y1="760" x2="1860" y2="760" stroke="#D2FF00" strokeWidth="1" strokeDasharray="6 3" opacity="0.65" />
+          <text x="500" y="752" fill="#D2FF00" fontWeight="bold">WL 200 [CHASSIS_UNDERFLOOR_DATUM]</text>
 
           {/* WL 380 (Wheel Center Hub Axis) */}
-          <line x1="480" y1="680" x2="1860" y2="680" stroke="#D2FF00" strokeWidth="0.9" strokeDasharray="6 3" opacity="0.5" />
-          <text x="500" y="672" fill="#D2FF00">WL 380 [WHEEL_HUB_AXIS]</text>
+          <line x1="480" y1="680" x2="1860" y2="680" stroke="#00E5FF" strokeWidth="0.9" strokeDasharray="6 3" opacity="0.5" />
+          <text x="500" y="672" fill="#00E5FF">WL 380 [WHEEL_HUB_AXIS]</text>
 
           {/* WL 600 (Cockpit Sill / Beltline) */}
           <line x1="480" y1="520" x2="1860" y2="520" />
@@ -99,23 +99,23 @@ export function HeroCadBackdrop() {
           {/* Crosshair 1: STA 00, WL 380 (Front Hub) */}
           <path d="M 830 680 L 850 680 M 840 670 L 840 690" />
           <circle cx="840" cy="680" r="3" fill="none" stroke="#D2FF00" strokeWidth="0.8" />
-          <text x="852" y="676" fill="#D2FF00" font-family="monospace" fontSize="8">[STA 00, WL 380]</text>
+          <text x="852" y="676" fill="#D2FF00" fontFamily="monospace" fontSize="8">[STA 00, WL 380]</text>
 
           {/* Crosshair 2: STA 2450, WL 380 (Rear Hub) */}
           <path d="M 1710 680 L 1730 680 M 1720 670 L 1720 690" />
           <circle cx="1720" cy="680" r="3" fill="none" stroke="#D2FF00" strokeWidth="0.8" />
-          <text x="1732" y="676" fill="#D2FF00" font-family="monospace" fontSize="8">[STA 2450, WL 380]</text>
+          <text x="1732" y="676" fill="#D2FF00" fontFamily="monospace" fontSize="8">[STA 2450, WL 380]</text>
 
-          {/* Crosshair 3: STA 500, WL 600 (Firewall Joint) */}
-          <path d="M 1030 520 L 1050 520 M 1040 510 L 1040 530" stroke="#00E5FF" />
-          <text x="1052" y="516" fill="#00E5FF" font-family="monospace" fontSize="8">[STA 500, WL 600]</text>
+          {/* Crosshair 3: STA 500, WL 200 (Firewall Underbody Datum) */}
+          <path d="M 1030 760 L 1050 760 M 1040 750 L 1040 770" stroke="#00E5FF" />
+          <text x="1052" y="756" fill="#00E5FF" fontFamily="monospace" fontSize="8">[STA 500, WL 200]</text>
 
           {/* Crosshair 4: STA 1200, WL 840 (Roof Center) */}
           <path d="M 1270 360 L 1290 360 M 1280 350 L 1280 370" stroke="#00E5FF" />
-          <text x="1292" y="356" fill="#00E5FF" font-family="monospace" fontSize="8">[STA 1200, WL 840]</text>
+          <text x="1292" y="356" fill="#00E5FF" fontFamily="monospace" fontSize="8">[STA 1200, WL 840]</text>
         </g>
 
-        {/* 5. ORTHOGRAPHIC MOTORSPORT CHASSIS & CARBON MONOCOQUE CUTAWAY WIREFRAME */}
+        {/* 5. ORTHOGRAPHIC ENDURANCE CHASSIS & CARBON MONOCOQUE CUTAWAY WIREFRAME */}
         <g fill="none" strokeLinecap="round" strokeLinejoin="round">
           {/* Main Carbon Monocoque Survival Tub (Mid-Chassis Safety Cell) */}
           <path
@@ -135,7 +135,7 @@ export function HeroCadBackdrop() {
             opacity="0.4"
           />
 
-          {/* Full Exterior Silhouette Profile (GT3 RS / Hypercar Aerodynamics) */}
+          {/* Full Exterior Silhouette Profile (Endurance / GT3 RS Prototype Aerodynamics) */}
           <path
             d="M 540 820 
                L 590 820 
@@ -189,7 +189,7 @@ export function HeroCadBackdrop() {
             <line x1="840" y1="720" x2="940" y2="740" />
             <line x1="840" y1="680" x2="970" y2="540" stroke="#D2FF00" strokeWidth="1.5" />
             <circle cx="970" cy="540" r="4" fill="#D2FF00" />
-            <text x="980" y="540" fill="#D2FF00" font-family="monospace" fontSize="8">[PUSHROD_PIVOT]</text>
+            <text x="980" y="540" fill="#D2FF00" fontFamily="monospace" fontSize="8">[PUSHROD_PIVOT]</text>
           </g>
 
           {/* Rear Multi-Link Subframe & Inboard Damper Geometry */}
@@ -198,7 +198,7 @@ export function HeroCadBackdrop() {
             <line x1="1720" y1="720" x2="1620" y2="740" />
             <line x1="1720" y1="680" x2="1580" y2="560" stroke="#D2FF00" strokeWidth="1.5" />
             <circle cx="1580" cy="560" r="4" fill="#D2FF00" />
-            <text x="1490" y="560" fill="#D2FF00" font-family="monospace" fontSize="8">[REAR_BELLCRANK]</text>
+            <text x="1490" y="560" fill="#D2FF00" fontFamily="monospace" fontSize="8">[REAR_BELLCRANK]</text>
           </g>
 
           {/* Mid-Rear Powertrain Cutaway: 4.0L Flat-6 Block & Transaxle */}
@@ -209,7 +209,7 @@ export function HeroCadBackdrop() {
             <ellipse cx="1540" cy="650" rx="14" ry="7" strokeDasharray="2 2" />
             {/* Transaxle Housing behind rear axle */}
             <path d="M 1580 650 L 1680 650 L 1690 710 L 1580 710 Z" stroke="#00E5FF" />
-            <text x="1445" y="612" fill="#FF8000" font-family="monospace" fontSize="8">MA1.77 4.0L FLAT-6 // PDK TRANSAXLE</text>
+            <text x="1445" y="612" fill="#FF8000" fontFamily="monospace" fontSize="8">MA1.77 4.0L FLAT-6 // PDK TRANSAXLE</text>
           </g>
 
           {/* Swan-Neck Active Rear Wing Assembly */}
@@ -229,7 +229,7 @@ export function HeroCadBackdrop() {
             {/* Articulated Active DRS Flap */}
             <line x1="1830" y1="225" x2="1875" y2="195" stroke="#FF8000" strokeWidth="1.8" strokeDasharray="3 2" />
             <circle cx="1830" cy="225" r="3" fill="#FF8000" />
-            <text x="1750" y="190" fill="#FF8000" font-family="monospace" fontSize="9" fontWeight="bold">ACTIVE DRS FLAP [34° DEPLOYED]</text>
+            <text x="1750" y="190" fill="#FF8000" fontFamily="monospace" fontSize="9" fontWeight="bold">ACTIVE DRS FLAP [34° DEPLOYED]</text>
           </g>
 
           {/* Rear Underbody Venturi Diffuser Ramps & Vertical Strakes */}
@@ -238,12 +238,12 @@ export function HeroCadBackdrop() {
             <line x1="1620" y1="805" x2="1630" y2="835" />
             <line x1="1700" y1="790" x2="1715" y2="820" />
             <line x1="1780" y1="775" x2="1795" y2="805" />
-            <text x="1640" y="855" fill="#00E5FF" font-family="monospace" fontSize="8">14° VENTURI DIFFUSER // EXPANSION TUNNEL</text>
+            <text x="1640" y="855" fill="#00E5FF" fontFamily="monospace" fontSize="8">14° VENTURI DIFFUSER // EXPANSION TUNNEL</text>
           </g>
         </g>
 
         {/* 6. TECHNICAL DIMENSIONING CALLOUTS & EXTENTS */}
-        <g stroke="#94A3B8" strokeWidth="0.9" font-family="monospace" fontSize="9" fill="#94A3B8" opacity="0.65">
+        <g stroke="#94A3B8" strokeWidth="0.9" fontFamily="monospace" fontSize="9" fill="#94A3B8" opacity="0.65">
           {/* Wheelbase Dimension Line */}
           <line x1="840" y1="890" x2="1720" y2="890" stroke="#D2FF00" strokeWidth="1.2" strokeDasharray="6 3" />
           <line x1="840" y1="875" x2="840" y2="905" stroke="#D2FF00" strokeWidth="1.5" />
@@ -268,14 +268,14 @@ export function HeroCadBackdrop() {
           <line x1="0" y1="50" x2="440" y2="50" stroke="#1E293B" strokeWidth="1" />
           <line x1="220" y1="0" x2="220" y2="50" stroke="#1E293B" strokeWidth="1" />
 
-          <text x="10" y="16" fill="#64748B" font-family="monospace" fontSize="8">DRAWING CLASSIFICATION</text>
-          <text x="10" y="40" fill="#FFFFFF" font-family="monospace" fontSize="10" fontWeight="bold">CAD-CHASSIS-992-GT3-RS</text>
+          <text x="10" y="16" fill="#64748B" fontFamily="monospace" fontSize="8">DRAWING CLASSIFICATION</text>
+          <text x="10" y="40" fill="#FFFFFF" fontFamily="monospace" fontSize="10" fontWeight="bold">CAD-CHASSIS-992-GT3-RS</text>
 
-          <text x="230" y="16" fill="#64748B" font-family="monospace" fontSize="8">ENGINEERING STANDARD</text>
-          <text x="230" y="40" fill="#D2FF00" font-family="monospace" fontSize="10" fontWeight="bold">ISO 7200 // CLASS-A AEROSPACE</text>
+          <text x="230" y="16" fill="#64748B" fontFamily="monospace" fontSize="8">ENGINEERING STANDARD</text>
+          <text x="230" y="40" fill="#D2FF00" fontFamily="monospace" fontSize="10" fontWeight="bold">ISO 7200 // CLASS-A AEROSPACE</text>
 
-          <text x="10" y="66" fill="#64748B" font-family="monospace" fontSize="8">SKUNKWORKS DYNAMICS LAB • SCALE 1:1</text>
-          <text x="230" y="66" fill="#00E5FF" font-family="monospace" fontSize="8">TORSIONAL RIGIDITY: 42,000 NM/DEG</text>
+          <text x="10" y="66" fill="#64748B" fontFamily="monospace" fontSize="8">SKUNKWORKS DYNAMICS LAB • SCALE 1:1</text>
+          <text x="230" y="66" fill="#00E5FF" fontFamily="monospace" fontSize="8">TORSIONAL RIGIDITY: 42,000 NM/DEG</text>
         </g>
       </svg>
     </div>
