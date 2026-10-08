@@ -179,6 +179,7 @@ export default function CarCadTerminalPage({ params }: PageProps) {
   const [activeTier, setActiveTier] = useState<KnollingTierFilter>("all");
   const [selectedCalloutId, setSelectedCalloutId] = useState<number | null>(null);
   const [hoveredCalloutId, setHoveredCalloutId] = useState<number | null>(null);
+  const [activePartId, setActivePartId] = useState<string | null>(null);
   const [glowColor, setGlowColor] = useState<"lime" | "papaya">("lime");
 
   // Progressive disclosure drawer tracking per card
@@ -243,12 +244,34 @@ export default function CarCadTerminalPage({ params }: PageProps) {
   const handlePinHover = useCallback((pinId: number | null) => {
     setHoveredCalloutId(pinId);
     if (pinId !== null) {
+      const pin = allPins.find((p) => p.id === pinId);
+      if (pin) {
+        setActivePartId(pin.num);
+      }
       const cardEl = cardRefs.current[pinId];
       if (cardEl) {
         cardEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
+    } else {
+      setActivePartId(null);
     }
-  }, []);
+  }, [allPins]);
+
+  const handlePartHover = useCallback((partNum: string | null) => {
+    setActivePartId(partNum);
+    if (partNum !== null) {
+      const pin = allPins.find((p) => p.num === partNum);
+      if (pin) {
+        setHoveredCalloutId(pin.id);
+        const cardEl = cardRefs.current[pin.id];
+        if (cardEl) {
+          cardEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
+    } else {
+      setHoveredCalloutId(null);
+    }
+  }, [allPins]);
 
   // Handler: Ledger card clicked -> Illuminates pin with McLaren Papaya or Lime glow
   const handleCardClick = useCallback((partId: number) => {
@@ -446,12 +469,15 @@ export default function CarCadTerminalPage({ params }: PageProps) {
               setActiveTier(tier);
               setSelectedCalloutId(null);
               setHoveredCalloutId(null);
+              setActivePartId(null);
             }}
             pins={allPins}
             selectedPinId={selectedCalloutId}
             onSelectPin={handlePinSelect}
             hoveredPinId={hoveredCalloutId}
             onHoverPin={handlePinHover}
+            activePartId={activePartId}
+            onHoverPart={handlePartHover}
             zoomLevel={zoomLevel}
             onZoomChange={setZoomLevel}
             panOffset={panOffset}
@@ -520,7 +546,9 @@ export default function CarCadTerminalPage({ params }: PageProps) {
           <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             {displayedPins.map((part) => {
               const isSelected = activeCallout?.id === part.id;
-              const isHovered = hoveredCalloutId === part.id;
+              const isHovered =
+                (activePartId !== null && (part.num === activePartId || String(part.id) === activePartId)) ||
+                hoveredCalloutId === part.id;
               const isTierMatch = activeTier === "all" || part.tier === activeTier;
               const isExpanded = expandedCardIds[part.id] || false;
 
@@ -534,8 +562,14 @@ export default function CarCadTerminalPage({ params }: PageProps) {
                     cardRefs.current[part.id] = el;
                   }}
                   onClick={() => handleCardClick(part.id)}
-                  onMouseEnter={() => setHoveredCalloutId(part.id)}
-                  onMouseLeave={() => setHoveredCalloutId(null)}
+                  onMouseEnter={() => {
+                    setActivePartId(part.num);
+                    setHoveredCalloutId(part.id);
+                  }}
+                  onMouseLeave={() => {
+                    setActivePartId(null);
+                    setHoveredCalloutId(null);
+                  }}
                   className={`rounded-xl border transition-all duration-200 cursor-pointer p-4 flex flex-col justify-between space-y-3 ${
                     !isTierMatch ? "opacity-35 hover:opacity-80" : "opacity-100"
                   } ${

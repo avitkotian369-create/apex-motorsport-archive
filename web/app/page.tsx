@@ -448,7 +448,7 @@ export default function MotorsportHomePage() {
         className="pt-6 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10"
       >
         {/* Search & Brand Filter Bar */}
-        <div className="relative w-full mb-8 z-10 bg-[#07090E]/95 border border-white/10 p-6 rounded-2xl shadow-2xl space-y-4">
+        <div className="relative w-full z-10 mb-8 py-4 bg-[#07090E]/95 border border-white/10 px-6 rounded-2xl shadow-2xl space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="text-xs font-mono text-[#D2FF00] font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">

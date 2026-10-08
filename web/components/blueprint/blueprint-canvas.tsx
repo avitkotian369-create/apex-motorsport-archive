@@ -51,6 +51,8 @@ export interface BlueprintCanvasProps {
   onSelectPin?: (id: number) => void;
   hoveredPinId?: number | null;
   onHoverPin?: (id: number | null) => void;
+  activePartId?: string | null;
+  onHoverPart?: (id: string | null) => void;
   zoomLevel?: number;
   onZoomChange?: (zoom: number | ((prev: number) => number)) => void;
   panOffset?: { x: number; y: number };
@@ -108,6 +110,8 @@ export function BlueprintCanvas({
   onSelectPin,
   hoveredPinId = null,
   onHoverPin,
+  activePartId,
+  onHoverPart,
   zoomLevel: propZoom,
   onZoomChange,
   panOffset: propPan,
@@ -557,6 +561,10 @@ export function BlueprintCanvas({
               pins.map((callout) => {
                 const isSelected = activeSelectedId === callout.id;
                 const isHovered = hoveredPinId === callout.id;
+                const isPartActive =
+                  (activePartId !== undefined && activePartId !== null) &&
+                  (callout.num === activePartId || String(callout.id) === activePartId);
+                const isIlluminated = isSelected || isHovered || isPartActive;
 
                 // Layer Isolation: Dim pins not belonging to active tier
                 const isTierMatch = activeTier === "all" || callout.tier === activeTier;
@@ -576,9 +584,11 @@ export function BlueprintCanvas({
                       handleSelect(callout.id);
                     }}
                     onMouseEnter={() => {
+                      if (onHoverPart) onHoverPart(callout.num);
                       if (onHoverPin) onHoverPin(callout.id);
                     }}
                     onMouseLeave={() => {
+                      if (onHoverPart) onHoverPart(null);
                       if (onHoverPin) onHoverPin(null);
                     }}
                     style={{
@@ -586,7 +596,7 @@ export function BlueprintCanvas({
                       top: `${callout.y_percent}%`,
                     }}
                     className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer group transition-all duration-200 ${
-                      isSelected || isHovered ? "z-40" : "z-30"
+                      isIlluminated ? "z-40 scale-110" : "z-30"
                     } ${
                       isTierMatch
                         ? "opacity-100 scale-100"
@@ -594,17 +604,17 @@ export function BlueprintCanvas({
                     }`}
                     title={`${callout.num}. ${callout.name}`}
                   >
-                    {/* Pulsing Radar Ring on Select or Hover */}
+                    {/* Pulsing Radar Ring on Select, Hover, or Part Active */}
                     <span
                       className={`absolute -inset-2.5 rounded-full pointer-events-none transition-all ${
-                        isSelected || isHovered
+                        isIlluminated
                           ? `animate-ping opacity-85 ${pingColor}`
                           : `opacity-0 group-hover:opacity-60 group-hover:animate-ping ${pingColor}`
                       }`}
                     />
 
-                    {/* Active Pulsing Halo Ring on Hover/Select */}
-                    {(isSelected || isHovered) && (
+                    {/* Active Pulsing Halo Ring on Hover/Select/Part Active */}
+                    {isIlluminated && (
                       <span
                         className={`absolute -inset-3.5 rounded-full pointer-events-none animate-pulse border-2 ${
                           isPapaya
@@ -617,7 +627,7 @@ export function BlueprintCanvas({
                     {/* Clean 24px Circular Numbered Badge (Zero text clutter) */}
                     <div
                       className={`relative flex items-center justify-center w-6 h-6 rounded-full transition-all duration-200 ${
-                        isSelected || isHovered
+                        isIlluminated
                           ? isPapaya
                             ? `bg-[#FF8000] text-black ${shadowGlow} scale-125 border-2 border-white font-black ring-4 ring-[#FF8000]/60`
                             : `bg-[#D2FF00] text-black ${shadowGlow} scale-125 border-2 border-white font-black ring-4 ring-[#D2FF00]/60`
