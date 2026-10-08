@@ -3,142 +3,159 @@
 import React, { useState } from "react";
 import { Wind, Gauge, Shield, Activity } from "lucide-react";
 
-export type AeroMode = "velocity" | "downforce" | "rigidity";
+export type AeroMode = "cfd" | "downforce" | "torsion";
 
 export function AeroChassisHud() {
-  const [activeMode, setActiveMode] = useState<AeroMode>("velocity");
+  const [activeMode, setActiveMode] = useState<AeroMode>("cfd");
   const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
+  const [mouseCoords, setMouseCoords] = useState<{ x: number; y: number }>({ x: 2450, y: 680 });
 
-  // Mode-dependent gradient IDs and color tokens
-  const getStreamlineStroke = () => {
-    switch (activeMode) {
-      case "velocity":
-        return "url(#velocityGrad)";
-      case "downforce":
-        return "url(#downforceGrad)";
-      case "rigidity":
-        return "url(#rigidityGrad)";
-    }
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const relX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const relY = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    // Map normalized 0-1 to realistic automotive CAD coordinates in mm
+    const mmX = Math.round(relX * 4500);
+    const mmY = Math.round((1 - relY) * 1400);
+    setMouseCoords({ x: mmX, y: mmY });
   };
 
   const getActiveColor = () => {
     switch (activeMode) {
-      case "velocity":
+      case "cfd":
         return "#D2FF00";
       case "downforce":
         return "#00E5FF";
-      case "rigidity":
+      case "torsion":
         return "#FFB800";
     }
   };
 
   return (
-    <div className="relative w-full bg-transparent overflow-hidden font-mono select-none group">
-      {/* Soft Ambient Coordinate Grid & Gradient Accents (Integrated into Darkroom Grid) */}
+    <div
+      onMouseMove={handleMouseMove}
+      className="relative w-full bg-[#0B0F17]/90 border border-white/10 rounded-xl p-5 shadow-2xl overflow-hidden font-mono select-none group"
+    >
+      {/* Corner Coordinate Brackets (+ Crosshairs & L-Brackets at each corner) */}
+      <span className="absolute top-2 left-2 text-slate-500 font-mono text-[11px] leading-none select-none pointer-events-none">
+        +
+      </span>
+      <span className="absolute top-2 right-2 text-slate-500 font-mono text-[11px] leading-none select-none pointer-events-none">
+        +
+      </span>
+      <span className="absolute bottom-2 left-2 text-slate-500 font-mono text-[11px] leading-none select-none pointer-events-none">
+        +
+      </span>
+      <span className="absolute bottom-2 right-2 text-slate-500 font-mono text-[11px] leading-none select-none pointer-events-none">
+        +
+      </span>
+
+      <div className="absolute top-2.5 left-2.5 w-2 h-2 border-t border-l border-white/20 pointer-events-none" />
+      <div className="absolute top-2.5 right-2.5 w-2 h-2 border-t border-r border-white/20 pointer-events-none" />
+      <div className="absolute bottom-2.5 left-2.5 w-2 h-2 border-b border-l border-white/20 pointer-events-none" />
+      <div className="absolute bottom-2.5 right-2.5 w-2 h-2 border-b border-r border-white/20 pointer-events-none" />
+
+      {/* Subtle CAD Background Grid & Soft Radial Accents */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-30 z-0"
+        className="absolute inset-0 pointer-events-none opacity-20 z-0"
         style={{
           backgroundImage: `
-            linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px)
+            linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
           `,
-          backgroundSize: "28px 28px",
+          backgroundSize: "24px 24px",
         }}
       />
-      <div className="absolute -top-10 -right-10 w-72 h-72 bg-[radial-gradient(ellipse_at_center,rgba(210,255,0,0.06)_0%,transparent_70%)] pointer-events-none blur-2xl" />
-      <div className="absolute -bottom-10 -left-10 w-72 h-72 bg-[radial-gradient(ellipse_at_center,rgba(0,229,255,0.05)_0%,transparent_70%)] pointer-events-none blur-2xl" />
+      <div className="absolute -top-12 -right-12 w-64 h-64 bg-[radial-gradient(ellipse_at_center,rgba(210,255,0,0.05)_0%,transparent_70%)] pointer-events-none blur-2xl" />
 
-      {/* Top Header Strip: Status & Telemetry Mode */}
-      <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-white/[0.08] text-xs">
+      {/* Top Header Strip: Status & Active Mouse-Tracking Coordinate Readout */}
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-white/[0.08] text-xs">
         <div className="flex items-center gap-2">
           <span
             className="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] animate-ping"
             style={{ backgroundColor: getActiveColor(), color: getActiveColor() }}
           />
           <span className="font-bold text-white uppercase tracking-wider text-[11px] sm:text-xs">
-            AERODYNAMIC FLOW HUD <span className="text-[#4E5B73]">{"//"}</span> ISO 7200 ORTHOGRAPHIC
+            CAD CHASSIS TERMINAL <span className="text-[#4E5B73]">{"//"}</span> APEX FEA
           </span>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 bg-white/[0.03] px-2.5 py-1 rounded border border-white/5">
+
+        {/* Active Mouse-Tracking Coordinate Readout */}
+        <div className="flex items-center gap-1.5 text-[10px] text-slate-300 bg-white/[0.03] px-2.5 py-1 rounded border border-white/10 font-mono tracking-wider tabular-nums">
           <Activity className="w-3 h-3 text-[#D2FF00]" />
-          <span>CFD TUNNEL: WT-04 ACTIVE</span>
+          <span>
+            ⌖ X: {mouseCoords.x.toLocaleString()} mm | Y: {mouseCoords.y.toLocaleString()} mm | ISO 7200 CLASS-A
+          </span>
         </div>
       </div>
 
-      {/* Interactive Mode Toggles: [ CFD VELOCITY ] | [ DOWNFORCE VECTORS ] | [ TORSIONAL RIGIDITY ] */}
-      <div className="relative z-10 grid grid-cols-3 gap-2 pt-3 pb-2 text-[10px] sm:text-xs">
+      {/* Aerospace-Grade Segmented Control (Zero Text Clipping) */}
+      <div className="relative z-10 flex flex-wrap sm:flex-nowrap gap-2 w-full pt-3 pb-2 text-[11px] font-mono tracking-wider">
         <button
-          onClick={() => setActiveMode("velocity")}
-          className={`px-2.5 py-2 rounded-lg border font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-            activeMode === "velocity"
-              ? "bg-[#D2FF00] text-black border-[#D2FF00] shadow-[0_0_18px_rgba(210,255,0,0.4)] scale-[1.02]"
-              : "bg-white/[0.02] hover:bg-white/[0.06] text-slate-400 hover:text-white border-white/10"
+          onClick={() => setActiveMode("cfd")}
+          className={`flex-1 min-w-0 px-3 py-1.5 rounded-lg border font-bold uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            activeMode === "cfd"
+              ? "bg-[#D2FF00] text-black border-[#D2FF00] shadow-[0_0_18px_rgba(210,255,0,0.4)]"
+              : "bg-white/[0.03] hover:bg-white/[0.08] text-slate-400 hover:text-white border-white/10"
           }`}
         >
-          <Wind className="w-3.5 h-3.5" />
-          <span className="truncate">[ CFD VELOCITY ]</span>
+          <Wind className="w-3.5 h-3.5 shrink-0" />
+          <span>[ 01 CFD FLOW ]</span>
         </button>
 
         <button
           onClick={() => setActiveMode("downforce")}
-          className={`px-2.5 py-2 rounded-lg border font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`flex-1 min-w-0 px-3 py-1.5 rounded-lg border font-bold uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap ${
             activeMode === "downforce"
-              ? "bg-[#00E5FF] text-black border-[#00E5FF] shadow-[0_0_18px_rgba(0,229,255,0.4)] scale-[1.02]"
-              : "bg-white/[0.02] hover:bg-white/[0.06] text-slate-400 hover:text-white border-white/10"
+              ? "bg-[#00E5FF] text-black border-[#00E5FF] shadow-[0_0_18px_rgba(0,229,255,0.4)]"
+              : "bg-white/[0.03] hover:bg-white/[0.08] text-slate-400 hover:text-white border-white/10"
           }`}
         >
-          <Gauge className="w-3.5 h-3.5" />
-          <span className="truncate">[ DOWNFORCE VECTORS ]</span>
+          <Gauge className="w-3.5 h-3.5 shrink-0" />
+          <span>[ 02 DOWNFORCE ]</span>
         </button>
 
         <button
-          onClick={() => setActiveMode("rigidity")}
-          className={`px-2.5 py-2 rounded-lg border font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-            activeMode === "rigidity"
-              ? "bg-[#FFB800] text-black border-[#FFB800] shadow-[0_0_18px_rgba(255,184,0,0.4)] scale-[1.02]"
-              : "bg-white/[0.02] hover:bg-white/[0.06] text-slate-400 hover:text-white border-white/10"
+          onClick={() => setActiveMode("torsion")}
+          className={`flex-1 min-w-0 px-3 py-1.5 rounded-lg border font-bold uppercase transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            activeMode === "torsion"
+              ? "bg-[#FFB800] text-black border-[#FFB800] shadow-[0_0_18px_rgba(255,184,0,0.4)]"
+              : "bg-white/[0.03] hover:bg-white/[0.08] text-slate-400 hover:text-white border-white/10"
           }`}
         >
-          <Shield className="w-3.5 h-3.5" />
-          <span className="truncate">[ TORSIONAL RIGIDITY ]</span>
+          <Shield className="w-3.5 h-3.5 shrink-0" />
+          <span>[ 03 TORSION FEA ]</span>
         </button>
       </div>
 
-      {/* GPU-Accelerated SVG Aerodynamic Stage */}
-      <div className="relative z-10 w-full aspect-[16/9] min-h-[220px] max-h-[295px] my-2 bg-transparent rounded-xl overflow-hidden flex items-center justify-center">
+      {/* GPU-Accelerated Razor-Sharp Technical CAD Wireframe Viewport */}
+      <div className="relative z-10 w-full aspect-[16/9] min-h-[220px] max-h-[295px] my-2 bg-[#06080E]/80 rounded-lg border border-white/[0.06] overflow-hidden flex items-center justify-center shadow-inner">
         <svg
-          viewBox="0 0 540 280"
+          viewBox="0 0 600 300"
           className="w-full h-full transform-gpu select-none"
           preserveAspectRatio="xMidYMid meet"
         >
           <defs>
-            {/* 1. Electric Lime Streamline Gradient (#D2FF00) */}
-            <linearGradient id="velocityGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            {/* Streamline Gradients */}
+            <linearGradient id="limeFlowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#D2FF00" stopOpacity="0.2" />
-              <stop offset="35%" stopColor="#D2FF00" stopOpacity="0.95" />
+              <stop offset="30%" stopColor="#D2FF00" stopOpacity="0.95" />
               <stop offset="70%" stopColor="#D2FF00" stopOpacity="0.9" />
               <stop offset="100%" stopColor="#D2FF00" stopOpacity="0.3" />
             </linearGradient>
 
-            {/* 2. Cyan Streamline Gradient (#00E5FF) */}
-            <linearGradient id="downforceGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.2" />
-              <stop offset="30%" stopColor="#00E5FF" stopOpacity="0.95" />
-              <stop offset="70%" stopColor="#00E5FF" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#00E5FF" stopOpacity="0.3" />
+            {/* FEA Stress Heat Gradient along Monocoque Safety Tub */}
+            <linearGradient id="feaStressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#FFB800" stopOpacity="0.3" />
+              <stop offset="25%" stopColor="#FF8000" stopOpacity="0.5" />
+              <stop offset="50%" stopColor="#FF4400" stopOpacity="0.65" />
+              <stop offset="75%" stopColor="#FFB800" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#FFD000" stopOpacity="0.3" />
             </linearGradient>
 
-            {/* 3. Amber Streamline Gradient (#FFB800) */}
-            <linearGradient id="rigidityGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#FFB800" stopOpacity="0.2" />
-              <stop offset="30%" stopColor="#FFB800" stopOpacity="0.95" />
-              <stop offset="70%" stopColor="#FFB800" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#FFB800" stopOpacity="0.3" />
-            </linearGradient>
-
-            {/* Downforce Vector Arrowhead (#00E5FF) */}
+            {/* Cyan Downforce Marker Arrow */}
             <marker
-              id="downforceHead"
+              id="cyanArrow"
               viewBox="0 0 10 10"
               refX="5"
               refY="5"
@@ -149,9 +166,9 @@ export function AeroChassisHud() {
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#00E5FF" />
             </marker>
 
-            {/* Lime Vector Arrowhead (#D2FF00) */}
+            {/* Lime Marker Arrow */}
             <marker
-              id="limeHead"
+              id="limeArrow"
               viewBox="0 0 10 10"
               refX="5"
               refY="5"
@@ -162,316 +179,335 @@ export function AeroChassisHud() {
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#D2FF00" />
             </marker>
 
-            {/* Amber Rigidity Arrowhead (#FFB800) */}
-            <marker
-              id="rigidityHead"
-              viewBox="0 0 10 10"
-              refX="5"
-              refY="5"
-              markerWidth="6"
-              markerHeight="6"
-              orient="auto-start-reverse"
-            >
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#FFB800" />
-            </marker>
-
-            {/* Diagonal Carbon Weave Hatch */}
+            {/* Carbon Weave Hatch */}
             <pattern
-              id="carbonHatch"
-              width="8"
-              height="8"
+              id="wireHatch"
+              width="6"
+              height="6"
               patternUnits="userSpaceOnUse"
               patternTransform="rotate(45)"
             >
-              <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(255,255,255,0.06)" strokeWidth="1.5" />
+              <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(255,255,255,0.04)" strokeWidth="0.8" />
             </pattern>
           </defs>
 
-          {/* Coordinate Crosshairs */}
-          <g stroke="rgba(255,255,255,0.1)" strokeWidth="1">
-            <line x1="15" y1="15" x2="30" y2="15" />
-            <line x1="15" y1="15" x2="15" y2="30" />
-            <line x1="525" y1="15" x2="510" y2="15" />
-            <line x1="525" y1="15" x2="525" y2="30" />
-            <line x1="15" y1="265" x2="30" y2="265" />
-            <line x1="15" y1="265" x2="15" y2="250" />
-            <line x1="525" y1="265" x2="510" y2="265" />
-            <line x1="525" y1="265" x2="525" y2="250" />
+          {/* 1. Coordinate Drafting Grid Marks */}
+          <g stroke="rgba(255,255,255,0.06)" strokeWidth="0.8">
+            <line x1="20" y1="20" x2="35" y2="20" />
+            <line x1="20" y1="20" x2="20" y2="35" />
+            <line x1="580" y1="20" x2="565" y2="20" />
+            <line x1="580" y1="20" x2="580" y2="35" />
+            <line x1="20" y1="280" x2="35" y2="280" />
+            <line x1="20" y1="280" x2="20" y2="265" />
+            <line x1="580" y1="280" x2="565" y2="280" />
+            <line x1="580" y1="280" x2="580" y2="265" />
           </g>
 
           {/* Ground Plane Datum Line */}
           <line
-            x1="10"
-            y1="218"
-            x2="530"
-            y2="218"
+            x1="15"
+            y1="238"
+            x2="585"
+            y2="238"
             stroke="rgba(255,255,255,0.12)"
-            strokeWidth="1"
-            strokeDasharray="6 3"
+            strokeWidth="0.8"
+            strokeDasharray="4 4"
           />
 
-          {/* Wheels / Tires Profiles (Orthographic Alignment) */}
-          <circle cx="108" cy="200" r="26" fill="#0A0E17" stroke="#3A475C" strokeWidth="2" />
-          <circle cx="108" cy="200" r="16" fill="#07090E" stroke="#5A6B85" strokeWidth="1.2" strokeDasharray="3 3" />
-          <circle cx="432" cy="200" r="27" fill="#0A0E17" stroke="#3A475C" strokeWidth="2" />
-          <circle cx="432" cy="200" r="17" fill="#07090E" stroke="#5A6B85" strokeWidth="1.2" strokeDasharray="3 3" />
-
-          {/* ORTHOGRAPHIC MONOCOQUE CHASSIS OUTLINE */}
-          {/* Main Carbon Monocoque Tub Body & Safety Survival Cell */}
+          {/* 2. RAZOR-SHARP TECHNICAL CAD WIREFRAME CHASSIS */}
+          {/* Main Monocoque Safety Tub & Structural Bulkheads (0.75px–1px Stroke) */}
           <path
             d="
-              M 40 200
-              L 65 200
-              L 75 192
-              L 128 192
-              L 138 170
-              L 182 165
-              L 215 124
-              L 260 104
-              L 300 106
-              L 335 130
-              L 375 145
-              L 415 160
-              L 458 160
-              L 472 175
-              L 472 195
-              L 460 200
-              L 350 200
-              L 240 200
-              L 136 200
+              M 55 220 
+              L 125 212 
+              L 142 188 
+              L 190 182 
+              L 230 140 
+              L 275 118 
+              L 320 118 
+              L 355 142 
+              L 400 156 
+              L 445 168 
+              L 495 174 
+              L 510 188 
+              L 505 212 
+              L 380 216 
+              L 250 216 
+              L 140 216 
               Z
             "
-            fill="url(#carbonHatch)"
-            stroke={activeMode === "rigidity" ? "#FFB800" : "#55647A"}
-            strokeWidth="1.8"
+            fill={activeMode === "torsion" ? "url(#feaStressGrad)" : "url(#wireHatch)"}
+            stroke={activeMode === "torsion" ? "#FFB800" : "rgba(148, 163, 184, 0.45)"}
+            strokeWidth={activeMode === "torsion" ? "1.5" : "0.9"}
             className="transition-colors duration-300"
           />
 
-          {/* Front Aerodynamic Splitter Blade with Endplate */}
-          <path
-            d="M 28 200 L 72 200 L 72 194 L 32 194 L 28 184 L 26 200 Z"
-            fill={activeMode === "velocity" ? "rgba(210,255,0,0.15)" : activeMode === "downforce" ? "rgba(0,229,255,0.15)" : "rgba(255,184,0,0.15)"}
-            stroke={getActiveColor()}
-            strokeWidth="1.6"
-            className="transition-colors duration-300"
-          />
+          {/* Internal Structural Bulkhead Ribs & Load Lines */}
+          <g stroke="rgba(148, 163, 184, 0.3)" strokeWidth="0.75" strokeDasharray="3 2">
+            {/* Front Suspension Bulkhead Node */}
+            <line x1="142" y1="188" x2="140" y2="216" />
+            {/* Steering Rack & Pedal Box Node */}
+            <line x1="190" y1="182" x2="190" y2="216" />
+            {/* Fuel Cell / Driver Seat Bulkhead */}
+            <line x1="275" y1="118" x2="275" y2="216" />
+            {/* Rear Engine Fire Wall Bulkhead */}
+            <line x1="355" y1="142" x2="355" y2="216" />
+            {/* Transaxle Carrier Ring */}
+            <line x1="445" y1="168" x2="445" y2="216" />
+          </g>
 
-          {/* Cockpit Halo Safety Hoop Structure */}
+          {/* Front Carbon-Composite Splitter & Dive Planes (Canards) */}
+          {/* Main Lower Splitter Blade */}
           <path
-            d="M 198 142 Q 240 98 280 110 L 286 130"
+            d="M 38 220 L 95 220 L 95 215 L 44 215 L 38 205 L 35 220 Z"
+            fill="rgba(210,255,0,0.06)"
+            stroke={activeMode === "cfd" ? "#D2FF00" : "rgba(148, 163, 184, 0.6)"}
+            strokeWidth="0.9"
+          />
+          {/* Stacked Dive Planes / Aerodynamic Canards */}
+          <path d="M 68 204 L 88 198 L 86 195 L 66 201 Z" fill="none" stroke="rgba(148, 163, 184, 0.5)" strokeWidth="0.8" />
+          <path d="M 72 195 L 94 189 L 92 186 L 70 192 Z" fill="none" stroke="rgba(148, 163, 184, 0.5)" strokeWidth="0.8" />
+
+          {/* Cockpit FIA Safety Halo & Windshield A-Pillar */}
+          <path
+            d="M 215 152 Q 255 106 295 116 L 302 136"
             fill="none"
-            stroke={hoveredHotspot === "halo" ? "#D2FF00" : activeMode === "rigidity" ? "#FFB800" : "#8A99AD"}
-            strokeWidth="2.5"
+            stroke={hoveredHotspot === "halo" ? "#D2FF00" : activeMode === "torsion" ? "#FFB800" : "rgba(226, 232, 240, 0.7)"}
+            strokeWidth="1.6"
             strokeLinecap="round"
           />
+          {/* Halo Central V-Strut */}
+          <line x1="255" y1="126" x2="225" y2="150" stroke="rgba(226, 232, 240, 0.6)" strokeWidth="1.2" />
 
           {/* Underfloor Ground-Effect Venturi Tunnel Kickup */}
           <path
             d="
-              M 72 202
-              L 340 202
-              Q 410 200 478 174
-              L 478 202
+              M 95 222 
+              L 370 222 
+              Q 450 220 520 188 
+              L 520 222 
               Z
             "
             fill="rgba(210,255,0,0.03)"
-            stroke={activeMode === "downforce" ? "#00E5FF" : activeMode === "rigidity" ? "#FFB800" : "#D2FF00"}
-            strokeWidth="1.5"
-            strokeDasharray={activeMode === "downforce" ? "none" : "4 2"}
+            stroke={activeMode === "downforce" ? "#00E5FF" : "rgba(148, 163, 184, 0.4)"}
+            strokeWidth="0.85"
+            strokeDasharray={activeMode === "downforce" ? "none" : "3 2"}
           />
 
-          {/* Swan-Neck Rear Wing Pylons & Dual-Element Airfoil */}
-          {/* Pylons */}
+          {/* Multi-Link Suspension Wishbones & Forged Magnesium Wheels */}
+          {/* Front Wheels (Center at X=130, Y=218, R=24) */}
+          <circle cx="130" cy="218" r="24" fill="#07090E" stroke="rgba(148, 163, 184, 0.4)" strokeWidth="1" />
+          <circle cx="130" cy="218" r="15" fill="#04060A" stroke="rgba(148, 163, 184, 0.6)" strokeWidth="0.8" />
+          <circle cx="130" cy="218" r="6" fill="#1E293B" stroke="#D2FF00" strokeWidth="0.8" />
+          {/* Brake Rotor Disc & Caliper */}
+          <circle cx="130" cy="218" r="11" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.75" strokeDasharray="2 2" />
+          <rect x="124" y="200" width="5" height="9" rx="1" fill="#FF8000" />
+          {/* Front Suspension Double Wishbones & Pushrod */}
+          <line x1="130" y1="205" x2="168" y2="195" stroke="rgba(148, 163, 184, 0.5)" strokeWidth="0.85" />
+          <line x1="130" y1="226" x2="168" y2="220" stroke="rgba(148, 163, 184, 0.5)" strokeWidth="0.85" />
+          <line x1="130" y1="218" x2="185" y2="186" stroke="rgba(210, 255, 0, 0.7)" strokeWidth="0.8" />
+
+          {/* Rear Wheels (Center at X=470, Y=218, R=25) */}
+          <circle cx="470" cy="218" r="25" fill="#07090E" stroke="rgba(148, 163, 184, 0.4)" strokeWidth="1" />
+          <circle cx="470" cy="218" r="16" fill="#04060A" stroke="rgba(148, 163, 184, 0.6)" strokeWidth="0.8" />
+          <circle cx="470" cy="218" r="6" fill="#1E293B" stroke="#D2FF00" strokeWidth="0.8" />
+          {/* Brake Rotor Disc & Caliper */}
+          <circle cx="470" cy="218" r="12" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="0.75" strokeDasharray="2 2" />
+          <rect x="464" y="199" width="5" height="10" rx="1" fill="#FF8000" />
+          {/* Rear Suspension Double Wishbones & Pushrod */}
+          <line x1="470" y1="204" x2="430" y2="194" stroke="rgba(148, 163, 184, 0.5)" strokeWidth="0.85" />
+          <line x1="470" y1="226" x2="430" y2="220" stroke="rgba(148, 163, 184, 0.5)" strokeWidth="0.85" />
+          <line x1="470" y1="218" x2="415" y2="188" stroke="rgba(210, 255, 0, 0.7)" strokeWidth="0.8" />
+
+          {/* Top-Mount Swan-Neck Active Rear Wing with DRS Actuator */}
+          {/* Curved Swan-Neck Pylons */}
           <path
-            d="M 442 165 L 466 86 L 476 86 L 468 160"
+            d="M 470 178 Q 482 92 514 86 L 522 86 Q 492 98 478 174"
             fill="none"
-            stroke="#4A5568"
-            strokeWidth="1.6"
+            stroke="rgba(226, 232, 240, 0.7)"
+            strokeWidth="1.2"
           />
-          {/* Main Airfoil Blade */}
+          {/* DRS Hydraulic Actuator Cylinder */}
+          <rect x="510" y="80" width="10" height="4" rx="1" fill="#38BDF8" stroke="white" strokeWidth="0.6" />
+          <line x1="515" y1="80" x2="528" y2="76" stroke="#38BDF8" strokeWidth="0.8" />
+          {/* Main Airfoil Profile & Dual-Element Flap */}
           <path
-            d="M 452 84 Q 484 76 520 80 L 518 87 Q 484 82 454 88 Z"
-            fill={activeMode === "downforce" ? "#00E5FF" : activeMode === "rigidity" ? "#FFB800" : "#D2FF00"}
-            stroke="#E2E8F0"
-            strokeWidth="1"
+            d="M 495 86 Q 530 76 565 80 L 562 86 Q 530 82 497 90 Z"
+            fill={activeMode === "downforce" ? "#00E5FF" : activeMode === "torsion" ? "#FFB800" : "#D2FF00"}
+            stroke="white"
+            strokeWidth="0.9"
           />
           {/* Gurney Flap */}
-          <line x1="520" y1="80" x2="520" y2="74" stroke="#FFF" strokeWidth="1.5" />
+          <line x1="565" y1="80" x2="565" y2="74" stroke="white" strokeWidth="1.2" />
+          {/* Aerodynamic Endplate */}
+          <path d="M 492 72 L 568 72 L 568 96 L 492 96 Z" fill="none" stroke="rgba(148, 163, 184, 0.5)" strokeWidth="0.75" />
 
-          {/* DYNAMIC STREAMLINES (GPU CSS Dash Animation) */}
-          {/* Dynamic streamlines curling over splitter, roofline, waistline, and rear wing */}
-          <g stroke={getStreamlineStroke()} fill="none" strokeLinecap="round" className="transition-all duration-300">
-            {/* Streamline 1: Splitter Leading Edge Curling Underneath Venturi */}
-            <path
-              d="M 10 196 C 24 196, 50 204, 90 204 C 180 204, 320 204, 380 200 C 430 195, 470 178, 528 170"
-              strokeWidth="2.5"
-              className="animate-aero-dash-fast"
-            />
+          {/* 3. TECHNICAL DIMENSION CALLOUTS WITH DASHED LEADER LINES */}
+          {/* Callout 1: Wheelbase WB: 2,750 MM */}
+          <g stroke="rgba(148, 163, 184, 0.5)" strokeWidth="0.8">
+            <line x1="130" y1="242" x2="130" y2="265" strokeDasharray="2 2" />
+            <line x1="470" y1="242" x2="470" y2="265" strokeDasharray="2 2" />
+            {/* Dimension Span Arrow */}
+            <line x1="130" y1="258" x2="470" y2="258" />
+            <line x1="130" y1="254" x2="130" y2="262" />
+            <line x1="470" y1="254" x2="470" y2="262" />
+          </g>
+          <rect x="250" y="250" width="100" height="15" rx="3" fill="#0B0F17" stroke="rgba(148, 163, 184, 0.3)" strokeWidth="0.8" />
+          <text x="300" y="261" fill="#94A3B8" fontSize="8" fontWeight="bold" textAnchor="middle">
+            WB: 2,750 MM
+          </text>
 
-            {/* Streamline 2: Splitter Curling Upwards Over Hood and Nose */}
-            <path
-              d="M 10 188 C 30 188, 50 175, 95 168 C 140 162, 175 145, 215 130"
-              strokeWidth="1.8"
-              className="animate-aero-dash"
+          {/* Callout 2: Aero Splitter Stagnation: 101.3 kPa */}
+          <g>
+            {/* Stagnation Dot on Splitter */}
+            <circle cx="40" cy="216" r="3" fill="#00E5FF" className="animate-ping" />
+            <circle cx="40" cy="216" r="2.5" fill="#00E5FF" />
+            <polyline
+              points="40,216 25,185 85,185"
+              fill="none"
+              stroke="#00E5FF"
+              strokeWidth="0.8"
+              strokeDasharray="2 2"
             />
-
-            {/* Streamline 3: Freestream Attached Flow Curling Smoothly Over Roofline & Canopy */}
-            <path
-              d="M 10 135 C 70 135, 140 115, 195 95 C 245 78, 290 80, 340 92 C 390 105, 430 84, 465 76 C 485 72, 510 74, 530 76"
-              strokeWidth="2.4"
-              className="animate-aero-dash-fast"
-            />
-
-            {/* Streamline 4: Boundary Layer Curling Directly Over Swan-Neck Rear Wing Top Surface */}
-            <path
-              d="M 10 95 C 110 95, 190 70, 260 62 C 330 54, 410 65, 460 76 C 485 82, 505 80, 530 82"
-              strokeWidth="2.8"
-              className="animate-aero-dash"
-            />
-
-            {/* Streamline 5: Cockpit Waistline Flow into Sidepod & Rear Wing Underside */}
-            <path
-              d="M 10 162 C 85 162, 150 155, 230 148 C 310 142, 380 142, 450 120 C 480 110, 510 102, 530 100"
-              strokeWidth="1.6"
-              className="animate-aero-dash-fast"
-            />
-
-            {/* Streamline 6: Diffuser High-Velocity Wake Expansion Plume */}
-            <path
-              d="M 10 216 C 120 216, 260 216, 360 212 C 420 205, 475 186, 530 180"
-              strokeWidth="2"
-              className="animate-aero-dash"
-            />
+            <rect x="88" y="177" width="170" height="15" rx="3" fill="#0B0F17" stroke="#00E5FF" strokeWidth="0.8" />
+            <text x="94" y="188" fill="#00E5FF" fontSize="7.5" fontWeight="bold">
+              AERO SPLITTER STAGNATION: 101.3 KPA
+            </text>
           </g>
 
-          {/* VECTOR FORCE ARROWS (Displayed Depending on Active Mode) */}
-          {/* Mode 1: [ CFD VELOCITY ] Flow Direction Vectors */}
-          {activeMode === "velocity" && (
-            <g className="animate-in fade-in duration-200">
-              {/* Splitter Ingestion Flow Vector */}
-              <line x1="20" y1="184" x2="60" y2="184" stroke="#D2FF00" strokeWidth="2" markerEnd="url(#limeHead)" />
-              <rect x="22" y="166" width="56" height="15" rx="3" fill="#07090E" stroke="#D2FF00" strokeWidth="0.8" />
-              <text x="50" y="177" fill="#D2FF00" fontSize="7.5" fontWeight="bold" textAnchor="middle">
-                → 285 KM/H
-              </text>
+          {/* Callout 3: Downforce Bias: 38% F / 62% R */}
+          <g>
+            <polyline
+              points="300,118 300,75 360,75"
+              fill="none"
+              stroke="rgba(210,255,0,0.6)"
+              strokeWidth="0.8"
+              strokeDasharray="2 2"
+            />
+            <rect x="362" y="67" width="160" height="15" rx="3" fill="#0B0F17" stroke="rgba(210,255,0,0.5)" strokeWidth="0.8" />
+            <text x="368" y="78" fill="#D2FF00" fontSize="7.5" fontWeight="bold">
+              DOWNFORCE BIAS: 38% F / 62% R
+            </text>
+          </g>
 
-              {/* Roof Freestream Flow Vector */}
-              <line x1="240" y1="52" x2="295" y2="52" stroke="#D2FF00" strokeWidth="2.2" markerEnd="url(#limeHead)" />
-              <rect x="245" y="34" width="56" height="15" rx="3" fill="#07090E" stroke="#D2FF00" strokeWidth="0.8" />
-              <text x="273" y="45" fill="#D2FF00" fontSize="7.5" fontWeight="bold" textAnchor="middle">
-                → 310 KM/H
-              </text>
+          {/* 4. DYNAMIC FLOW & PARTICLES BY ACTIVE MODE */}
+          {/* Mode 01: [ 01 CFD FLOW ] - 4 Multi-Layer Bézier Streamlines in Electric Lime #D2FF00 */}
+          {activeMode === "cfd" && (
+            <g stroke="url(#limeFlowGrad)" fill="none" strokeLinecap="round" className="animate-in fade-in duration-200">
+              {/* Streamline 1: Splitter Underfloor & Venturi Diffuser Flow */}
+              <path
+                d="M 15 218 C 35 218, 75 224, 130 224 C 240 224, 380 222, 440 216 C 480 210, 520 188, 580 182"
+                strokeWidth="2.5"
+                className="animate-aero-dash-fast"
+              />
 
-              {/* Rear Diffuser High-Velocity Suction Vector */}
-              <line x1="450" y1="186" x2="495" y2="175" stroke="#D2FF00" strokeWidth="2" markerEnd="url(#limeHead)" />
-              <rect x="460" y="194" width="56" height="15" rx="3" fill="#07090E" stroke="#D2FF00" strokeWidth="0.8" />
-              <text x="488" y="205" fill="#D2FF00" fontSize="7.5" fontWeight="bold" textAnchor="middle">
-                → 245 KM/H
-              </text>
+              {/* Streamline 2: Nose Cone & Splitter Boundary Layer Flow */}
+              <path
+                d="M 15 208 C 40 208, 70 196, 120 186 C 170 176, 205 160, 240 145"
+                strokeWidth="1.8"
+                className="animate-aero-dash"
+              />
+
+              {/* Streamline 3: Windshield, Halo, & Roofline Flow curling into Swan-Neck Rear Wing */}
+              <path
+                d="M 15 152 C 80 152, 160 130, 220 110 C 270 94, 320 96, 370 108 C 420 120, 465 96, 505 86 C 530 80, 555 82, 585 84"
+                strokeWidth="2.6"
+                className="animate-aero-dash-fast"
+              />
+
+              {/* Streamline 4: Upper Freestream Wind-Tunnel Boundary Skim */}
+              <path
+                d="M 15 110 C 120 110, 210 82, 280 74 C 350 66, 440 76, 495 86 C 525 92, 555 88, 585 90"
+                strokeWidth="2.8"
+                className="animate-aero-dash"
+              />
             </g>
           )}
 
-          {/* Mode 2: [ DOWNFORCE VECTORS ] Downward Load Vector Arrows */}
+          {/* Mode 02: [ 02 DOWNFORCE ] - Downforce Load Vectors in Cyan #00E5FF */}
           {activeMode === "downforce" && (
             <g className="animate-in fade-in duration-200">
-              {/* Front Splitter Downforce Vector */}
+              {/* Front Axle Downforce Vector */}
               <line
-                x1="80"
+                x1="130"
                 y1="130"
-                x2="80"
-                y2="188"
+                x2="130"
+                y2="190"
                 stroke="#00E5FF"
                 strokeWidth="2.5"
-                markerEnd="url(#downforceHead)"
+                markerEnd="url(#cyanArrow)"
               />
-              <rect x="46" y="110" width="68" height="16" rx="4" fill="#07090E" stroke="#00E5FF" strokeWidth="1" />
-              <text x="80" y="121" fill="#00E5FF" fontSize="7.5" fontWeight="bold" textAnchor="middle">
+              <rect x="94" y="110" width="72" height="17" rx="3" fill="#0B0F17" stroke="#00E5FF" strokeWidth="1" />
+              <text x="130" y="122" fill="#00E5FF" fontSize="7.5" fontWeight="bold" textAnchor="middle">
                 ↓ 340 KG (38%)
               </text>
 
-              {/* Aerodynamic Center of Pressure (COP) Vector */}
+              {/* Center of Pressure Marker */}
               <line
-                x1="255"
-                y1="60"
-                x2="255"
-                y2="100"
+                x1="285"
+                y1="65"
+                x2="285"
+                y2="108"
                 stroke="#D2FF00"
                 strokeWidth="2"
-                markerEnd="url(#limeHead)"
+                markerEnd="url(#limeArrow)"
               />
-              <rect x="222" y="40" width="66" height="16" rx="4" fill="#07090E" stroke="#D2FF00" strokeWidth="1" />
-              <text x="255" y="51" fill="#D2FF00" fontSize="7.5" fontWeight="bold" textAnchor="middle">
-                ⌖ COP: 42%
+              <rect x="252" y="45" width="66" height="17" rx="3" fill="#0B0F17" stroke="#D2FF00" strokeWidth="1" />
+              <text x="285" y="57" fill="#D2FF00" fontSize="7.5" fontWeight="bold" textAnchor="middle">
+                ⌖ COP: 41.5%
               </text>
 
               {/* Rear Wing & Diffuser Combined Downforce Vector */}
               <line
-                x1="482"
-                y1="34"
-                x2="482"
-                y2="76"
+                x1="535"
+                y1="25"
+                x2="535"
+                y2="72"
                 stroke="#00E5FF"
                 strokeWidth="3"
-                markerEnd="url(#downforceHead)"
+                markerEnd="url(#cyanArrow)"
               />
-              <rect x="446" y="14" width="72" height="16" rx="4" fill="#07090E" stroke="#00E5FF" strokeWidth="1" />
-              <text x="482" y="25" fill="#00E5FF" fontSize="7.5" fontWeight="bold" textAnchor="middle">
+              <rect x="498" y="5" width="74" height="17" rx="3" fill="#0B0F17" stroke="#00E5FF" strokeWidth="1" />
+              <text x="535" y="17" fill="#00E5FF" fontSize="7.5" fontWeight="bold" textAnchor="middle">
                 ↓ 520 KG (62%)
               </text>
             </g>
           )}
 
-          {/* Mode 3: [ TORSIONAL RIGIDITY ] Chassis Structural Vectors */}
-          {activeMode === "rigidity" && (
+          {/* Mode 03: [ 03 TORSION FEA ] - FEA Stress-Distribution Gradient in Amber #FFB800 */}
+          {activeMode === "torsion" && (
             <g className="animate-in fade-in duration-200">
-              {/* Front Bulkhead Suspension Node Vector */}
-              <line
-                x1="120"
-                y1="160"
-                x2="95"
-                y2="135"
-                stroke="#FFB800"
-                strokeWidth="2.5"
-                markerEnd="url(#rigidityHead)"
-              />
-              <rect x="68" y="112" width="78" height="16" rx="4" fill="#07090E" stroke="#FFB800" strokeWidth="1" />
-              <text x="107" y="123" fill="#FFB800" fontSize="7.5" fontWeight="bold" textAnchor="middle">
-                ↗ 45 kN·m/deg
+              {/* Central Monocoque Torsion FEA Node */}
+              <circle cx="280" cy="150" r="16" fill="none" stroke="#FFB800" strokeWidth="1.8" strokeDasharray="3 3" />
+              <circle cx="280" cy="150" r="5" fill="#FFB800" className="animate-ping" />
+              <circle cx="280" cy="150" r="4" fill="#FFB800" />
+              <rect x="180" y="170" width="200" height="18" rx="3" fill="#0B0F17" stroke="#FFB800" strokeWidth="1" />
+              <text x="280" y="182" fill="#FFB800" fontSize="8" fontWeight="bold" textAnchor="middle">
+                TORSIONAL RIGIDITY: 42,000 NM/DEG
               </text>
 
-              {/* Central Monocoque Tub Torsional Node Vector */}
-              <circle cx="260" cy="140" r="14" fill="none" stroke="#FFB800" strokeWidth="1.8" strokeDasharray="3 3" />
-              <circle cx="260" cy="140" r="4" fill="#FFB800" />
-              <rect x="216" y="160" width="88" height="16" rx="4" fill="#07090E" stroke="#FFB800" strokeWidth="1" />
-              <text x="260" y="171" fill="#FFB800" fontSize="7.5" fontWeight="bold" textAnchor="middle">
-                ↺ 52.0 kN·m/deg TUB
+              {/* Front Bulkhead FEA Shear Vector */}
+              <line x1="140" y1="170" x2="115" y2="145" stroke="#FFB800" strokeWidth="2.2" />
+              <text x="110" y="135" fill="#FFB800" fontSize="7" fontWeight="bold">
+                FRONT BULKHEAD: 45 kN·m/deg
               </text>
 
-              {/* Rear Subframe Node Shear Vector */}
-              <line
-                x1="410"
-                y1="150"
-                x2="435"
-                y2="125"
-                stroke="#FFB800"
-                strokeWidth="2.5"
-                markerEnd="url(#rigidityHead)"
-              />
-              <rect x="410" y="102" width="78" height="16" rx="4" fill="#07090E" stroke="#FFB800" strokeWidth="1" />
-              <text x="449" y="113" fill="#FFB800" fontSize="7.5" fontWeight="bold" textAnchor="middle">
-                ↘ 48 kN·m/deg
+              {/* Rear Cradle FEA Shear Vector */}
+              <line x1="440" y1="165" x2="465" y2="140" stroke="#FFB800" strokeWidth="2.2" />
+              <text x="460" y="135" fill="#FFB800" fontSize="7" fontWeight="bold">
+                REAR CRADLE: 38 kN·m/deg
               </text>
             </g>
           )}
 
-          {/* Interactive Probing Nodes */}
+          {/* Probing Interactive Hotspots */}
           <g
             className="cursor-pointer"
             onMouseEnter={() => setHoveredHotspot("splitter")}
             onMouseLeave={() => setHoveredHotspot(null)}
           >
-            <circle cx="50" cy="198" r="4" fill="#D2FF00" className="animate-pulse" />
-            <circle cx="50" cy="198" r="8" fill="none" stroke="#D2FF00" strokeWidth="1" opacity="0.6" />
+            <circle cx="50" cy="216" r="4" fill="#D2FF00" className="animate-pulse" />
+            <circle cx="50" cy="216" r="8" fill="none" stroke="#D2FF00" strokeWidth="1" opacity="0.6" />
           </g>
 
           <g
@@ -479,8 +515,8 @@ export function AeroChassisHud() {
             onMouseEnter={() => setHoveredHotspot("halo")}
             onMouseLeave={() => setHoveredHotspot(null)}
           >
-            <circle cx="240" cy="116" r="4" fill="#00E5FF" className="animate-pulse" />
-            <circle cx="240" cy="116" r="8" fill="none" stroke="#00E5FF" strokeWidth="1" opacity="0.6" />
+            <circle cx="255" cy="120" r="4" fill="#00E5FF" className="animate-pulse" />
+            <circle cx="255" cy="120" r="8" fill="none" stroke="#00E5FF" strokeWidth="1" opacity="0.6" />
           </g>
 
           <g
@@ -488,8 +524,8 @@ export function AeroChassisHud() {
             onMouseEnter={() => setHoveredHotspot("wing")}
             onMouseLeave={() => setHoveredHotspot(null)}
           >
-            <circle cx="488" cy="82" r="4" fill="#FFB800" className="animate-pulse" />
-            <circle cx="488" cy="82" r="8" fill="none" stroke="#FFB800" strokeWidth="1" opacity="0.6" />
+            <circle cx="540" cy="80" r="4" fill="#FFB800" className="animate-pulse" />
+            <circle cx="540" cy="80" r="8" fill="none" stroke="#FFB800" strokeWidth="1" opacity="0.6" />
           </g>
         </svg>
 
@@ -506,7 +542,7 @@ export function AeroChassisHud() {
         )}
       </div>
 
-      {/* TELEMETRY DATA OVERLAY (Subtle, Clean Monospace Telemetry Data) */}
+      {/* Clean Telemetry Data Overlay (Subtle, Clean Monospace Telemetry Data) */}
       <div className="relative z-10 grid grid-cols-3 gap-2.5 pt-3 border-t border-white/[0.08] text-center font-mono">
         {/* Metric 1: AERO EFFICIENCY */}
         <div className="p-2 sm:p-2.5 rounded-lg bg-white/[0.02] border border-white/5 flex flex-col items-center justify-center">
@@ -543,9 +579,9 @@ export function AeroChassisHud() {
       <div className="relative z-10 mt-2.5 pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10px] text-[#718096] uppercase tracking-wider">
         <span className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getActiveColor() }} />
-          {activeMode === "velocity" && "DYNAMIC FLOW VELOCITY: 294 KM/H (Re: 4.8×10⁶)"}
+          {activeMode === "cfd" && "DYNAMIC FLOW VELOCITY: 294 KM/H (Re: 4.8×10⁶)"}
           {activeMode === "downforce" && "TOTAL APEX DOWNFORCE: 860 KG @ 285 KM/H"}
-          {activeMode === "rigidity" && "COMPOSITE TORSIONAL RIGIDITY: 52.0 kNm/deg"}
+          {activeMode === "torsion" && "COMPOSITE TORSIONAL RIGIDITY: 42,000 NM/DEG"}
         </span>
         <span className="text-[#D2FF00] font-bold">FIA HOMOLOGATED</span>
       </div>

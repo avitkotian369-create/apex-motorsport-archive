@@ -21,7 +21,7 @@ export function Hero({ onExploreClick, onDispatchClick }: HeroProps) {
       <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(210,255,0,0.04)_0%,transparent_70%)] rounded-full blur-[140px] pointer-events-none animate-pulse-glow" />
 
       {/* Large Technical Monospace Watermark Typography in Background */}
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 font-mono font-black text-7xl sm:text-9xl text-white/[0.02] select-none pointer-events-none tracking-tighter leading-none text-right z-0">
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 font-mono font-black text-7xl sm:text-9xl text-white opacity-[0.03] select-none pointer-events-none tracking-tighter leading-none text-right z-0">
         <div>{"// APEX SPEC"}</div>
         <div>{"MONOCOQUE ARCHIVE"}</div>
       </div>
